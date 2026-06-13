@@ -1,0 +1,157 @@
+﻿using Infrastructure.Identity;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Ui.Services;
+using Ui.ViewModels;
+
+namespace Ui.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class AccountsController(UserManager<Bro> userManager) : ControllerBase
+{
+    private Bro _bro = null!;
+
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutUser(string id, [FromBody] AccountProfileViewModel model)
+    {
+        _bro = (await userManager.FindByIdAsync(id))!;
+
+        if (_bro is null) return NotFound();
+
+        var result = await SetUserAsync(model);
+
+        if (UpdateFailed(result))
+        {
+            return new BadRequestObjectResult(new
+            {
+                Message = "Account update failed.",
+                result.Errors
+            });
+        }
+
+        return Ok(new
+        {
+            Message = "Account details updated successfully.",
+            Token = Jwt.GenerateToken(For: _bro)
+        });
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<Bro>> PostUser(AccountViewModel model)
+    {
+        var applicationUser = new Bro
+        {
+            UserName = model.Email,
+            Email = model.Email,
+        };
+
+        var result = await userManager.CreateAsync(applicationUser, model.Password);
+
+        if (!result.Succeeded)
+        {
+            var dictionary = new ModelStateDictionary();
+
+            foreach (IdentityError error in result.Errors)
+            {
+                dictionary.AddModelError(error.Code, error.Description);
+            }
+
+            return new BadRequestObjectResult(new
+            {
+                Message = "Account creation failed",
+                Errors = dictionary
+            });
+        }
+
+        return Ok(new
+        {
+            Message = "Account creation successful",
+            Token = Jwt.GenerateToken(For: applicationUser)
+        });
+    }
+
+    [Authorize]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser()
+    {
+        var user = await userManager.GetUserAsync(User);
+
+        if (user is not null)
+        {
+            var result = await userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+            {
+                foreach (IdentityError error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.ToString()!);
+                }
+            }
+
+            return NoContent();
+        }
+        else
+        {
+            return BadRequest(new
+            {
+                Message = @"Account not found. Please contact the site administrator."
+            });
+        }
+    }
+
+    [Authorize]
+    [HttpPut("{id}/Password")]
+    public async Task<IActionResult> PasswordAsync(string id, [FromBody] ChangePasswordViewModel model)
+    {
+        _bro = (await userManager.FindByIdAsync(id))!;
+
+        if (_bro is null) return NotFound();
+
+        var result = await UpdatePasswordAsync(model);
+
+        if (PasswordChangeFailed(result))
+        {
+            return new BadRequestObjectResult(new { Errors = result.Errors });
+        }
+
+        return Ok(new
+        {
+            Message = "Password changed successfully.",
+            Token = Jwt.GenerateToken(For: _bro)
+        });
+    }
+
+    private async Task<ErrorsParser> SetUserAsync(AccountProfileViewModel model)
+    {
+        var errorsParser = new ErrorsParser();
+
+        _bro.Email = model.Email;
+        _bro.UserName = model.Email;
+        _bro.FirstName = model.FirstName;
+        _bro.LastName = model.LastName;
+
+        var result = await userManager.UpdateAsync(_bro);
+        errorsParser.ParseErrors(from: result);
+
+        return errorsParser;
+    }
+
+    private async Task<ErrorsParser> UpdatePasswordAsync(ChangePasswordViewModel model)
+    {
+        var result = await userManager.ChangePasswordAsync(
+            user: _bro,
+            currentPassword: model.OldPassword,
+            newPassword: model.Password);
+
+        return new ErrorsParser().ParseErrors(from: result);
+    }
+
+    private static bool UpdateFailed(ErrorsParser result) => result.ErrorCount > 0;
+
+    private static bool PasswordChangeFailed(ErrorsParser result) => result.ErrorCount > 0;
+}
