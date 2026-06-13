@@ -1,0 +1,32 @@
+﻿using Infrastructure.Data;
+using Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Utility.Helpers;
+
+public class RepositoryHelper
+{
+    public static T GetFirstRecord<T>(ApplicationFactory<Program> factory) where T : class
+    {
+        using var scope = factory.Services.CreateScope();
+        var scopedServices = scope.ServiceProvider;
+        var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+
+        return context.Set<T>().First();
+    }
+
+    public static async Task<Bro> GetUserBy(string email, ApplicationFactory<Program> factory)
+    {
+        using var scope = factory.Services.CreateScope();
+        var scopedServices = scope.ServiceProvider;
+        var userManager = scopedServices.GetRequiredService<UserManager<Bro>>();
+
+        return (await userManager.FindByEmailAsync(email))!;
+    }
+
+    public static async Task<Bro> GetUserBy(string email, ApplicationDbContext context)
+    {
+        return context.Users.FirstOrDefault<Bro>(bro => bro.Email == email)!;
+    }
+}
