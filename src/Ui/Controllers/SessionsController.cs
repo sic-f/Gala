@@ -11,7 +11,8 @@ namespace Ui.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class SessionsController(UserManager<Bro> userManager,
-                                ApplicationDbContext context) : ControllerBase
+                                ApplicationDbContext context,
+                                GenerateRefreshToken generateRefreshToken) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Post(LoginViewModel model)
@@ -23,12 +24,11 @@ public class SessionsController(UserManager<Bro> userManager,
             return BadRequest(new { Message = "Login failed." });
         }
 
-        return Ok(new { Token = Jwt.GenerateToken(For: user) });
+        return Ok(new { Token = Jwt.GenerateToken(For: user), RefreshToken = generateRefreshToken.Compute(user.Id) });
     }
 
     [HttpPost("Refresh")]
     public async Task<IActionResult> Refresh([FromBody] string token,
-                                             GenerateRefreshToken generateRefreshToken,
                                              RevokeAllActiveRefreshTokens revokeAllActiveRefreshTokens)
     {
         RefreshToken? existingRefreshToken = context.RefreshToken.FirstOrDefault(rt => rt.Token == token);
