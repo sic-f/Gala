@@ -23,6 +23,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = "Gala",
             ValidAudience = "Lakwatsa",
+            ClockSkew = TimeSpan.Zero,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("1f354b830d17f2cb7a01dedf8933b58a")),
         };
     });
