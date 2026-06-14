@@ -24,5 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<Bro, IdentityRole<Guid>, G
         builder.Entity<RefreshToken>().HasIndex(rf => rf.Token).IsUnique();
         builder.Entity<RefreshToken>().HasIndex(rf => rf.ReplacedByToken).IsUnique();
         builder.Entity<RefreshToken>().HasIndex(rf => new { rf.Expires, rf.Revoked });
+        builder.Entity<RefreshToken>().HasIndex(rt => rt.BroId).IsUnique(false);
+        builder.Entity<Bro>().HasMany<RefreshToken>().WithOne().HasForeignKey(rt => rt.BroId).OnDelete(DeleteBehavior.Cascade);
     }
 }

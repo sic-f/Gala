@@ -53,8 +53,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BroId")
-                        .IsUnique();
+                    b.HasIndex("BroId");
 
                     b.HasIndex("ReplacedByToken")
                         .IsUnique()
@@ -276,8 +275,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Infrastructure.Identity.Bro", null)
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("Core.Entities.RefreshToken", "BroId")
+                        .WithMany()
+                        .HasForeignKey("BroId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -331,11 +330,6 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
-                {
-                    b.Navigation("RefreshToken");
                 });
 #pragma warning restore 612, 618
         }
