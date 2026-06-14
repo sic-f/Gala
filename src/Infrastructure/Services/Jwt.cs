@@ -15,6 +15,19 @@ public class Jwt(Bro bro)
         return new Jwt(For).Token();
     }
 
+    private static SigningCredentials SigningCredentials()
+    {
+        return new SigningCredentials(SecretKey(), SecurityAlgorithms.HmacSha256);
+    }
+
+    private static SymmetricSecurityKey SecretKey()
+    {
+        return new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(
+                "1f354b830d17f2cb7a01dedf8933b58a")
+        );
+    }
+
     private string Token()
     {
         return new JsonWebTokenHandler().CreateToken(TokenDescriptor());
@@ -32,11 +45,11 @@ public class Jwt(Bro bro)
         };
     }
 
-    private IDictionary<string, object> Claims()
+    private Dictionary<string, object> Claims()
     {
         return new Dictionary<string, object>
         {
-            [JwtRegisteredClaimNames.Sub] = bro.Id.ToString(),
+            [JwtRegisteredClaimNames.Sub] = bro.Id,
             [JwtRegisteredClaimNames.Email] = bro.Email!,
             [JwtRegisteredClaimNames.GivenName] = FirstName(),
             [JwtRegisteredClaimNames.FamilyName] = LastName(),
@@ -44,19 +57,6 @@ public class Jwt(Bro bro)
             [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString(),
             [JwtRegisteredClaimNames.Typ] = "access",
         };
-    }
-
-    private SigningCredentials SigningCredentials()
-    {
-        return new SigningCredentials(SecretKey(), SecurityAlgorithms.HmacSha256);
-    }
-
-    private static SymmetricSecurityKey SecretKey()
-    {
-        return new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(
-                "1f354b830d17f2cb7a01dedf8933b58a")
-        );
     }
 
     private string FirstName() => bro.FirstName ?? string.Empty;
