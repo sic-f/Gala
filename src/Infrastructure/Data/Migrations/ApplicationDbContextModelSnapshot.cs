@@ -22,6 +22,52 @@ namespace Infrastructure.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Core.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BroId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTimeOffset>("Expires")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset?>("Revoked")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BroId")
+                        .IsUnique();
+
+                    b.HasIndex("ReplacedByToken")
+                        .IsUnique()
+                        .HasFilter("[ReplacedByToken] IS NOT NULL");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("Expires", "Revoked");
+
+                    b.ToTable("RefreshToken");
+                });
+
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
                 {
                     b.Property<Guid>("Id")
@@ -227,6 +273,15 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.Bro", null)
+                        .WithOne("RefreshToken")
+                        .HasForeignKey("Core.Entities.RefreshToken", "BroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -276,6 +331,11 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
+                {
+                    b.Navigation("RefreshToken");
                 });
 #pragma warning restore 612, 618
         }
