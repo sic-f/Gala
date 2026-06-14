@@ -56,6 +56,22 @@ public class SessionsController(UserManager<Bro> userManager,
         return Ok(new { Token = Jwt.GenerateToken(For: bro!), RefreshToken = newRefreshToken });
     }
 
+    [HttpDelete]
+    public async Task<IActionResult> Logout([FromBody] string token)
+    {
+        var refreshToken = context.RefreshToken.FirstOrDefault<RefreshToken>(rt => rt.Token == token);
+
+        if (refreshToken is null || refreshToken.IsTerminated)
+        {
+            return NotFound("Token not found or already inactive.");
+        }
+
+        refreshToken.Revoked = DateTimeOffset.UtcNow;
+        await context.SaveChangesAsync();
+
+        return Ok("Refresh token revoked.");
+    }
+
     private async Task<Bro?> ValidateAccount(LoginViewModel model)
     {
         var identityUser = await userManager.FindByNameAsync(model.Email);
