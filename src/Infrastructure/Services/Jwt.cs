@@ -40,7 +40,7 @@ public class Jwt(Bro bro)
             Issuer = Issuer,
             Audience = Audience,
             Claims = Claims(),
-            Expires = DateTime.Now.AddHours(24),
+            Expires = DateTime.Now.AddSeconds(20),
             SigningCredentials = SigningCredentials()
         };
     }
