@@ -18,12 +18,12 @@ public class ApplicationDbContext : IdentityDbContext<Bro, IdentityRole<Guid>, G
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<RefreshToken>().Property(rf => rf.CreatedAt).HasDefaultValueSql<DateTimeOffset>("GETUTCDATE()");
-        builder.Entity<RefreshToken>().Property(rf => rf.Token).HasMaxLength(128);
-        builder.Entity<RefreshToken>().Property(rf => rf.ReplacedByToken).HasMaxLength(128);
-        builder.Entity<RefreshToken>().HasIndex(rf => rf.Token).IsUnique();
-        builder.Entity<RefreshToken>().HasIndex(rf => rf.ReplacedByToken).IsUnique();
-        builder.Entity<RefreshToken>().HasIndex(rf => new { rf.Expires, rf.Revoked });
+        builder.Entity<RefreshToken>().Property(rt => rt.CreatedAt).HasDefaultValueSql<DateTimeOffset>("GETUTCDATE()");
+        builder.Entity<RefreshToken>().Property(rt => rt.Token).HasMaxLength(128);
+        builder.Entity<RefreshToken>().Property(rt => rt.ReplacedByToken).HasMaxLength(128);
+        builder.Entity<RefreshToken>().HasIndex(rt => rt.Token).IsUnique();
+        builder.Entity<RefreshToken>().HasIndex(rt => rt.ReplacedByToken).IsUnique();
+        builder.Entity<RefreshToken>().HasIndex(rt => new { rt.Expires, rt.Revoked });
         builder.Entity<RefreshToken>().HasIndex(rt => rt.BroId).IsUnique(false);
         builder.Entity<Bro>().HasMany<RefreshToken>().WithOne().HasForeignKey(rt => rt.BroId).OnDelete(DeleteBehavior.Cascade);
     }
