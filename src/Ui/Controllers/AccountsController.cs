@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Identity;
 using Infrastructure.Services;
+using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

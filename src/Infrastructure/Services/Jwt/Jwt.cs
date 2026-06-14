@@ -1,9 +1,11 @@
-﻿using Infrastructure.Identity;
+﻿using Core.Entities;
+using Infrastructure.Identity;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 using System.Text;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.Jwt;
 
 public class Jwt(Bro bro)
 {
@@ -14,6 +16,12 @@ public class Jwt(Bro bro)
     {
         return new Jwt(For).Token();
     }
+
+    //public static string GenerateRefreshToken()
+    //{
+    //    string refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+    //}
 
     private static SigningCredentials SigningCredentials()
     {
