@@ -64,7 +64,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("Expires", "Revoked");
 
-                    b.ToTable("RefreshToken");
+                    b.ToTable("RefreshToken", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
