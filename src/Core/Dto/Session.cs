@@ -2,6 +2,6 @@
 
 public class Session
 {
-    public record RefreshTokenables(string RefreshToken, Guid BroId);
+    public record RefreshTokenable(string Token);
     public record RefreshTokenResponse(string RefreshToken, string Token);
 }
