@@ -39,9 +39,12 @@ public class SessionsController(UserManager<Bro> userManager,
             return Unauthorized();
         }
 
-        if (existingRefreshToken.IsTerminated)
+        if (existingRefreshToken.IsUnusable)
         {
-            await revokeAllActiveRefreshTokens.ComputeAsync(broId: existingRefreshToken.BroId);
+            if (existingRefreshToken.HasBeenRevoked)
+            {
+                await revokeAllActiveRefreshTokens.ComputeAsync(broId: existingRefreshToken.BroId);
+            }
 
             return Unauthorized();
         }
@@ -61,7 +64,7 @@ public class SessionsController(UserManager<Bro> userManager,
     {
         var refreshToken = context.RefreshToken.FirstOrDefault<RefreshToken>(rt => rt.Token == token);
 
-        if (refreshToken is null || refreshToken.IsTerminated)
+        if (refreshToken is null || refreshToken.IsUnusable)
         {
             return NotFound("Token not found or already inactive.");
         }
