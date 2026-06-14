@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Core.Entities;
+﻿namespace Core.Entities;
 
 public class RefreshToken
 {
@@ -11,6 +9,7 @@ public class RefreshToken
     public string? ReplacedByToken { get; set; }
     public DateTimeOffset CreatedAt { get; }
     public Guid BroId { get; set; }
-
-    public bool IsActive => Revoked is null && DateTimeOffset.UtcNow < Expires;
+    public bool IsTerminated => HasBeenRevoked && IsExpired;
+    private bool HasBeenRevoked => Revoked is not null;
+    private bool IsExpired => DateTimeOffset.UtcNow > Expires;
 }
