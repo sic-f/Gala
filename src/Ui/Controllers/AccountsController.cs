@@ -1,5 +1,4 @@
 ﻿using Infrastructure.Identity;
-using Infrastructure.Services;
 using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +42,7 @@ public class AccountsController(UserManager<Bro> userManager) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Bro>> PostUser(AccountViewModel model)
+    public async Task<ActionResult<Bro>> PostUser(AccountViewModel model, GenerateRefreshToken generateRefreshToken)
     {
         var applicationUser = new Bro
         {
@@ -72,7 +71,8 @@ public class AccountsController(UserManager<Bro> userManager) : ControllerBase
         return Ok(new
         {
             Message = "Account creation successful",
-            Token = Jwt.GenerateToken(For: applicationUser)
+            Token = Jwt.GenerateToken(For: applicationUser),
+            RefreshToken = generateRefreshToken.Compute(applicationUser.Id)
         });
     }
 
