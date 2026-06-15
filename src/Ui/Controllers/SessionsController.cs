@@ -12,6 +12,7 @@ namespace Ui.Controllers;
 [ApiController]
 public class SessionsController(UserManager<Bro> userManager,
                                 ApplicationDbContext context,
+                                GenerateToken generateToken,
                                 GenerateRefreshToken generateRefreshToken) : ControllerBase
 {
     [HttpPost]
@@ -24,7 +25,7 @@ public class SessionsController(UserManager<Bro> userManager,
             return BadRequest(new { Message = "Login failed." });
         }
 
-        return Ok(new { Token = Jwt.GenerateToken(For: user), RefreshToken = generateRefreshToken.Compute(user.Id) });
+        return Ok(new { Token = generateToken.Compute(user), RefreshToken = generateRefreshToken.Compute(user.Id) });
     }
 
     [HttpPost("Refresh")]
@@ -56,7 +57,7 @@ public class SessionsController(UserManager<Bro> userManager,
         context.RefreshToken.Update(existingRefreshToken);
         context.SaveChanges();
 
-        return Ok(new { Token = Jwt.GenerateToken(For: bro!), RefreshToken = newRefreshToken });
+        return Ok(new { Token = generateToken.Compute(bro!), RefreshToken = newRefreshToken });
     }
 
     [HttpDelete]
