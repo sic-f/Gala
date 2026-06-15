@@ -1,19 +1,16 @@
 ﻿using Infrastructure.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 namespace Infrastructure.Services.Jwt;
 
-public class Jwt(Bro bro)
+public class GenerateToken(IOptions<Configuration.Jwt> jwtOptions)
 {
     private const string Issuer = "Gala";
     private const string Audience = "Lakwatsa";
-
-    public static string GenerateToken(Bro For)
-    {
-        return new Jwt(For).Token();
-    }
+    private Bro _bro = null!;
 
     private static SigningCredentials SigningCredentials()
     {
@@ -28,8 +25,9 @@ public class Jwt(Bro bro)
         );
     }
 
-    private string Token()
+    public string Compute(Bro bro)
     {
+        _bro = bro;
         return new JsonWebTokenHandler().CreateToken(TokenDescriptor());
     }
 
@@ -40,7 +38,7 @@ public class Jwt(Bro bro)
             Issuer = Issuer,
             Audience = Audience,
             Claims = Claims(),
-            Expires = DateTime.Now.AddSeconds(20),
+            Expires = DateTime.Now.AddSeconds(jwtOptions.Value.TokenDays),
             SigningCredentials = SigningCredentials()
         };
     }
@@ -49,8 +47,8 @@ public class Jwt(Bro bro)
     {
         return new Dictionary<string, object>
         {
-            [JwtRegisteredClaimNames.Sub] = bro.Id,
-            [JwtRegisteredClaimNames.Email] = bro.Email!,
+            [JwtRegisteredClaimNames.Sub] = _bro.Id,
+            [JwtRegisteredClaimNames.Email] = _bro.Email!,
             [JwtRegisteredClaimNames.GivenName] = FirstName(),
             [JwtRegisteredClaimNames.FamilyName] = LastName(),
             [JwtRegisteredClaimNames.Iat] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -59,6 +57,6 @@ public class Jwt(Bro bro)
         };
     }
 
-    private string FirstName() => bro.FirstName ?? string.Empty;
-    private string LastName() => bro.LastName ?? string.Empty;
+    private string FirstName() => _bro.FirstName ?? string.Empty;
+    private string LastName() => _bro.LastName ?? string.Empty;
 }
