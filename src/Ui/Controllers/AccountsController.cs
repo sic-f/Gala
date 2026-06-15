@@ -1,5 +1,5 @@
 ﻿using Infrastructure.Identity;
-using Infrastructure.Services;
+using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ namespace Ui.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountsController(UserManager<Bro> userManager) : ControllerBase
+public class AccountsController(UserManager<Bro> userManager, GenerateToken generateToken) : ControllerBase
 {
     private Bro _bro = null!;
 
@@ -37,12 +37,12 @@ public class AccountsController(UserManager<Bro> userManager) : ControllerBase
         return Ok(new
         {
             Message = "Account details updated successfully.",
-            Token = Jwt.GenerateToken(For: _bro)
+            Token = generateToken.Compute(_bro)
         });
     }
 
     [HttpPost]
-    public async Task<ActionResult<Bro>> PostUser(AccountViewModel model)
+    public async Task<ActionResult<Bro>> PostUser(AccountViewModel model, GenerateRefreshToken generateRefreshToken)
     {
         var applicationUser = new Bro
         {
@@ -71,7 +71,8 @@ public class AccountsController(UserManager<Bro> userManager) : ControllerBase
         return Ok(new
         {
             Message = "Account creation successful",
-            Token = Jwt.GenerateToken(For: applicationUser)
+            Token = generateToken.Compute(applicationUser),
+            RefreshToken = generateRefreshToken.Compute(applicationUser.Id)
         });
     }
 
@@ -119,11 +120,7 @@ public class AccountsController(UserManager<Bro> userManager) : ControllerBase
             return new BadRequestObjectResult(new { Errors = result.Errors });
         }
 
-        return Ok(new
-        {
-            Message = "Password changed successfully.",
-            Token = Jwt.GenerateToken(For: _bro)
-        });
+        return Ok(new { Message = "Password changed successfully." });
     }
 
     private async Task<ErrorsParser> SetUserAsync(AccountProfileViewModel model)
