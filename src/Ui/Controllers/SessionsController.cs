@@ -73,7 +73,7 @@ public class SessionsController(UserManager<Bro> userManager,
         refreshToken.Revoked = DateTimeOffset.UtcNow;
         await context.SaveChangesAsync();
 
-        return Ok("Refresh token revoked.");
+        return NoContent();
     }
 
     private async Task<Bro?> ValidateAccount(LoginViewModel model)
