@@ -5,13 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Security.Cryptography;
 using Utility.Factories;
-using Utility.Scope;
+using Utility.Scopes;
 using static Core.Dto.Session;
 
 namespace IntegrationTests.Session;
 
 [Collection("Application Factory Collection")]
-public class RefreshTokenTests(Sessions app) : BaseTest(app, isAuthenticated: false), IClassFixture<Sessions>
+public class RefreshTokenTests(SessionScope app) : BaseTest(app, isAuthenticated: false), IClassFixture<SessionScope>
 {
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
