@@ -1,108 +1,119 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
+using Infrastructure.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Ui.Dto;
 
-namespace Ui.Controllers
+namespace Ui.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class PlacesController(ApplicationDbContext context, UserManager<Bro> userManager) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PlacesController : ControllerBase
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Place>>> GetPlace()
     {
-        private readonly ApplicationDbContext _context;
+        return await context.Place.ToListAsync();
+    }
 
-        public PlacesController(ApplicationDbContext context)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Place>> GetPlace(Guid id)
+    {
+        var place = await context.Place.FindAsync(id);
+
+        if (place == null)
         {
-            _context = context;
+            return NotFound();
         }
 
-        // GET: api/Places
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Place>>> GetPlace()
+        return place;
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutPlace(Guid id, Place place)
+    {
+        if (id != place.Id)
         {
-            return await _context.Place.ToListAsync();
+            return BadRequest();
         }
 
-        // GET: api/Places/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Place>> GetPlace(Guid id)
-        {
-            var place = await _context.Place.FindAsync(id);
+        context.Entry(place).State = EntityState.Modified;
 
-            if (place == null)
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!PlaceExists(id))
             {
                 return NotFound();
             }
-
-            return place;
-        }
-
-        // PUT: api/Places/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPlace(Guid id, Place place)
-        {
-            if (id != place.Id)
+            else
             {
-                return BadRequest();
+                throw;
             }
-
-            _context.Entry(place).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PlaceExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
-        // POST: api/Places
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Place>> PostPlace(Place place)
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<ActionResult<Place>> PostPlace(PlaceDetails details)
+    {
+        Bro? bro = await userManager.GetUserAsync(User);
+
+        if (bro is null)
         {
-            _context.Place.Add(place);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPlace", new { id = place.Id }, place);
+            return NotFound("Bro doesn't exist.");
         }
 
-        // DELETE: api/Places/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePlace(Guid id)
+        Place place = new() 
         {
-            var place = await _context.Place.FindAsync(id);
-            if (place == null)
-            {
-                return NotFound();
-            }
+            Name         = details.Name,
+            Description  = details.Description,
+            Information  = details.Information,
+            Address      = details.Address,
+            Mobile       = details.Mobile,
+            Landline     = details.Landline,
+            Email        = details.Email,
+            Website      = details.Website,
+            Facebook     = details.Facebook,
+            Instagram    = details.Instagram,
+            BroId        = bro.Id,
+            LastModified = DateTimeOffset.UtcNow,
+        };
 
-            _context.Place.Remove(place);
-            await _context.SaveChangesAsync();
+        context.Place.Add(place);
+        await context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        return CreatedAtAction(
+            nameof(GetPlace),
+            new { place.Id },
+            new { Message = "Submit successful", place });
+    }
 
-        private bool PlaceExists(Guid id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePlace(Guid id)
+    {
+        var place = await context.Place.FindAsync(id);
+        if (place == null)
         {
-            return _context.Place.Any(e => e.Id == id);
+            return NotFound();
         }
+
+        context.Place.Remove(place);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private bool PlaceExists(Guid id)
+    {
+        return context.Place.Any(e => e.Id == id);
     }
 }

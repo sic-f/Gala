@@ -3,10 +3,10 @@
 public class Place
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public string? Information { get; set; }
-    public string Address { get; set; } = string.Empty;
+    public string Address { get; set; } = null!;
     public string? Mobile { get; set; }
     public string? Landline { get; set; }
     public string? Email { get; set; }
