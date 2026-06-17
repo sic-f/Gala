@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.PlaceAggregate;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<Bro, IdentityRole<Guid>, G
     { }
 
     public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
+    public DbSet<Place> Place => Set<Place>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
