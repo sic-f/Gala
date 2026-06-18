@@ -1,3 +1,4 @@
+using Core.Interfaces;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -22,25 +23,21 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpGet("{id}")]
     public async Task<ActionResult<Place>> GetPlace(Guid id)
     {
-        var place = await context.Place.FindAsync(id);
+        Place? place = context.Place.AsNoTracking().FirstOrDefault(p => p.Id == id);
 
-        if (place == null)
-        {
-            return NotFound();
-        }
+        if (place is null) return NotFound("❌🏤 Place does not exist.");
 
         return place;
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutPlace(Guid id, Place place)
+    public async Task<IActionResult> PutPlace(Guid id, IPlaceDetailer details)
     {
-        if (id != place.Id)
-        {
-            return BadRequest();
-        }
+        Place? place = context.Place.Find(id);
 
-        context.Entry(place).State = EntityState.Modified;
+        if (place is null) return NotFound("❌🏤 Place does not exist.");
+
+        place.UpdateDetails(details);
 
         try
         {
@@ -72,19 +69,19 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             return NotFound("Bro doesn't exist.");
         }
 
-        Place place = new() 
+        Place place = new()
         {
-            Name         = details.Name,
-            Description  = details.Description,
-            Information  = details.Information,
-            Address      = details.Address,
-            Mobile       = details.Mobile,
-            Landline     = details.Landline,
-            Email        = details.Email,
-            Website      = details.Website,
-            Facebook     = details.Facebook,
-            Instagram    = details.Instagram,
-            BroId        = bro.Id,
+            Name = details.Name,
+            Description = details.Description,
+            Information = details.Information,
+            Address = details.Address,
+            Mobile = details.Mobile,
+            Landline = details.Landline,
+            Email = details.Email,
+            Website = details.Website,
+            Facebook = details.Facebook,
+            Instagram = details.Instagram,
+            BroId = bro.Id,
             LastModified = DateTimeOffset.UtcNow,
         };
 
