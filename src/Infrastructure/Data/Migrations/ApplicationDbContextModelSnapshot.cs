@@ -64,7 +64,81 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("Expires", "Revoked");
 
-                    b.ToTable("RefreshToken", (string)null);
+                    b.ToTable("RefreshToken");
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.Place", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(95)
+                        .HasColumnType("nvarchar(95)");
+
+                    b.Property<Guid>("BroId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(155)
+                        .HasColumnType("nvarchar(155)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<string>("Facebook")
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.Property<string>("Information")
+                        .HasMaxLength(50000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Instagram")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Landline")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Mobile")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Address");
+
+                    b.HasIndex("BroId");
+
+                    b.HasIndex("Email");
+
+                    b.HasIndex("Instagram");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("Place");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
@@ -278,6 +352,15 @@ namespace Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("BroId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.Place", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.Bro", null)
+                        .WithMany()
+                        .HasForeignKey("BroId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
