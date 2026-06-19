@@ -1,15 +1,15 @@
 ﻿namespace Core.Interfaces;
 
-public class IPlaceDetailer
+public interface IPlaceDetailer
 {
-    public string Name { get; set; } = null!;
-    public string? Description { get; set; }
-    public string? Information { get; set; }
-    public string Address { get; set; } = null!;
-    public string? Mobile { get; set; }
-    public string? Landline { get; set; }
-    public string? Email { get; set; }
-    public string? Website { get; set; }
-    public string? Facebook { get; set; }
-    public string? Instagram { get; set; }
+    string Name { get; set; }
+    string? Description { get; set; }
+    string? Information { get; set; }
+    string Address { get; set; }
+    string? Mobile { get; set; }
+    string? Landline { get; set; }
+    string? Email { get; set; }
+    string? Website { get; set; }
+    string? Facebook { get; set; }
+    string? Instagram { get; set; }
 }

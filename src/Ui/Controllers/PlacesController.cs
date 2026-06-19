@@ -31,7 +31,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutPlace(Guid id, IPlaceDetailer details)
+    public async Task<IActionResult> PutPlace(Guid id, PlaceDetails details)
     {
         Place? place = context.Place.Find(id);
 
@@ -55,7 +55,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             }
         }
 
-        return NoContent();
+        return Ok(new { Message = "Updated successfuly "});
     }
 
     [Authorize]
