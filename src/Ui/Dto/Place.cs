@@ -1,19 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ui.Dto;
 
-public record PlaceDetails
+public class PlaceDetails : IPlaceDetailer
 {
     [Required(ErrorMessage = "Name of place is required")]
     [MaxLength(75, ErrorMessage = "Exceeds 75 characters")]
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = null!;
     [MaxLength(155, ErrorMessage = "Exceeds 155 characters")]
     public string? Description { get; set; }
     [MaxLength(50000, ErrorMessage = "Exceeds 50,000 characters")]
     public string? Information { get; set; }
     [Required(ErrorMessage = "Address is required")]
     [MaxLength(95, ErrorMessage = "Exceeds 95 characters")]
-    public string Address { get; set; } = string.Empty;
+    public string Address { get; set; } = null!;
     [MaxLength(15, ErrorMessage = "Exceeds 15 digits")]
     public string? Mobile { get; set; }
     [MaxLength(15, ErrorMessage = "Exceeds 15 digits")]

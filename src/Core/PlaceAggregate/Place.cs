@@ -1,4 +1,6 @@
-﻿namespace Core.PlaceAggregate;
+﻿using Core.Interfaces;
+
+namespace Core.PlaceAggregate;
 
 public class Place
 {
@@ -16,4 +18,19 @@ public class Place
     public Guid BroId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset LastModified { get; set; }
+
+    public void UpdateDetails(IPlaceDetailer details)
+    {
+        Name = details.Name;
+        Description = details.Description;
+        Information = details.Information;
+        Address = details.Address;
+        Mobile = details.Mobile;
+        Landline = details.Landline;
+        Email = details.Email;
+        Website = details.Website;
+        Facebook = details.Facebook;
+        Instagram = details.Instagram;
+        LastModified = DateTimeOffset.UtcNow;
+    }
 }
