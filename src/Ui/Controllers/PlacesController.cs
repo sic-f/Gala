@@ -1,4 +1,3 @@
-using Core.Interfaces;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -56,7 +55,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             }
         }
 
-        return Ok(new { Message = "Updated successfuly "});
+        return Ok(new { Message = "Updated successfuly " });
     }
 
     [Authorize]
@@ -95,6 +94,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             new { Message = "Submit successful", place });
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePlace(Guid id)
     {
