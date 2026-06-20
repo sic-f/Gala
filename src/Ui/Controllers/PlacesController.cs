@@ -30,6 +30,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         return place;
     }
 
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPlace(Guid id, PlaceDetails details)
     {
