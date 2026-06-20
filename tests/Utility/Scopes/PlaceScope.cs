@@ -21,4 +21,9 @@ public class PlaceScope : ApplicationFactory<Program>
     {
         Response = await Client.PostAsJsonAsync<PlaceDetails>(DefaultStartUrl, details);
     }
+
+    public async Task DeletePlaceAsync(Guid placeId)
+    {
+        Response = await Client.DeleteAsync($"{DefaultStartUrl}/{placeId}");
+    }
 }
