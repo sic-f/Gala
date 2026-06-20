@@ -101,7 +101,14 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         var place = await context.Place.FindAsync(id);
         if (place == null)
         {
-            return NotFound();
+            return NotFound("❌🏤 Place does not exist.");
+        }
+
+        Bro? bro = await userManager.GetUserAsync(User);
+
+        if (bro is not null && bro.Id != place.BroId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to delete other people's places");
         }
 
         context.Place.Remove(place);
