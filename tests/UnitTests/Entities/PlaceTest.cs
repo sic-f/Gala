@@ -1,5 +1,5 @@
-﻿using Core.Interfaces;
-using Core.PlaceAggregate;
+﻿using Core.PlaceAggregate;
+using Ui.Dto;
 
 namespace UnitTests.Entities;
 
@@ -15,7 +15,7 @@ public class PlaceTest
             Description = "Test Description",
         };
 
-        IPlaceDetailer details = new() { Name = "Updated", Address = "Updated" };
+        PlaceDetails details = new() { Name = "Updated", Address = "Updated" };
 
         place.UpdateDetails(details);
 
