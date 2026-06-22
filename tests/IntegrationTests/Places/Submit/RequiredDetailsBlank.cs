@@ -2,7 +2,7 @@
 using Utility.Errors;
 using Utility.Scopes;
 
-namespace IntegrationTests.Place.Submit;
+namespace IntegrationTests.Places.Submit;
 
 [Collection("Application Factory Collection")]
 public class RequiredDetailsBlank(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>

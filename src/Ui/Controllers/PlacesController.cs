@@ -1,4 +1,3 @@
-using Core.Interfaces;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -38,6 +37,13 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         if (place is null) return NotFound("❌🏤 Place does not exist.");
 
+        Bro? bro = await userManager.GetUserAsync(User);
+
+        if (bro is not null && place.BroId != bro.Id)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to update other people's places.");
+        }
+
         place.UpdateDetails(details);
 
         try
@@ -56,7 +62,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             }
         }
 
-        return Ok(new { Message = "Updated successfuly "});
+        return Ok(new { Message = "Updated successfuly " });
     }
 
     [Authorize]
@@ -95,13 +101,21 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             new { Message = "Submit successful", place });
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePlace(Guid id)
     {
         var place = await context.Place.FindAsync(id);
         if (place == null)
         {
-            return NotFound();
+            return NotFound("❌🏤 Place does not exist.");
+        }
+
+        Bro? bro = await userManager.GetUserAsync(User);
+
+        if (bro is not null && bro.Id != place.BroId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to delete other people's places");
         }
 
         context.Place.Remove(place);
