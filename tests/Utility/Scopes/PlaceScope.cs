@@ -26,4 +26,9 @@ public class PlaceScope : ApplicationFactory<Program>
     {
         Response = await Client.DeleteAsync($"{DefaultStartUrl}/{placeId}");
     }
+
+    public async Task UpdatePlaceAsync(Guid placeId, PlaceUpdateAttributes attributes)
+    {
+        Response = await Client.PutAsJsonAsync<PlaceUpdateAttributes>($"{DefaultStartUrl}/{placeId}", attributes);
+    }
 }

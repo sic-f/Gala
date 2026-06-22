@@ -24,3 +24,5 @@ string? Email = null,
 string? Website = null,
 string? Facebook = null,
 string? Instagram = null);
+
+public record PlaceUpdateAttributes(string Name, string Address);

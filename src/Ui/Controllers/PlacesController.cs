@@ -37,6 +37,13 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         if (place is null) return NotFound("❌🏤 Place does not exist.");
 
+        Bro? bro = await userManager.GetUserAsync(User);
+
+        if (bro is not null && place.BroId != bro.Id)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to update other people's places.");
+        }
+
         place.UpdateDetails(details);
 
         try
