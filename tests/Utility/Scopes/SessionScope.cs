@@ -1,9 +1,9 @@
 ﻿using System.Net.Http.Json;
 using static Core.Dto.Session;
 
-namespace Utility.Scope;
+namespace Utility.Scopes;
 
-public class Sessions() : ApplicationFactory<Program>
+public class SessionScope() : ApplicationFactory<Program>
 {
     protected override string DefaultStartUrl => "api/Sessions";
 

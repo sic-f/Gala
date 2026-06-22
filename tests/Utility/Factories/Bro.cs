@@ -42,7 +42,12 @@ public class BroFactory
         var scopedServices = scope.ServiceProvider;
         var userManager = scopedServices.GetRequiredService<UserManager<Bro>>();
 
-        await userManager.CreateAsync(bro, password);
+        var result = await userManager.CreateAsync(bro, password);
+
+        if (!result.Succeeded)
+        {
+            throw new Exception(result.Errors.First().Description);
+        }
     }
 
     private static async Task CreateBroAsync(Bro bro, ApplicationDbContext context)
