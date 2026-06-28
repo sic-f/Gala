@@ -1,4 +1,5 @@
 ﻿using Core.PlaceAggregate;
+using NuGet.Protocol;
 using System.Net.Http.Json;
 using Utility.Dto;
 
@@ -33,8 +34,8 @@ public class PlaceScope : ApplicationFactory<Program>
         Response = await Client.PutAsJsonAsync<PlaceUpdateAttributes>($"{DefaultStartUrl}/{placeId}", attributes);
     }
 
-    public async Task<IEnumerable<Place>?> GetPlacesAsync(DateTimeOffset? lastModifiedDate, int fetchLimit)
+    public async Task<IEnumerable<Place>?> GetPlacesAsync(string? lastModifiedDate, int fetchLimit)
     {
-        return await Client.GetFromJsonAsync<IEnumerable<Place>>($"{DefaultStartUrl}?offset={lastModifiedDate}&limit={fetchLimit}");
+        return await Client.GetFromJsonAsync<IEnumerable<Place>>($"{DefaultStartUrl}/?offset={lastModifiedDate}&limit={fetchLimit}");
     }
 }
