@@ -14,9 +14,12 @@ namespace Ui.Controllers;
 public class PlacesController(ApplicationDbContext context, UserManager<Bro> userManager) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Place>>> GetPlace()
+    public async Task<ActionResult<IEnumerable<Place>>> GetPlace(DateTimeOffset offset, int limit)
     {
-        return await context.Place.ToListAsync();
+        return await context.Place.Where(p => p.CreatedAt < offset)
+                                  .OrderByDescending(p => p.CreatedAt)
+                                  .Take(limit)
+                                  .ToListAsync();
     }
 
     [HttpGet("{id}")]

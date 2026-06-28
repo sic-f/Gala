@@ -21,19 +21,19 @@ public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceSco
         context.Place.AddRange(newPlaces);
         await context.SaveChangesAsync();
 
-        DateTimeOffset? lastModifiedDate = context.Place.FirstOrDefault<Place>(p => p.Name == "2nd Batch E")?.LastModified;
+        DateTimeOffset? createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "2nd Batch A")?.CreatedAt;
         var fetchLimit = 5;
-        IEnumerable<Place>? places = await app.GetPlacesAsync(lastModifiedDate, fetchLimit);
+        IEnumerable<Place>? places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
 
         Assert.Collection(places!,
-            p => Assert.Equal("3rd Batch E", p.Name),
-            p => Assert.Equal("3rd Batch D", p.Name),
-            p => Assert.Equal("3rd Batch C", p.Name),
-            p => Assert.Equal("3rd Batch B", p.Name),
-            p => Assert.Equal("3rd Batch A", p.Name));
+            p => Assert.Equal("1st Batch E", p.Name),
+            p => Assert.Equal("1st Batch D", p.Name),
+            p => Assert.Equal("1st Batch C", p.Name),
+            p => Assert.Equal("1st Batch B", p.Name),
+            p => Assert.Equal("1st Batch A", p.Name));
 
-        lastModifiedDate = context.Place.FirstOrDefault<Place>(p => p.Name == "1st Batch E")?.LastModified;
-        places = await app.GetPlacesAsync(lastModifiedDate, fetchLimit);
+        createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "3rd Batch A")?.CreatedAt;
+        places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
 
         Assert.Collection(places!,
             p => Assert.Equal("2nd Batch E", p.Name),
@@ -51,114 +51,111 @@ public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceSco
                 Name = "1st Batch A",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow,
             },
             new Place
             {
                 Name = "1st Batch B",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1),
             },
             new Place
             {
                 Name = "1st Batch C",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(2),
             },
             new Place
             {
                 Name = "1st Batch D",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3),
             },
             new Place
             {
                 Name = "1st Batch E",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(4),
             },
             new Place
             {
                 Name = "2nd Batch A",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5),
             },
             new Place
             {
                 Name = "2nd Batch B",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(6),
             },
             new Place
             {
                 Name = "2nd Batch C",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7),
             },
             new Place
             {
                 Name = "2nd Batch D",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(8),
             },
             new Place
             {
                 Name = "2nd Batch E",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9),
             },
             new Place
             {
                 Name = "3rd Batch A",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(10),
             },
             new Place
             {
                 Name = "3rd Batch B",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11),
             },
             new Place
             {
                 Name = "3rd Batch C",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(12),
             },
             new Place
             {
                 Name = "3rd Batch D",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13),
             },
             new Place
             {
                 Name = "3rd Batch E",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                LastModified = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(14),
             },
         ];
     }
 
-    private static IEnumerable<Place> GetPlaces(ApplicationDbContext context, DateTimeOffset? lastModifiedDate)
+    private static string? GetFormattedDateTimeOffset(DateTimeOffset? dateTime)
     {
-        return [.. context.Place.Where(p => p.LastModified > lastModifiedDate)
-                                .OrderBy(p => p.LastModified)
-                                .Take(5)
-                                .OrderDescending()];
+        return dateTime?.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
     }
 }
