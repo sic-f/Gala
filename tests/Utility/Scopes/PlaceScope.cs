@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using Core.PlaceAggregate;
+using NuGet.Protocol;
+using System.Net.Http.Json;
 using Utility.Dto;
 
 namespace Utility.Scopes;
@@ -30,5 +32,10 @@ public class PlaceScope : ApplicationFactory<Program>
     public async Task UpdatePlaceAsync(Guid placeId, PlaceUpdateAttributes attributes)
     {
         Response = await Client.PutAsJsonAsync<PlaceUpdateAttributes>($"{DefaultStartUrl}/{placeId}", attributes);
+    }
+
+    public async Task<IEnumerable<Place>?> GetPlacesAsync(string? lastModifiedDate, int fetchLimit)
+    {
+        return await Client.GetFromJsonAsync<IEnumerable<Place>>($"{DefaultStartUrl}/?offset={lastModifiedDate}&limit={fetchLimit}");
     }
 }
