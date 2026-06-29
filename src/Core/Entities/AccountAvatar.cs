@@ -11,4 +11,5 @@ public class AccountAvatar
     public string Normal { get; set; } = string.Empty;
     public string Small { get; set; } = string.Empty;
     public Guid BroId { get; set; }
+    public DateTimeOffset CreatedAt { get; }
 }
