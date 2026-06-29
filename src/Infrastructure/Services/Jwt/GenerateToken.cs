@@ -51,6 +51,7 @@ public class GenerateToken(IOptions<Configuration.Jwt> jwtOptions)
             [JwtRegisteredClaimNames.Email] = _bro.Email!,
             [JwtRegisteredClaimNames.GivenName] = FirstName(),
             [JwtRegisteredClaimNames.FamilyName] = LastName(),
+            [JwtRegisteredClaimNames.Picture] = Avatar(),
             [JwtRegisteredClaimNames.Iat] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString(),
             [JwtRegisteredClaimNames.Typ] = "access",
@@ -59,4 +60,5 @@ public class GenerateToken(IOptions<Configuration.Jwt> jwtOptions)
 
     private string FirstName() => _bro.FirstName ?? string.Empty;
     private string LastName() => _bro.LastName ?? string.Empty;
+    private string Avatar() => _bro.Avatar?.Normal ?? string.Empty;
 }
