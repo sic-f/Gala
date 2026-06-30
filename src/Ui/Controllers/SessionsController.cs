@@ -25,6 +25,8 @@ public class SessionsController(UserManager<Bro> userManager,
             return BadRequest(new { Message = "Login failed." });
         }
 
+        await context.Entry(user).Reference(u => u.Avatar).LoadAsync();
+
         return Ok(new { Token = generateToken.Compute(user), RefreshToken = generateRefreshToken.Compute(user.Id) });
     }
 
