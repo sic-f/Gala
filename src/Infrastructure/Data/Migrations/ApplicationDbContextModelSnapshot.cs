@@ -22,6 +22,38 @@ namespace Infrastructure.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Core.Entities.AccountAvatar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BroId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Normal")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.Property<string>("Small")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BroId")
+                        .IsUnique();
+
+                    b.ToTable("AccountAvatar");
+                });
+
             modelBuilder.Entity("Core.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -346,6 +378,15 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Entities.AccountAvatar", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.Bro", null)
+                        .WithOne("Avatar")
+                        .HasForeignKey("Core.Entities.AccountAvatar", "BroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Core.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Infrastructure.Identity.Bro", null)
@@ -413,6 +454,11 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
+                {
+                    b.Navigation("Avatar");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<Bro, IdentityRole<Guid>, G
 
     public DbSet<RefreshToken> RefreshToken => Set<RefreshToken>();
     public DbSet<Place> Place => Set<Place>();
+    public DbSet<AccountAvatar> AccountAvatar => Set<AccountAvatar>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
