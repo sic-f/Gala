@@ -4,6 +4,7 @@ using Infrastructure.Identity;
 using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Ui.ViewModels;
 
 namespace Ui.Controllers;
@@ -32,15 +33,16 @@ public class SessionsController(UserManager<Bro> userManager,
 
     [HttpPost("Refresh")]
     public async Task<IActionResult> Refresh([FromBody] string token,
-                                             RevokeAllActiveRefreshTokens revokeAllActiveRefreshTokens)
+                                             RevokeAllActiveRefreshTokens revokeAllActiveRefreshTokens,
+                                             ApplicationDbContext context)
     {
         RefreshToken? existingRefreshToken = context.RefreshToken.FirstOrDefault(rt => rt.Token == token);
-        Bro? bro = await userManager.FindByIdAsync(existingRefreshToken?.BroId.ToString() ?? string.Empty);
 
-        if (existingRefreshToken is null || bro is null)
-        {
-            return Unauthorized();
-        }
+        if (existingRefreshToken is null) return Unauthorized();
+
+        Bro? bro = await context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == existingRefreshToken.BroId);
+
+        if (bro is null) return Unauthorized();
 
         if (existingRefreshToken.IsUnusable)
         {
