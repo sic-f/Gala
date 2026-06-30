@@ -143,7 +143,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(15)");
 
                     b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Mobile")
                         .HasMaxLength(15)
