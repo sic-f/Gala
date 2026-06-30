@@ -51,5 +51,17 @@ public class PlaceConfiguration : IEntityTypeConfiguration<Place>
         builder.HasIndex(p => p.BroId);
 
         builder.Property(p => p.CreatedAt).HasDefaultValueSql<DateTimeOffset>("GETUTCDATE()");
+
+        builder.HasMany<PlaceProfilePicture>(p => p.ProfilePictures)
+               .WithOne()
+               .HasForeignKey(ppp => ppp.PlaceId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany<PlaceExtraPicture>(p => p.Pictures)
+               .WithOne()
+               .HasForeignKey(pep => pep.PlaceId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
