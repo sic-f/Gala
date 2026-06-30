@@ -74,10 +74,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     {
         Bro? bro = await userManager.GetUserAsync(User);
 
-        if (bro is null)
-        {
-            return NotFound("Bro doesn't exist.");
-        }
+        if (bro is null) return NotFound("Bro doesn't exist.");
 
         Place place = new()
         {
