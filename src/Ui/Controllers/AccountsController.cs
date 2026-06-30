@@ -22,9 +22,9 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutUser(string id, [FromBody] AccountProfileViewModel model)
+    public async Task<IActionResult> PutUser(Guid id, [FromBody] AccountProfileViewModel model, ApplicationDbContext context)
     {
-        _bro = await userManager.FindByIdAsync(id);
+        _bro = await context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == id);
 
         if (_bro is null) return NotFound();
 
