@@ -19,5 +19,11 @@ public class BroConfiguration : IEntityTypeConfiguration<Bro>
                .WithOne()
                .HasForeignKey(p => p.BroId)
                .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasOne<AccountAvatar>(b => b.Avatar)
+               .WithOne()
+               .HasForeignKey<AccountAvatar>(aa => aa.BroId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }

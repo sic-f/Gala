@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Core.Entities;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Identity;
@@ -9,6 +10,7 @@ public class Bro : IdentityUser<Guid>
     public string? FirstName { get; set; }
     [StringLength(60)]
     public string? LastName { get; set; }
+    public AccountAvatar? Avatar { get; set; }
 
     public string Name()
     {

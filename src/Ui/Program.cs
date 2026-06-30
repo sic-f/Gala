@@ -43,7 +43,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddInfrastructureOptions();
+builder.Services.AddInfrastructureOptions(builder);
 
 var app = builder.Build();
 
