@@ -361,4 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Six Labors License
 /src/Infrastructure/sixlabors.lic
+
+# Webroot
+wwwroot
