@@ -7,7 +7,7 @@ public class PlacePicture
     public string Normal { get; set; } = string.Empty;
     public string Small { get; set; } = string.Empty;
     public Guid PlaceId { get; set; }
-    public Guid UploaderId { get; set; }
+    public Guid? UploaderId { get; set; }
     public DateTimeOffset CreatedAt { get; }
     public DateTimeOffset LastModified { get; set; }
 }

@@ -15,8 +15,10 @@ public class Place
     public string? Website { get; set; }
     public string? Facebook { get; set; }
     public string? Instagram { get; set; }
+    public ICollection<PlaceProfilePicture> ProfilePictures { get; } = Enumerable.Empty<PlaceProfilePicture>().ToList();
+    public List<PlaceExtraPicture> Pictures { get; } = new List<PlaceExtraPicture>();
     public Guid BroId { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; }
     public DateTimeOffset LastModified { get; set; }
 
     public void UpdateDetails(IPlaceDetailer details)
