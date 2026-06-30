@@ -1,11 +1,16 @@
-﻿using Infrastructure.Identity;
+﻿using Infrastructure.Data;
+using Infrastructure.Identity;
+using Infrastructure.Services.Images;
 using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Ui.Services;
 using Ui.ViewModels;
+using static Core.ValueObjects.General;
 
 namespace Ui.Controllers;
 
@@ -13,13 +18,13 @@ namespace Ui.Controllers;
 [ApiController]
 public class AccountsController(UserManager<Bro> userManager, GenerateToken generateToken) : ControllerBase
 {
-    private Bro _bro = null!;
+    private Bro? _bro;
 
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutUser(string id, [FromBody] AccountProfileViewModel model)
     {
-        _bro = (await userManager.FindByIdAsync(id))!;
+        _bro = await userManager.FindByIdAsync(id);
 
         if (_bro is null) return NotFound();
 
@@ -77,14 +82,14 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     }
 
     [Authorize]
-    [HttpDelete("{id}")]
+    [HttpDelete]
     public async Task<IActionResult> DeleteUser()
     {
-        var user = await userManager.GetUserAsync(User);
+        _bro = await userManager.GetUserAsync(User);
 
-        if (user is not null)
+        if (_bro is not null)
         {
-            var result = await userManager.DeleteAsync(user);
+            var result = await userManager.DeleteAsync(_bro);
 
             if (!result.Succeeded)
             {
@@ -109,7 +114,7 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     [HttpPut("{id}/Password")]
     public async Task<IActionResult> PasswordAsync(string id, [FromBody] ChangePasswordViewModel model)
     {
-        _bro = (await userManager.FindByIdAsync(id))!;
+        _bro = await userManager.FindByIdAsync(id);
 
         if (_bro is null) return NotFound();
 
@@ -123,9 +128,47 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
         return Ok(new { Message = "Password changed successfully." });
     }
 
+    [Authorize]
+    [HttpPut("Update-Avatar")]
+    public async Task<IActionResult> UpdateAvatarAsync([FromForm] IFormFile avatar,
+                                                       AttachImages attachImages,
+                                                       GenerateToken generateToken,
+                                                       ApplicationDbContext context)
+    {
+        string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (broId is null) return NotFound();
+
+        _bro = await context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == Guid.Parse(broId));
+
+        if (_bro is null) return NotFound();
+
+        await attachImages.ComputeAsync(_bro, avatar, new UrlSegments(Request.Scheme, Request.Host.ToString()));
+
+        IdentityResult result = await userManager.UpdateAsync(_bro);
+
+        if (result.Errors.Any())
+        {
+            return new BadRequestObjectResult(new
+            {
+                Message = "Avatar update failed.",
+                result.Errors
+            });
+        }
+
+        return Ok(new
+        {
+            Message = "Avatar updated successfully.",
+            Token = generateToken.Compute(_bro),
+        });
+    }
+
+
     private async Task<ErrorsParser> SetUserAsync(AccountProfileViewModel model)
     {
         var errorsParser = new ErrorsParser();
+
+        if (_bro is null) return errorsParser;
 
         _bro.Email = model.Email;
         _bro.UserName = model.Email;
