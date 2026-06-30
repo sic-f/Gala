@@ -27,4 +27,5 @@ public record PlaceDetails : IPlaceDetailer
     public string? Facebook { get; set; }
     [MaxLength(30, ErrorMessage = "Exceeds 30 characters")]
     public string? Instagram { get; set; }
+    public IFormFile? Picture { get; set; }
 }
