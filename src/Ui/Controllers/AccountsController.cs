@@ -1,4 +1,6 @@
-﻿using Infrastructure.Data;
+﻿using Core.Interfaces;
+using Infrastructure.Configuration.Storage.Options;
+using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.Services.Images;
 using Infrastructure.Services.Jwt;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Ui.Services;
 using Ui.ViewModels;
@@ -22,7 +25,9 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutUser(Guid id, [FromBody] AccountProfileViewModel model, ApplicationDbContext context)
+    public async Task<IActionResult> PutUser(Guid id,
+                                             [FromBody] AccountProfileViewModel model,
+                                             ApplicationDbContext context)
     {
         _bro = await context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == id);
 
@@ -47,7 +52,8 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     }
 
     [HttpPost]
-    public async Task<ActionResult<Bro>> PostUser(AccountViewModel model, GenerateRefreshToken generateRefreshToken)
+    public async Task<ActionResult<Bro>> PostUser(AccountViewModel model,
+                                                  GenerateRefreshToken generateRefreshToken)
     {
         var applicationUser = new Bro
         {
@@ -131,6 +137,7 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     [Authorize]
     [HttpPut("Update-Avatar")]
     public async Task<IActionResult> UpdateAvatarAsync([FromForm] IFormFile avatar,
+                                                       IOptionsSnapshot<AvatarOptions> avatarOptions,
                                                        AttachImages attachImages,
                                                        GenerateToken generateToken,
                                                        ApplicationDbContext context)
@@ -143,7 +150,12 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
         if (_bro is null) return NotFound();
 
-        await attachImages.ComputeAsync(_bro, avatar, new UrlSegments(Request.Scheme, Request.Host.ToString()));
+        IPathSwapElements paths = avatarOptions.Get(AvatarOptions.Avatar);
+
+        await attachImages.ComputeAsync(_bro,
+                                        avatar,
+                                        new UrlSegments(Request.Scheme, Request.Host.ToString()),
+                                        new GetImagesPath(paths));
 
         IdentityResult result = await userManager.UpdateAsync(_bro);
 
@@ -184,7 +196,7 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     private async Task<ErrorsParser> UpdatePasswordAsync(ChangePasswordViewModel model)
     {
         var result = await userManager.ChangePasswordAsync(
-            user: _bro,
+            user: _bro!,
             currentPassword: model.OldPassword,
             newPassword: model.Password);
 
