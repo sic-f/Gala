@@ -154,8 +154,8 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
         await attachImages.ComputeAsync(_bro,
                                         avatar,
-                                        new UrlSegments(Request.Scheme, Request.Host.ToString()),
-                                        new GetImagesPath(paths));
+                                        new GetImagesPath(paths),
+                                        new UrlSegments(Request.Scheme, Request.Host.ToString()));
 
         IdentityResult result = await userManager.UpdateAsync(_bro);
 
