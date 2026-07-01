@@ -1,4 +1,7 @@
+using Core.Exceptions;
+using Core.Interfaces;
 using Core.PlaceAggregate;
+using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.Services.Images;
@@ -6,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Ui.Dto;
 using static Core.ValueObjects.General;
 using static Infrastructure.ValueObjects.ImageValues;
@@ -19,7 +23,9 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Place>>> GetPlace(DateTimeOffset offset, int limit)
     {
-        return await context.Place.Where(p => p.CreatedAt < offset)
+        return await context.Place.Include(p => p.ProfilePictures)
+                                  .Include(p => p.Pictures)
+                                  .Where(p => p.CreatedAt < offset)
                                   .OrderByDescending(p => p.CreatedAt)
                                   .Take(limit)
                                   .ToListAsync();
@@ -28,7 +34,10 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpGet("{id}")]
     public async Task<ActionResult<Place>> GetPlace(Guid id)
     {
-        Place? place = context.Place.AsNoTracking().FirstOrDefault(p => p.Id == id);
+        Place? place = context.Place.Include(p => p.ProfilePictures)
+                                    .Include(p => p.Pictures)
+                                    .AsNoTracking()
+                                    .FirstOrDefault(p => p.Id == id);
 
         if (place is null) return NotFound("❌🏤 Place does not exist.");
 
@@ -75,7 +84,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpPost]
     public async Task<ActionResult<Place>> PostPlace(PlaceDetails details,
                                                      AttachImages attachImages,
-                                                     GetImagesPath getImagesPath)
+                                                     IOptionsSnapshot<PlaceImageOptions> options)
     {
         Bro? bro = await userManager.GetUserAsync(User);
 
@@ -98,11 +107,20 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         Images images = new(details.Picture, details.Pictures);
 
-        await attachImages.ComputeAsync(place,
-                                        images,
-                                        getImagesPath,
-                                        new UrlSegments(Request.Scheme,
-                                                        Request.Host.ToString()));
+        IPathSwapElements paths = options.Get(PlaceImageOptions.Place);
+
+        try
+        {
+            await attachImages.ComputeAsync(place,
+                                            images,
+                                            new GetImagesPath(paths),
+                                            new UrlSegments(Request.Scheme,
+                                                            Request.Host.ToString()));
+        }
+        catch (ImageTypeException ex)
+        {
+            return BadRequest(new { Errors = new { Picture = new string[] { ex.Message } } });
+        }
 
         context.Place.Add(place);
         await context.SaveChangesAsync();

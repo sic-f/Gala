@@ -25,7 +25,7 @@ public class UpdateAvatar()
 
     public string GetUri()
     {
-        return $"{_urlSegments.Scheme}://{_urlSegments.Host}/images/avatar/{_fileName}";
+        return $"{_urlSegments.Scheme}://{_urlSegments.Host}/{_getImagesPath.GetImageKindSegment()}/{_fileName}";
     }
 
     private async Task PersistAvatarAsync()

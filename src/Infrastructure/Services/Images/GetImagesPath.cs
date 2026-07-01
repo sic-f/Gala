@@ -1,6 +1,7 @@
 ﻿using Core.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text;
 
 namespace Infrastructure.Services.Images;
 
@@ -11,6 +12,7 @@ public class GetImagesPath
     public GetImagesPath(IPathSwapElements paths)
     {
         InitializeImageDirectory(paths);
+        CreateDirectory();
     }
 
     /// <summary>
@@ -23,6 +25,28 @@ public class GetImagesPath
     }
 
     /// <summary>
+    /// Supplies correct image kind directory segment. 🛣️🚶‍
+    /// </summary>
+    /// <returns>The correct image kind directory segment after wwwroot and excluding the file name. ☑️
+    /// e.g. "image/place"</returns>
+    public string GetImageKindSegment()
+    {
+        StringBuilder sb = new();
+        int index = 0;
+        do
+        {
+            index = _imageKindDirectory.IndexOf("Images\\Place", index);
+            if (index != -1)
+            {
+                sb.Append("images/place");
+                index++;
+            }
+        } while (index != -1);
+
+        return sb.ToString();
+    }
+
+    /// <summary>
     /// Returns the folder path for the kind of image, e.g. A place's picture(s), an account's avatar, etc. 📁📂
     /// </summary>
     /// <param name="paths">A value object that contains incorrect and correct paths as properties. 
@@ -32,5 +56,13 @@ public class GetImagesPath
     {
         _imageKindDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!
             .Replace(paths.IncorrectPath, paths.CorrectPath);
+    }
+
+    private void CreateDirectory()
+    {
+        if (!Directory.Exists(_imageKindDirectory))
+        {
+            Directory.CreateDirectory(_imageKindDirectory);
+        }
     }
 }
