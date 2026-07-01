@@ -16,7 +16,7 @@ public static class InfrastructureOptions
         services.AddScoped<RevokeAllActiveRefreshTokens>();
 
         services.Configure<AvatarOptions>(AvatarOptions.Avatar, builder.Configuration.GetSection("Images:Avatar"));
-        services.Configure<AvatarOptions>(PlaceImageOptions.Place, builder.Configuration.GetSection("Images:Place"));
+        services.Configure<PlaceImageOptions>(PlaceImageOptions.Place, builder.Configuration.GetSection("Images:Place"));
         services.AddScoped<AttachImages>();
         services.AddScoped<ValidateImageType>();
         services.AddScoped<UpdateAvatar>();
