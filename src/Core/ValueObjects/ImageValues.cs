@@ -1,6 +1,6 @@
 ﻿namespace Core.ValueObjects;
 
-public class Images
+public class ImageValues
 {
     public record ImageDimensions(int Width, int Height);
 }
