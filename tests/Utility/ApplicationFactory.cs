@@ -10,7 +10,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Utility.Factories;
-using static Core.Dto.Bro;
 using static Core.Dto.Response;
 
 namespace Utility;
