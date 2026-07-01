@@ -2,16 +2,21 @@
 
 namespace Infrastructure.Services.Images;
 
-public class UpdateAvatar(GetImagesPath getImagesPath)
+public class UpdateAvatar()
 {
     public const string Small = "small";
     private string _fileName = string.Empty;
-    private UrlSegments _imageUrlSegments = default!;
+    private GetImagesPath _getImagesPath = default!;
+    private UrlSegments _urlSegments = default!;
     private ImagePreparer _preparer = default!;
 
-    public async Task<UpdateAvatar> ComputeAsync(string fileName, UrlSegments imageUrlSegments, ImagePreparer preparer, string? imageVariant = null)
+    public async Task<UpdateAvatar> ComputeAsync(string fileName,
+                                                 GetImagesPath getImagesPath,
+                                                 UrlSegments urlSegments,
+                                                 ImagePreparer preparer,
+                                                 string? imageVariant = null)
     {
-        SetFields(fileName, imageUrlSegments, preparer, imageVariant);
+        SetFields(fileName, getImagesPath, urlSegments, preparer, imageVariant);
 
         await PersistAvatarAsync();
 
@@ -20,25 +25,24 @@ public class UpdateAvatar(GetImagesPath getImagesPath)
 
     public string GetUri()
     {
-        return $"{_imageUrlSegments.Scheme}://{_imageUrlSegments.Host}/images/avatar/{_fileName}";
+        return $"{_urlSegments.Scheme}://{_urlSegments.Host}/images/avatar/{_fileName}";
     }
 
     private async Task PersistAvatarAsync()
     {
-        if (!Directory.Exists(getImagesPath.AvatarDirectory()))
-        {
-            Directory.CreateDirectory(getImagesPath.AvatarDirectory());
-        }
-
-        using var stream = new FileStream(getImagesPath.Avatar(_fileName), FileMode.Create);
-
+        using var stream = new FileStream(_getImagesPath.FileNamePath(_fileName), FileMode.Create);
         await _preparer.PrepareAsync(stream);
     }
 
-    private void SetFields(string fileName, UrlSegments imageUrlSegments, ImagePreparer preparer, string? imageVariant)
+    private void SetFields(string fileName,
+                           GetImagesPath getImagesPath,
+                           UrlSegments urlSegments,
+                           ImagePreparer preparer,
+                           string? imageVariant)
     {
         _fileName = imageVariant is null ? $"{fileName}.jpg" : $"{fileName}-{imageVariant}.jpg";
-        _imageUrlSegments = imageUrlSegments;
+        _getImagesPath = getImagesPath;
+        _urlSegments = urlSegments;
         _preparer = preparer;
     }
 }
