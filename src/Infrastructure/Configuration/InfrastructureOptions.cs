@@ -1,5 +1,4 @@
-﻿using Infrastructure.Configuration.Storage;
-using Infrastructure.Configuration.Storage.Options;
+﻿using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Services.Images;
 using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Builder;
@@ -16,8 +15,8 @@ public static class InfrastructureOptions
         services.AddScoped<GenerateRefreshToken>();
         services.AddScoped<RevokeAllActiveRefreshTokens>();
 
-        services.Configure<ImagesOptions>(ImagesOptions.Avatar, builder.Configuration.GetSection("Images:Avatar"));
-        services.Configure<ImagesOptions>(PlaceImageOptions.Place, builder.Configuration.GetSection("Images:Place"));
+        services.Configure<AvatarOptions>(AvatarOptions.Avatar, builder.Configuration.GetSection("Images:Avatar"));
+        services.Configure<AvatarOptions>(PlaceImageOptions.Place, builder.Configuration.GetSection("Images:Place"));
         services.AddScoped<GetImagesPath>();
         services.AddScoped<AttachImages>();
         services.AddScoped<ValidateImageType>();

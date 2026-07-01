@@ -1,6 +1,6 @@
-﻿namespace Infrastructure.Configuration.Storage
+﻿namespace Infrastructure.Configuration.Storage.Options
 {
-    public class ImagesOptions
+    public class AvatarOptions
     {
         public const string Avatar = "Avatar";
 
