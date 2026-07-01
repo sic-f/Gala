@@ -1,6 +1,8 @@
-﻿namespace Infrastructure.Configuration.Storage.Options
+﻿using Core.Interfaces;
+
+namespace Infrastructure.Configuration.Storage.Options
 {
-    public class AvatarOptions
+    public class AvatarOptions : IPathSwapElements
     {
         public const string Avatar = "Avatar";
 

@@ -1,6 +1,8 @@
-﻿namespace Infrastructure.Configuration.Storage.Options;
+﻿using Core.Interfaces;
 
-public class PlaceImageOptions
+namespace Infrastructure.Configuration.Storage.Options;
+
+public class PlaceImageOptions : IPathSwapElements
 {
     public const string Place = "Place";
 
