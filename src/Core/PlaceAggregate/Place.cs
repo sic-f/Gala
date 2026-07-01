@@ -20,6 +20,7 @@ public class Place
     public Guid BroId { get; set; }
     public DateTimeOffset CreatedAt { get; }
     public DateTimeOffset LastModified { get; set; }
+    public PlaceProfilePicture? Picture => ProfilePictures.FirstOrDefault();
 
     public void UpdateDetails(IPlaceDetailer details)
     {

@@ -37,4 +37,15 @@ public class PlaceTest
         Assert.Single(place.ProfilePictures, p => p.Normal == "Normal");
     }
 
+
+    [Fact]
+    public async Task PictureTest()
+    {
+        PlaceProfilePicture profilePicture = new() { Normal = "Normal" };
+        Place place = new();
+        place.AddProfilePicture(profilePicture);
+
+        Assert.NotNull(place.Picture);
+        Assert.IsType<PlaceProfilePicture>(place.Picture);
+    }
 }
