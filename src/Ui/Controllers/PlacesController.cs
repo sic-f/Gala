@@ -22,7 +22,6 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 {
     [HttpGet]
     public IEnumerable<Core.Dto.PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
-    //public IQueryable<Place> GetPlace(DateTimeOffset offset, int limit)
     {
         PlaceGeneralPictureDetails? picture = default;
         IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
