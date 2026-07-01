@@ -31,7 +31,7 @@ public class PlaceTest
 
         Place place = new();
 
-        place.AddProfilePicture(profilePicture);
+        place.AddPicture(profilePicture);
 
         Assert.NotEmpty(place.ProfilePictures);
         Assert.Single(place.ProfilePictures, p => p.Normal == "Normal");
@@ -43,7 +43,7 @@ public class PlaceTest
     {
         PlaceProfilePicture profilePicture = new() { Normal = "Normal" };
         Place place = new();
-        place.AddProfilePicture(profilePicture);
+        place.AddPicture(profilePicture);
 
         Assert.NotNull(place.Picture);
         Assert.IsType<PlaceProfilePicture>(place.Picture);

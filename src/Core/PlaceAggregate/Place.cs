@@ -37,7 +37,7 @@ public class Place
         LastModified = DateTimeOffset.UtcNow;
     }
 
-    public void AddProfilePicture(PlaceProfilePicture profilePicture)
+    public void AddPicture(PlaceProfilePicture profilePicture)
     {
         ProfilePictures.Add(profilePicture);
     }
