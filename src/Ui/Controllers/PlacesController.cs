@@ -21,7 +21,7 @@ namespace Ui.Controllers;
 public class PlacesController(ApplicationDbContext context, UserManager<Bro> userManager) : ControllerBase
 {
     [HttpGet]
-    public IEnumerable<Core.Dto.PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
+    public IEnumerable<PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
     {
         PlaceGeneralPictureDetails? picture = default;
         IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
@@ -31,8 +31,9 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
                             .Include(p => p.Pictures)
                             .Where(p => p.CreatedAt < offset)
                             .OrderByDescending(p => p.CreatedAt)
-                            .Take(limit).ToList()
-                            .Select<Core.PlaceAggregate.Place, PlaceDetailsHomePage>(p =>
+                            .Take(limit)
+                            .ToList()
+                            .Select(p =>
                             {
                                 if (p.Picture is not null)
                                 {
@@ -52,22 +53,21 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
                                                                        Small: pep.Small,
                                                                        PlaceId: pep.PlaceId)).ToList();
                                 }
-                                return new Core.Dto.PlaceDetailsHomePage(
-                                                            Id: p.Id,
-                                                            Name: p.Name,
-                                                            Description: p.Description,
-                                                            Information: p.Information,
-                                                            Address: p.Address,
-                                                            Mobile: p.Mobile,
-                                                            Landline: p.Landline,
-                                                            Email: p.Email,
-                                                            Website: p.Website,
-                                                            Facebook: p.Facebook,
-                                                            Instagram: p.Instagram,
-                                                            BroId: p.BroId,
-                                                            Picture: picture,
-                                                            Pictures: pictures,
-                                                            CreatedAt: p.CreatedAt);
+                                return new PlaceDetailsHomePage(Id: p.Id,
+                                                                Name: p.Name,
+                                                                Description: p.Description,
+                                                                Information: p.Information,
+                                                                Address: p.Address,
+                                                                Mobile: p.Mobile,
+                                                                Landline: p.Landline,
+                                                                Email: p.Email,
+                                                                Website: p.Website,
+                                                                Facebook: p.Facebook,
+                                                                Instagram: p.Instagram,
+                                                                BroId: p.BroId,
+                                                                Picture: picture,
+                                                                Pictures: pictures,
+                                                                CreatedAt: p.CreatedAt);
                             });
     }
 
