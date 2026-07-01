@@ -1,6 +1,8 @@
-﻿namespace Core.Entities;
+﻿using Core.Interfaces;
 
-public class AccountAvatar
+namespace Core.Entities;
+
+public class AccountAvatar : IImageDeletable
 {
     public const int DisplayWidth = 854;
     public const int DisplayHeight = 480;

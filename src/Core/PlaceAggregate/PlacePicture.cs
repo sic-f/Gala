@@ -1,6 +1,8 @@
-﻿namespace Core.PlaceAggregate;
+﻿using Core.Interfaces;
 
-public class PlacePicture
+namespace Core.PlaceAggregate;
+
+public class PlacePicture : IImageDeletable
 {
     public Guid Id { get; set; }
     public string? Caption { get; set; }
