@@ -41,4 +41,9 @@ public class Place
     {
         ProfilePictures.Add(profilePicture);
     }
+
+    public void AddPictures(IEnumerable<PlaceExtraPicture> pictures)
+    {
+        Pictures.AddRange(pictures);
+    }
 }
