@@ -122,7 +122,8 @@ public class AttachImages(UpdateAvatar updateAvatar, ValidateImageType validateI
             preparer: new ResizedImagePreparer(
                 picture,
                 imageDimensions: new ImageDimensions(Width: 854, Height: 480),
-                resizeMode: ResizeMode.Max))).GetUri();
+                resizeMode: ResizeMode.Max),
+            imageVariant: UpdateAvatar.Small)).GetUri();
 
         place.AddPicture(new PlaceProfilePicture
         {
@@ -156,7 +157,8 @@ public class AttachImages(UpdateAvatar updateAvatar, ValidateImageType validateI
                 preparer: new ResizedImagePreparer(
                     picture,
                     imageDimensions: new ImageDimensions(Width: 300, Height: 300),
-                    resizeMode: ResizeMode.Crop))).GetUri();
+                    resizeMode: ResizeMode.Crop),
+                imageVariant: UpdateAvatar.Small)).GetUri();
 
             return new PlaceExtraPicture
             {
