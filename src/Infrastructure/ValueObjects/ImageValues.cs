@@ -4,5 +4,5 @@ namespace Infrastructure.ValueObjects;
 
 public class ImageValues
 {
-    public record Images(IFormFile? ProfilePicture, IFormFileCollection? Pictures);
+    public record Images(IFormFile? Picture, IFormFileCollection? Pictures);
 }
