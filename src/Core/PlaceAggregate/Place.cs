@@ -35,4 +35,9 @@ public class Place
         Instagram = details.Instagram;
         LastModified = DateTimeOffset.UtcNow;
     }
+
+    public void AddProfilePicture(PlaceProfilePicture profilePicture)
+    {
+        ProfilePictures.Add(profilePicture);
+    }
 }

@@ -23,4 +23,18 @@ public class PlaceTest
         Assert.Equal("Updated", place.Address);
         Assert.NotEqual("Updated", place.Description);
     }
+
+    [Fact]
+    public void AddProfilePictureTest()
+    {
+        PlaceProfilePicture profilePicture = new() { Normal = "Normal" };
+
+        Place place = new();
+
+        place.AddProfilePicture(profilePicture);
+
+        Assert.NotEmpty(place.ProfilePictures);
+        Assert.Single(place.ProfilePictures, p => p.Normal == "Normal");
+    }
+
 }
