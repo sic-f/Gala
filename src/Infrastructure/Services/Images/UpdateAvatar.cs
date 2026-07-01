@@ -25,9 +25,9 @@ public class UpdateAvatar(GetImagesPath getImagesPath)
 
     private async Task PersistAvatarAsync()
     {
-        if (!Directory.Exists(getImagesPath.ImagesFolder()))
+        if (!Directory.Exists(getImagesPath.AvatarDirectory()))
         {
-            Directory.CreateDirectory(getImagesPath.ImagesFolder());
+            Directory.CreateDirectory(getImagesPath.AvatarDirectory());
         }
 
         using var stream = new FileStream(getImagesPath.Avatar(_fileName), FileMode.Create);
