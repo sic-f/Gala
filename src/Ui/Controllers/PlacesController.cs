@@ -1,3 +1,4 @@
+using Core.Dto;
 using Core.Exceptions;
 using Core.Interfaces;
 using Core.PlaceAggregate;
@@ -10,7 +11,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Ui.Dto;
 using static Core.ValueObjects.General;
 using static Infrastructure.ValueObjects.ImageValues;
 
@@ -21,32 +21,108 @@ namespace Ui.Controllers;
 public class PlacesController(ApplicationDbContext context, UserManager<Bro> userManager) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Place>>> GetPlace(DateTimeOffset offset, int limit)
+    public IEnumerable<Core.Dto.PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
+    //public IQueryable<Place> GetPlace(DateTimeOffset offset, int limit)
     {
-        return await context.Place.Include(p => p.ProfilePictures)
-                                  .Include(p => p.Pictures)
-                                  .Where(p => p.CreatedAt < offset)
-                                  .OrderByDescending(p => p.CreatedAt)
-                                  .Take(limit)
-                                  .ToListAsync();
+        PlaceGeneralPictureDetails? picture = default;
+        IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
+
+        return context.Place.AsNoTracking()
+                            .Include(p => p.ProfilePictures)
+                            .Include(p => p.Pictures)
+                            .Where(p => p.CreatedAt < offset)
+                            .OrderByDescending(p => p.CreatedAt)
+                            .Take(limit).ToList()
+                            .Select<Core.PlaceAggregate.Place, PlaceDetailsHomePage>(p =>
+                            {
+                                if (p.Picture is not null)
+                                {
+                                    picture = new(Id: p.Picture.Id,
+                                                  Caption: p.Picture.Caption,
+                                                  Normal: p.Picture.Normal,
+                                                  Small: p.Picture.Small,
+                                                  PlaceId: p.Picture.PlaceId);
+                                }
+
+                                if (p.Pictures.Count != 0)
+                                {
+                                    pictures = p.Pictures.Select(pep =>
+                                        new PlaceGeneralPictureDetails(Id: pep.Id,
+                                                                       Caption: pep.Caption,
+                                                                       Normal: pep.Normal,
+                                                                       Small: pep.Small,
+                                                                       PlaceId: pep.PlaceId)).ToList();
+                                }
+                                return new Core.Dto.PlaceDetailsHomePage(
+                                                            Id: p.Id,
+                                                            Name: p.Name,
+                                                            Description: p.Description,
+                                                            Information: p.Information,
+                                                            Address: p.Address,
+                                                            Mobile: p.Mobile,
+                                                            Landline: p.Landline,
+                                                            Email: p.Email,
+                                                            Website: p.Website,
+                                                            Facebook: p.Facebook,
+                                                            Instagram: p.Instagram,
+                                                            BroId: p.BroId,
+                                                            Picture: picture,
+                                                            Pictures: pictures,
+                                                            CreatedAt: p.CreatedAt);
+                            });
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Place>> GetPlace(Guid id)
+    public async Task<ActionResult<Core.Dto.PlaceDetails>> GetPlace(Guid id)
     {
-        Place? place = context.Place.Include(p => p.ProfilePictures)
+        Place? place = context.Place.AsNoTracking()
+                                    .Include(p => p.ProfilePictures)
                                     .Include(p => p.Pictures)
-                                    .AsNoTracking()
                                     .FirstOrDefault(p => p.Id == id);
 
         if (place is null) return NotFound("❌🏤 Place does not exist.");
 
-        return place;
+        PlaceGeneralPictureDetails? picture = default;
+        IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
+
+        if (place.Picture is not null)
+        {
+            picture = new(Id: place.Picture.Id,
+                          Caption: place.Picture.Caption,
+                          Normal: place.Picture.Normal,
+                          Small: place.Picture.Small,
+                          PlaceId: place.Picture.PlaceId);
+        }
+
+        if (place.Pictures.Count != 0)
+        {
+            pictures = place.Pictures.Select(p =>
+                new PlaceGeneralPictureDetails(Id: p.Id,
+                                               Caption: p.Caption,
+                                               Normal: p.Normal,
+                                               Small: p.Small,
+                                               PlaceId: p.PlaceId)).ToList();
+        }
+
+        return new Core.Dto.PlaceDetails(Id: place.Id,
+                                         Name: place.Name,
+                                         Description: place.Description,
+                                         Information: place.Information,
+                                         Address: place.Address,
+                                         Mobile: place.Mobile,
+                                         Landline: place.Landline,
+                                         Email: place.Email,
+                                         Website: place.Website,
+                                         Facebook: place.Facebook,
+                                         Instagram: place.Instagram,
+                                         BroId: place.BroId,
+                                         Picture: picture,
+                                         Pictures: pictures);
     }
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutPlace(Guid id, PlaceDetails details)
+    public async Task<IActionResult> PutPlace(Guid id, Dto.PlaceDetails details)
     {
         Place? place = context.Place.Find(id);
 
@@ -82,7 +158,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Place>> PostPlace(PlaceDetails details,
+    public async Task<ActionResult<Place>> PostPlace(Dto.PlaceDetails details,
                                                      AttachImages attachImages,
                                                      IOptionsSnapshot<PlaceImageOptions> options)
     {
@@ -128,7 +204,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         return CreatedAtAction(
             nameof(GetPlace),
             new { place.Id },
-            new { Message = "Submit successful", place });
+            new { Message = "Submit successful", place.Id });
     }
 
     [Authorize]
