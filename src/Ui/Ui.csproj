@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -16,6 +16,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+	  <!-- Remove Microsoft.OpenApi when main package updates and includes Microsoft.OpenApi 
+	       without vulnerabilities -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
 	  <!-- Remove NuGet.Packaging and NuGet.Protocol when Microsoft.VisualStudio.Web.CodeGeneration.Design
 	       updates and includes both transitive packages with no vulnerabilities -->
@@ -28,3 +31,4 @@
   </ItemGroup>
 
 </Project>
+    
