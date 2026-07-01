@@ -17,7 +17,6 @@ public static class InfrastructureOptions
 
         services.Configure<AvatarOptions>(AvatarOptions.Avatar, builder.Configuration.GetSection("Images:Avatar"));
         services.Configure<AvatarOptions>(PlaceImageOptions.Place, builder.Configuration.GetSection("Images:Place"));
-        services.AddScoped<GetImagesPath>();
         services.AddScoped<AttachImages>();
         services.AddScoped<ValidateImageType>();
         services.AddScoped<UpdateAvatar>();
