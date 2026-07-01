@@ -1,11 +1,14 @@
 using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
+using Infrastructure.Services.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ui.Dto;
+using static Core.ValueObjects.General;
+using static Infrastructure.ValueObjects.ImageValues;
 
 namespace Ui.Controllers;
 
@@ -70,7 +73,9 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Place>> PostPlace(PlaceDetails details)
+    public async Task<ActionResult<Place>> PostPlace(PlaceDetails details,
+                                                     AttachImages attachImages,
+                                                     GetImagesPath getImagesPath)
     {
         Bro? bro = await userManager.GetUserAsync(User);
 
@@ -89,8 +94,15 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             Facebook = details.Facebook,
             Instagram = details.Instagram,
             BroId = bro.Id,
-            LastModified = DateTimeOffset.UtcNow,
         };
+
+        Images images = new(details.Picture, details.Pictures);
+
+        await attachImages.ComputeAsync(place,
+                                        images,
+                                        getImagesPath,
+                                        new UrlSegments(Request.Scheme,
+                                                        Request.Host.ToString()));
 
         context.Place.Add(place);
         await context.SaveChangesAsync();

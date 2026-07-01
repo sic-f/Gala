@@ -1,36 +1,82 @@
 using Core.Entities;
+using Core.Interfaces;
+using Core.PlaceAggregate;
 using Infrastructure.Identity;
+using Infrastructure.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Processing;
+using System.Diagnostics.CodeAnalysis;
 using static Core.ValueObjects.General;
-using static Core.ValueObjects.Images;
+using static Core.ValueObjects.ImageValues;
 
 namespace Infrastructure.Services.Images;
 
-public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, ValidateImageType validateImageType)
+public class AttachImages(UpdateAvatar updateAvatar, ValidateImageType validateImageType)
 {
-    public async Task ComputeAsync(Bro bro, IFormFile newAvatar, UrlSegments imageUrlSegments)
+    public async Task ComputeAsync(Bro bro,
+                                   IFormFile? newAvatar,
+                                   GetImagesPath getImagesPath,
+                                   UrlSegments imageUrlSegments)
     {
-        validateImageType.Compute(newAvatar);
+        if (IsNotUpdatingPicture(newAvatar)) return;
 
-        await RemoveOldProfilePictureAsync(bro.Avatar);
+        validateImageType.Validate(newAvatar);
 
-        await BuildProfilePictureAsync(bro, newAvatar, imageUrlSegments);
+        await RemoveOldProfilePictureAsync(bro.Avatar, getImagesPath);
+
+        await BuildProfilePictureAsync(bro, newAvatar, getImagesPath, imageUrlSegments);
     }
 
-    protected async Task RemoveOldProfilePictureAsync(AccountAvatar? oldAvatar)
+    public async Task ComputeAsync(Place place,
+                                   ImageValues.Images images,
+                                   GetImagesPath getImagesPath,
+                                   UrlSegments urlSegments)
     {
-        if (oldAvatar is null) return;
+        if (HasNoPicturesToUpdate(images.Picture, images.Pictures)) return;
 
-        await deleteAvatar.ComputeAsync(oldAvatar);
+        validateImageType.Validate(images);
+
+        await RemoveOldProfilePictureAsync(place.Picture, getImagesPath);
+
+        await BuildPlacePictureAsync(place, images.Picture, getImagesPath, urlSegments);
+
+        await BuildPicturesAsync(place, images.Pictures, getImagesPath, urlSegments);
     }
 
-    private async Task BuildProfilePictureAsync(Bro bro, IFormFile newAvatar, UrlSegments imageUrlSegments)
+    private static bool HasNoPicturesToUpdate([NotNullWhen(false)] IFormFile? picture,
+                                              [NotNullWhen(false)] IFormFileCollection? pictures)
+    {
+        return IsNotUpdatingPicture(picture) && IsNotAddingPictures(pictures);
+    }
+
+    private static bool IsNotUpdatingPicture([NotNullWhen(false)] IFormFile? picture)
+    {
+        return picture is null;
+    }
+
+    private static bool IsNotAddingPictures([NotNullWhen(false)] IFormFileCollection? pictures)
+    {
+        return pictures is null;
+    }
+
+    private static async Task RemoveOldProfilePictureAsync(IImageDeletable? oldPicture,
+                                                           GetImagesPath getImagesPath)
+    {
+        if (oldPicture is null) return;
+
+        await DeleteAvatar.ComputeAsync(oldPicture, getImagesPath);
+    }
+
+    private async Task BuildProfilePictureAsync(Bro bro,
+                                                IFormFile newAvatar,
+                                                GetImagesPath getImagesPath,
+                                                UrlSegments imageUrlSegments)
     {
         var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
 
         string normalUrl = (await updateAvatar.ComputeAsync(
             fileName,
+            getImagesPath,
             imageUrlSegments,
             preparer: new ResizedImagePreparer(
                 newAvatar,
@@ -39,6 +85,7 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
 
         string smallUrl = (await updateAvatar.ComputeAsync(
                 fileName,
+                getImagesPath,
                 imageUrlSegments,
                 preparer: new ResizedImagePreparer(
                     newAvatar,
@@ -49,7 +96,76 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
         bro.Avatar = new AccountAvatar
         {
             Normal = normalUrl,
-            Small = smallUrl
+            Small = smallUrl,
         };
+    }
+
+    private async Task BuildPlacePictureAsync(Place place,
+                                              IFormFile picture,
+                                              GetImagesPath getImagesPath,
+                                              UrlSegments urlSegments)
+    {
+        if (picture is null) return;
+
+        var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
+
+        string normalUrl = (await updateAvatar.ComputeAsync(
+            fileName,
+            getImagesPath,
+            urlSegments,
+            preparer: new ImagePreparer(picture))).GetUri();
+
+        var smallUrl = (await updateAvatar.ComputeAsync(
+            fileName,
+            getImagesPath,
+            urlSegments,
+            preparer: new ResizedImagePreparer(
+                picture,
+                imageDimensions: new ImageDimensions(Width: 854, Height: 480),
+                resizeMode: ResizeMode.Max))).GetUri();
+
+        place.AddPicture(new PlaceProfilePicture
+        {
+            Normal = normalUrl,
+            Small = smallUrl,
+            UploaderId = place.BroId,
+        });
+    }
+
+    private async Task BuildPicturesAsync(Place place,
+                                          IFormFileCollection pictures,
+                                          GetImagesPath getImagesPath,
+                                          UrlSegments urlSegments)
+    {
+        if (pictures is null) return;
+
+        var placePicturesTasks = pictures.Select(async picture =>
+        {
+            var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
+
+            var normalUrl = (await updateAvatar.ComputeAsync(
+                fileName,
+                getImagesPath,
+                urlSegments,
+                preparer: new ImagePreparer(picture))).GetUri();
+
+            var smallUrl = (await updateAvatar.ComputeAsync(
+                fileName,
+                getImagesPath,
+                urlSegments,
+                preparer: new ResizedImagePreparer(
+                    picture,
+                    imageDimensions: new ImageDimensions(Width: 300, Height: 300),
+                    resizeMode: ResizeMode.Crop))).GetUri();
+
+            return new PlaceExtraPicture
+            {
+                Normal = normalUrl,
+                Small = smallUrl,
+                UploaderId = place.BroId,
+            };
+        }).ToList();
+
+        place.AddPictures((await Task.WhenAll(placePicturesTasks)).ToList());
     }
 }

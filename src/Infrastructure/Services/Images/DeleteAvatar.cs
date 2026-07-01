@@ -1,19 +1,15 @@
-﻿using Core.Entities;
-using Infrastructure.Data;
+﻿using Core.Interfaces;
 
 namespace Infrastructure.Services.Images;
 
-public class DeleteAvatar(GetImagesPath getImagesPath, ApplicationDbContext context)
+public class DeleteAvatar()
 {
-    public async Task ComputeAsync(AccountAvatar avatar)
+    public static async Task ComputeAsync(IImageDeletable picture, GetImagesPath getImagesPath)
     {
-        string normalFileName = new Uri(avatar.Normal).Segments.Last();
-        string smallFileName = new Uri(avatar.Small).Segments.Last();
+        string normalFileName = new Uri(picture.Normal).Segments.Last();
+        string smallFileName = new Uri(picture.Small).Segments.Last();
 
-        File.Delete(getImagesPath.Avatar(normalFileName));
-        File.Delete(getImagesPath.Avatar(smallFileName));
-
-        context.AccountAvatar.Remove(avatar);
-        await context.SaveChangesAsync();
+        File.Delete(getImagesPath.FileNamePath(normalFileName));
+        File.Delete(getImagesPath.FileNamePath(smallFileName));
     }
 }
