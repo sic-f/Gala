@@ -3,7 +3,6 @@ using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Identity;
-using Infrastructure.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
@@ -27,7 +26,7 @@ public class AttachImages(UpdateAvatar updateAvatar, ValidateImageType validateI
     }
 
     public async Task ComputeAsync(Place place,
-                                   ImageValues.Images images,
+                                   Values.Images images,
                                    GetImagesPath getImagesPath,
                                    UrlSegments urlSegments)
     {

@@ -7,12 +7,12 @@ using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.Services.Images;
+using Infrastructure.Values;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using static Infrastructure.ValueObjects.ImageValues;
 
 namespace Ui.Controllers;
 

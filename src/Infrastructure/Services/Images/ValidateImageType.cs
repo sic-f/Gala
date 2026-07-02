@@ -1,5 +1,4 @@
 ﻿using Core.Exceptions;
-using Infrastructure.ValueObjects;
 using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services.Images;
@@ -13,7 +12,7 @@ public class ValidateImageType
         Compute(image);
     }
 
-    public void Validate(ImageValues.Images images)
+    public void Validate(Values.Images images)
     {
         if (images.Picture is not null)
         {
