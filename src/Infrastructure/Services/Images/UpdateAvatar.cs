@@ -1,4 +1,4 @@
-﻿using static Core.ValueObjects.General;
+﻿using Core.Values;
 
 namespace Infrastructure.Services.Images;
 

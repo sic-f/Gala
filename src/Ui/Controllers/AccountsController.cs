@@ -1,4 +1,5 @@
 ﻿using Core.Interfaces;
+using Core.Values;
 using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -13,7 +14,6 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Ui.Services;
 using Ui.ViewModels;
-using static Core.ValueObjects.General;
 
 namespace Ui.Controllers;
 

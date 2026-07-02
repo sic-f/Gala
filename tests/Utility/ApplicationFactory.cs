@@ -1,4 +1,5 @@
-﻿using Infrastructure.Data;
+﻿using Core.Dto;
+using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

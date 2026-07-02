@@ -2,6 +2,7 @@ using Core.Dto;
 using Core.Exceptions;
 using Core.Interfaces;
 using Core.PlaceAggregate;
+using Core.Values;
 using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using static Core.ValueObjects.General;
 using static Infrastructure.ValueObjects.ImageValues;
 
 namespace Ui.Controllers;

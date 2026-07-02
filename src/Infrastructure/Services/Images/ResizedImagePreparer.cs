@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Core.Values;
+using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using static Core.ValueObjects.Image;
 
 namespace Infrastructure.Services.Images;
 

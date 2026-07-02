@@ -1,13 +1,12 @@
 using Core.Entities;
 using Core.Interfaces;
 using Core.PlaceAggregate;
+using Core.Values;
 using Infrastructure.Identity;
 using Infrastructure.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
-using static Core.ValueObjects.General;
-using static Core.ValueObjects.Image;
 
 namespace Infrastructure.Services.Images;
 
