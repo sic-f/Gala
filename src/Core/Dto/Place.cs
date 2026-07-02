@@ -1,6 +1,5 @@
-﻿using Core.PlaceAggregate;
+﻿namespace Core.Dto;
 
-namespace Core.Dto;
 public record PlaceDetailsHomePage(Guid Id,
                            string Name,
                            string? Description,
