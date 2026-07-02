@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
 using static Core.ValueObjects.General;
-using static Core.ValueObjects.ImageValues;
+using static Core.ValueObjects.Image;
 
 namespace Infrastructure.Services.Images;
 
