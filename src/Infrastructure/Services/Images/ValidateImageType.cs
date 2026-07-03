@@ -30,6 +30,11 @@ public class ValidateImageType
 
     private void Compute(IFormFile formFile)
     {
+        if (formFile is null)
+        {
+            ArgumentNullException.ThrowIfNull(formFile, nameof(formFile));
+        }
+
         if (!ValidTypes.Contains(formFile.ContentType))
         {
             throw new ImageTypeException($"\"{formFile.FileName}\" not of jpeg, jpg, png");
