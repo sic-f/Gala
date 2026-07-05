@@ -7,7 +7,7 @@ namespace Utility.Factories;
 
 public class PlaceFactory
 {
-    public static Place CreatePlace(PlaceAttributes attributes, ApplicationFactory<Program> app)
+    public static async Task<Place> CreatePlaceAsync(PlaceAttributes attributes, ApplicationFactory<Program> app)
     {
         Place place = new()
         {
@@ -21,15 +21,18 @@ public class PlaceFactory
             Website = attributes.Website,
             Facebook = attributes.Facebook,
             Instagram = attributes.Instagram,
-            BroId = attributes.BroId,
+            BroId = attributes.BroId
         };
+
+        if (attributes.Picture is not null) place.AddPicture(attributes.Picture!);
+        place.AddPictures(attributes.Pictures);
 
         using var scope = app.Services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 
-        place = context.Place.Add(place).Entity;
-        context.SaveChanges();
+        place = (await context.Place.AddAsync(place)).Entity;
+        await context.SaveChangesAsync();
 
         return place;
     }

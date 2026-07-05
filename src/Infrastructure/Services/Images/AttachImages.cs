@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Infrastructure.Services.Images;
 
-public class AttachImages(UpdateAvatar updateAvatar, ValidateImageType validateImageType)
+public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, ValidateImageType validateImageType)
 {
     public async Task ComputeAsync(Bro bro,
                                    IFormFile? newAvatar,
@@ -57,12 +57,12 @@ public class AttachImages(UpdateAvatar updateAvatar, ValidateImageType validateI
         return pictures is null;
     }
 
-    private static async Task RemoveOldProfilePictureAsync(IImageDeletable? oldPicture,
-                                                           GetImagesPath getImagesPath)
+    private async Task RemoveOldProfilePictureAsync(IImageDeletable? oldPicture,
+                                                    GetImagesPath getImagesPath)
     {
         if (oldPicture is null) return;
 
-        await DeleteAvatar.ComputeAsync(oldPicture, getImagesPath);
+        await deleteAvatar.ComputeAsync(oldPicture, getImagesPath);
     }
 
     private async Task BuildProfilePictureAsync(Bro bro,

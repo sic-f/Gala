@@ -8,7 +8,7 @@ namespace IntegrationTests.Places.Fetch;
 public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
 {
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
-
+    // TODO: Fix test (not urgent)
     [Fact]
     public async Task FetchPlacesTestAsync()
     {

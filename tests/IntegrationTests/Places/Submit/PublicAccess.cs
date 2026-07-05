@@ -1,6 +1,6 @@
 ﻿using System.Net;
+using Ui.Dto;
 using Utility.Scopes;
-using Utility.Dto;
 
 namespace IntegrationTests.Places.Submit;
 
@@ -16,7 +16,7 @@ public class PublicAccess(PlaceScope app) : BaseTest(app, isAuthenticated: false
 
     private async Task WhenBroSubmitsPlace()
     {
-        PlaceDetails placeDetails = new(Name: string.Empty, Address: string.Empty);
+        PlaceDetails placeDetails = new() { Name = string.Empty, Address = string.Empty };
         await app.SubmitPlaceUnauthenticatedAsync(placeDetails);
     }
 

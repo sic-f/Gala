@@ -23,8 +23,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpGet]
     public IEnumerable<PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
     {
-        PlaceGeneralPictureDetails? picture = default;
-        IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
+
 
         return context.Place.AsNoTracking()
                             .Include(p => p.ProfilePictures)
@@ -34,7 +33,10 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
                             .Take(limit)
                             .ToList()
                             .Select(p =>
-                            {
+                            {// TODO: Check later for memory efficiency
+                                PlaceGeneralPictureDetails? picture = default;
+                                IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
+
                                 if (p.Picture is not null)
                                 {
                                     picture = new(Id: p.Picture.Id,
@@ -121,9 +123,12 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutPlace(Guid id, Dto.PlaceDetails details)
+    public async Task<IActionResult> PutPlace(Guid id,
+                                              Dto.PlaceDetails details,
+                                              IOptionsSnapshot<PlaceImageOptions> options,
+                                              AttachImages attachImages)
     {
-        Place? place = context.Place.Find(id);
+        Place? place = await context.Place.Include(p => p.ProfilePictures).FirstOrDefaultAsync(p => p.Id == id);
 
         if (place is null) return NotFound("❌🏤 Place does not exist.");
 
@@ -132,6 +137,22 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         if (bro is not null && place.BroId != bro.Id)
         {
             return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to update other people's places.");
+        }
+
+        Images images = new(details.Picture, details.Pictures);
+
+        IPathSwapElements paths = options.Get(PlaceImageOptions.Place);
+
+        try
+        {
+            await attachImages.ComputeAsync(place,
+                                            images,
+                                            new GetImagesPath(paths),
+                                            new UrlSegments(Request.Scheme, Request.Host.ToString()));
+        }
+        catch (ImageTypeException ex)
+        {
+            return BadRequest(new { Errors = new { Picture = new string[] { ex.Message } } });
         }
 
         place.UpdateDetails(details);
@@ -152,7 +173,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             }
         }
 
-        return Ok(new { Message = "Updated successfuly " });
+        return Ok(new { Message = "Updated successfuly" });
     }
 
     [Authorize]
@@ -189,8 +210,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             await attachImages.ComputeAsync(place,
                                             images,
                                             new GetImagesPath(paths),
-                                            new UrlSegments(Request.Scheme,
-                                                            Request.Host.ToString()));
+                                            new UrlSegments(Request.Scheme, Request.Host.ToString()));
         }
         catch (ImageTypeException ex)
         {
@@ -213,7 +233,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         var place = await context.Place.FindAsync(id);
         if (place == null)
         {
-            return NotFound("❌🏤 Place does not exist.");
+            return NotFound("❌🏤 Can't delete a place that does not exist.");
         }
 
         Bro? bro = await userManager.GetUserAsync(User);
