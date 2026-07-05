@@ -249,6 +249,31 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         return NoContent();
     }
 
+    [Authorize]
+    [HttpDelete("picture/{id}")]
+    public async Task<IActionResult> DeletePicture(Guid id,
+                                                   IOptionsSnapshot<PlaceImageOptions> options,
+                                                   DeleteAvatar deleteAvatar)
+    {
+        PlaceProfilePicture? placeProfilePicture = await context.PlaceProfilePicture.FirstOrDefaultAsync(ppp => ppp.Id == id);
+
+        if (placeProfilePicture is null) return NotFound("Cannot find picture.");
+
+        IPathSwapElements paths = options.Get(PlaceImageOptions.Place);
+
+        try
+        {
+            await deleteAvatar.ComputeAsync(placeProfilePicture, new GetImagesPath(paths));
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+
+        return NoContent();
+    }
+
     private bool PlaceExists(Guid id)
     {
         return context.Place.Any(e => e.Id == id);
