@@ -196,7 +196,9 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePlace(Guid id)
+    public async Task<IActionResult> DeletePlace(Guid id,
+                                                 IOptionsSnapshot<PlaceImageOptions> options,
+                                                 DeleteImage deleteImage)
     {
         var place = await context.Place.FindAsync(id);
         if (place == null)
@@ -208,8 +210,13 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         if (bro is not null && bro.Id != place.BroId)
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to delete other people's places");
+            return BadRequest("❌👦🏣 Bro not allowed to delete other people's places");
         }
+
+        IEnumerable<Core.PlaceAggregate.PlacePicture> placePictures = 
+            context.PlacePicture.Where(pp => pp.PlaceId == place.Id);
+
+        await deleteImage.DeleteAllAsync(placePictures, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
 
         context.Place.Remove(place);
         await context.SaveChangesAsync();
@@ -232,7 +239,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             await deleteImage.ComputeAsync(placeProfilePicture, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
             await context.SaveChangesAsync();
         }
-        catch (DbUpdateException ex)
+        catch (DbUpdateConcurrencyException ex)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
