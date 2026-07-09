@@ -1,8 +1,11 @@
 using Core.PlaceAggregate;
+using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
+using Infrastructure.Services.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Ui.Controllers
 {
@@ -81,16 +84,22 @@ namespace Ui.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePlacePicture(Guid id)
+        public async Task<IActionResult> DeletePlacePicture(Guid id,
+                                                            IOptionsSnapshot<PlaceImageOptions> options,
+                                                            DeleteImage deleteImage)
         {
             var placePicture = await context.PlacePicture.FindAsync(id);
-            if (placePicture == null)
-            {
-                return NotFound();
-            }
+            if (placePicture == null) return NotFound("Picture not found.");
 
-            context.PlacePicture.Remove(placePicture);
-            await context.SaveChangesAsync();
+            try
+            {
+                await deleteImage.ComputeAsync(placePicture, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
 
             return NoContent();
         }
