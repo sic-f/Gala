@@ -2,8 +2,10 @@
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Ui.Dto;
 using Utility.Dto;
 using Utility.Factories;
+using Utility.Helpers;
 using Utility.Scopes;
 
 namespace IntegrationTests.Places.Update;
@@ -16,28 +18,40 @@ public class ExclusiveUpdate(PlaceScope app) : BaseTest(app), IClassFixture<Plac
     [Fact]
     public async Task ExclusivePlaceUpdateTestAsync()
     {
-        (PlaceAttributes attributes, Place place) = await GivenPlaceOwnedByAnotherBroAsync();
+        (PlaceAttributes _, Place place) = await GivenPlaceOwnedByAnotherBroAsync();
         await WhenBroTriesToUpdatePlaceOwnedByAnotherBroAsync(place.Id);
-        ThenBroWillNotBeAbleToUpdateThePlace(place.Id);
+        await ThenBroWillNotBeAbleToUpdateThePlace(place.Id);
     }
 
     private async Task<(PlaceAttributes attributes, Place place)> GivenPlaceOwnedByAnotherBroAsync()
     {
         Bro placeOwner = await BroFactory.CreateBroAsync("test@example.org", "Hey@123", app);
-        PlaceAttributes attributes = new(Name: "Test Name", Address: "Test Address", BroId: placeOwner.Id);
-        Place place = PlaceFactory.CreatePlace(attributes, app);
+        PlaceAttributes attributes = new()
+        {
+            Name = "Test Name",
+            Address = "Test Address",
+            BroId = placeOwner.Id
+        };
+        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app);
 
         return (attributes, place);
     }
 
     private async Task WhenBroTriesToUpdatePlaceOwnedByAnotherBroAsync(Guid placeId)
     {
-        PlaceUpdateAttributes updateAttributes = new(Name: "Test Name Update", Address: "Test Address Update");
+        PlaceDetails updateAttributes = new()
+        {
+            Name = "Test Name Update",
+            Address = "Test Address Update",
+            Picture = ImageHelper.MockImageFormFile()
+        };
+
         await app.UpdatePlaceAsync(placeId, updateAttributes);
     }
 
-    private void ThenBroWillNotBeAbleToUpdateThePlace(Guid placeId)
+    private async Task ThenBroWillNotBeAbleToUpdateThePlace(Guid placeId)
     {
+        Assert.Equal("❌👦🏣 Bro not allowed to update other people's places.", await app.Response.Content.ReadAsStringAsync());
         var exception = Record.Exception(() => app.Response.EnsureSuccessStatusCode());
         Assert.NotNull(exception);
 

@@ -1,7 +1,7 @@
 ﻿using Core.PlaceAggregate;
-using NuGet.Protocol;
 using System.Net.Http.Json;
-using Utility.Dto;
+using Ui.Dto;
+using Ui.Services;
 
 namespace Utility.Scopes;
 
@@ -21,7 +21,10 @@ public class PlaceScope : ApplicationFactory<Program>
 
     public async Task SubmitPlaceWithLongInvalidValuesAsync(PlaceDetails details)
     {
-        Response = await Client.PostAsJsonAsync<PlaceDetails>(DefaultStartUrl, details);
+        using var content = new MultipartFormDataContent();
+        BuildPayload.Compute(details, content);
+
+        Response = await Client.PostAsync(DefaultStartUrl, content);
     }
 
     public async Task DeletePlaceAsync(Guid placeId)
@@ -29,13 +32,21 @@ public class PlaceScope : ApplicationFactory<Program>
         Response = await Client.DeleteAsync($"{DefaultStartUrl}/{placeId}");
     }
 
-    public async Task UpdatePlaceAsync(Guid placeId, PlaceUpdateAttributes attributes)
+    public async Task UpdatePlaceAsync(Guid placeId, PlaceDetails details)
     {
-        Response = await Client.PutAsJsonAsync<PlaceUpdateAttributes>($"{DefaultStartUrl}/{placeId}", attributes);
+        using var content = new MultipartFormDataContent();
+        BuildPayload.Compute(details, content);
+
+        Response = await Client.PutAsync($"{DefaultStartUrl}/{placeId}", content);
     }
 
     public async Task<IEnumerable<Place>?> GetPlacesAsync(string? lastModifiedDate, int fetchLimit)
     {
         return await Client.GetFromJsonAsync<IEnumerable<Place>>($"{DefaultStartUrl}/?offset={lastModifiedDate}&limit={fetchLimit}");
+    }
+
+    public async Task DeletePictureAsync(Guid id)
+    {
+        Response = await Client.DeleteAsync($"{DefaultStartUrl}/picture/{id}");
     }
 }

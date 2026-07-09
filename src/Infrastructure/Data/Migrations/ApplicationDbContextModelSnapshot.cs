@@ -143,7 +143,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(15)");
 
                     b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Mobile")
                         .HasMaxLength(15)
@@ -171,6 +173,56 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Place");
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.PlacePicture", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Caption")
+                        .HasMaxLength(155)
+                        .HasColumnType("nvarchar(155)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Normal")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.Property<Guid>("PlaceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Small")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.Property<Guid?>("UploaderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlacePicture");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("PlacePicture");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
@@ -378,6 +430,28 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Core.PlaceAggregate.PlaceExtraPicture", b =>
+                {
+                    b.HasBaseType("Core.PlaceAggregate.PlacePicture");
+
+                    b.HasIndex("PlaceId");
+
+                    b.HasIndex("UploaderId");
+
+                    b.HasDiscriminator().HasValue("PlaceExtraPicture");
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.PlaceProfilePicture", b =>
+                {
+                    b.HasBaseType("Core.PlaceAggregate.PlacePicture");
+
+                    b.HasIndex("PlaceId");
+
+                    b.HasIndex("UploaderId");
+
+                    b.HasDiscriminator().HasValue("PlaceProfilePicture");
+                });
+
             modelBuilder.Entity("Core.Entities.AccountAvatar", b =>
                 {
                     b.HasOne("Infrastructure.Identity.Bro", null)
@@ -454,6 +528,41 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.PlaceExtraPicture", b =>
+                {
+                    b.HasOne("Core.PlaceAggregate.Place", null)
+                        .WithMany("Pictures")
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Identity.Bro", null)
+                        .WithMany()
+                        .HasForeignKey("UploaderId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.PlaceProfilePicture", b =>
+                {
+                    b.HasOne("Core.PlaceAggregate.Place", null)
+                        .WithMany("ProfilePictures")
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Identity.Bro", null)
+                        .WithMany()
+                        .HasForeignKey("UploaderId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.Place", b =>
+                {
+                    b.Navigation("Pictures");
+
+                    b.Navigation("ProfilePictures");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>

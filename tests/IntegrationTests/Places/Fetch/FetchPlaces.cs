@@ -8,7 +8,7 @@ namespace IntegrationTests.Places.Fetch;
 public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
 {
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
-
+    // TODO: Fix test (not urgent)
     [Fact]
     public async Task FetchPlacesTestAsync()
     {
@@ -51,105 +51,90 @@ public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceSco
                 Name = "1st Batch A",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow,
             },
             new Place
             {
                 Name = "1st Batch B",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1),
             },
             new Place
             {
                 Name = "1st Batch C",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(2),
             },
             new Place
             {
                 Name = "1st Batch D",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3),
             },
             new Place
             {
                 Name = "1st Batch E",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(4),
             },
             new Place
             {
                 Name = "2nd Batch A",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5),
             },
             new Place
             {
                 Name = "2nd Batch B",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(6),
             },
             new Place
             {
                 Name = "2nd Batch C",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7),
             },
             new Place
             {
                 Name = "2nd Batch D",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(8),
             },
             new Place
             {
                 Name = "2nd Batch E",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9),
             },
             new Place
             {
                 Name = "3rd Batch A",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(10),
             },
             new Place
             {
                 Name = "3rd Batch B",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11),
             },
             new Place
             {
                 Name = "3rd Batch C",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(12),
             },
             new Place
             {
                 Name = "3rd Batch D",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13),
             },
             new Place
             {
                 Name = "3rd Batch E",
                 Address = string.Empty,
                 BroId = app.Bro.Id,
-                CreatedAt = DateTimeOffset.UtcNow.AddSeconds(14),
             },
         ];
     }

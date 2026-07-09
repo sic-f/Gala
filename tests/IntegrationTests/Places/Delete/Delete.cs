@@ -15,16 +15,16 @@ public class Delete(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
     [Fact]
     public async Task DeletePlaceTestAsync()
     {
-        Place place = GivenPlace();
+        Place place = await GivenPlaceAsync();
         await WhenBroDeletesPlace(place.Id);
         ThenPlaceIsDeleted(place.Id);
     }
 
-    private Place GivenPlace()
+    private async Task<Place> GivenPlaceAsync()
     {
-        PlaceAttributes attributes = new(Name: "Test Name", Address: "Test Address", BroId: app.Bro.Id);
+        PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Address", BroId = app.Bro.Id };
 
-        return PlaceFactory.CreatePlace(attributes, app);
+        return await PlaceFactory.CreatePlaceAsync(attributes, app);
     }
 
     private async Task WhenBroDeletesPlace(Guid placeId)
@@ -49,7 +49,7 @@ public class Delete(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
     {
         var nonExistentPlaceId = Guid.NewGuid();
 
-        Place place = GivenPlace();
+        Place place = await GivenPlaceAsync();
         await WhenBroDeletesNonExistentPlace(placeId: nonExistentPlaceId);
         ThenPlaceIsNotDeleted(place.Id);
     }

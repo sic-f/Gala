@@ -6,7 +6,5 @@
         public ImageTypeException() : base() { }
         public ImageTypeException(string message) : base(message) { }
         public ImageTypeException(string message, Exception inner) : base(message, inner) { }
-        protected ImageTypeException(System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 }

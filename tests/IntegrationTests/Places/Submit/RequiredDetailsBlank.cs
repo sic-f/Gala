@@ -1,4 +1,4 @@
-﻿using Utility.Dto;
+﻿using Ui.Dto;
 using Utility.Errors;
 using Utility.Scopes;
 
@@ -19,7 +19,8 @@ public class RequiredDetailsBlank(PlaceScope app) : BaseTest(app), IClassFixture
 
     private async Task WhenUserSubmitsWithRequiredDetailsNotPresent()
     {
-        PlaceDetails placeDetails = new(Name: string.Empty, Address: string.Empty);
+        PlaceDetails placeDetails = new() { Name = string.Empty, Address = string.Empty };
+
         await app.SubmitRequiredDetailsBlankAsync(placeDetails);
     }
 

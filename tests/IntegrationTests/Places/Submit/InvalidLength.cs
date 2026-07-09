@@ -1,4 +1,4 @@
-﻿using Utility.Dto;
+﻿using Ui.Dto;
 using Utility.Helpers;
 using Utility.Scopes;
 
@@ -20,18 +20,19 @@ public class InvalidLength(PlaceScope app) : BaseTest(app), IClassFixture<PlaceS
     private async Task WhenBroSubmitsPlaceWithInvalidLongValuesAsync()
     {
         var invalidValues = new LongInvalidPlaceValues();
-        PlaceDetails details = new(
-            Name: invalidValues.Name,
-            Description: invalidValues.Description,
-            Information: invalidValues.Information,
-            Address: invalidValues.Address,
-            Mobile: invalidValues.Mobile,
-            Landline: invalidValues.Landline,
-            Email: invalidValues.Email,
-            Website: invalidValues.Website,
-            Facebook: invalidValues.Facebook,
-            Instagram: invalidValues.Instagram
-        );
+        PlaceDetails details = new()
+        {
+            Name = invalidValues.Name,
+            Description = invalidValues.Description,
+            Information = invalidValues.Information,
+            Address = invalidValues.Address,
+            Mobile = invalidValues.Mobile,
+            Landline = invalidValues.Landline,
+            Email = invalidValues.Email,
+            Website = invalidValues.Website,
+            Facebook = invalidValues.Facebook,
+            Instagram = invalidValues.Instagram
+        };
 
         await app.SubmitPlaceWithLongInvalidValuesAsync(details);
     }
