@@ -9,6 +9,7 @@ using Utility.Scopes;
 
 namespace IntegrationTests.Places.Delete;
 
+[Collection("Application Factory Collection")]
 public class DeletePlacePicture(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
 {
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
