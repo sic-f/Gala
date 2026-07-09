@@ -3,7 +3,7 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Services.Images;
 
-public class DeleteAvatar(ApplicationDbContext context)
+public class DeleteImage(ApplicationDbContext context)
 {
     public async Task ComputeAsync(IImageDeletable picture, GetImagesPath getImagesPath)
     {

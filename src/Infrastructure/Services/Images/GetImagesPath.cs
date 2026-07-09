@@ -7,11 +7,13 @@ namespace Infrastructure.Services.Images;
 
 public class GetImagesPath
 {
+    private readonly IPathSwapElements _paths;
     private string _imageKindDirectory;
 
     public GetImagesPath(IPathSwapElements paths)
     {
-        InitializeImageDirectory(paths);
+        _paths = paths;
+        InitializeImageDirectory();
         CreateDirectory();
     }
 
@@ -35,10 +37,10 @@ public class GetImagesPath
         int index = 0;
         do
         {
-            index = _imageKindDirectory.IndexOf("Images\\Place", index);
+            index = _imageKindDirectory.IndexOf(_paths.ImageKindSegmentWithWindowsDirectorySeparator, index);
             if (index != -1)
             {
-                sb.Append("images/place");
+                sb.Append(_paths.ImageKindSegmentWitGeneralDirectorySeparator);
                 index++;
             }
         } while (index != -1);
@@ -52,10 +54,10 @@ public class GetImagesPath
     /// <param name="paths">A value object that contains incorrect and correct paths as properties. 
     /// The correct path will replace the incorrect path where the value object will be used. ☑️</param>
     [MemberNotNull(nameof(_imageKindDirectory))]
-    private void InitializeImageDirectory(IPathSwapElements paths)
+    private void InitializeImageDirectory()
     {
         _imageKindDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!
-            .Replace(paths.IncorrectPath, paths.CorrectPath);
+            .Replace(_paths.IncorrectPath, _paths.CorrectPath);
     }
 
     private void CreateDirectory()

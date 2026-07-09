@@ -31,7 +31,7 @@ public class PlaceFactory
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 
-        place = (await context.Place.AddAsync(place)).Entity;
+        place = context.Place.Add(place).Entity;
         await context.SaveChangesAsync();
 
         return place;

@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Infrastructure.Services.Images;
 
-public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, ValidateImageType validateImageType)
+public class AttachImages(UpdateImage updateImage, DeleteImage deleteImage, ValidateImageType validateImageType)
 {
     public async Task ComputeAsync(Bro bro,
                                    IFormFile? newAvatar,
@@ -34,7 +34,10 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
 
         validateImageType.Validate(images);
 
-        await RemoveOldProfilePictureAsync(place.Picture, getImagesPath);
+        if (IsUpdatingPicture(images.Picture))
+        {
+            await RemoveOldProfilePictureAsync(place.Picture, getImagesPath);
+        }
 
         await BuildPlacePictureAsync(place, images.Picture, getImagesPath, urlSegments);
 
@@ -57,12 +60,17 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
         return pictures is null;
     }
 
+    private static bool IsUpdatingPicture([NotNullWhen(false)] IFormFile? picture)
+    {
+        return picture is not null;
+    }
+
     private async Task RemoveOldProfilePictureAsync(IImageDeletable? oldPicture,
                                                     GetImagesPath getImagesPath)
     {
         if (oldPicture is null) return;
 
-        await deleteAvatar.ComputeAsync(oldPicture, getImagesPath);
+        await deleteImage.ComputeAsync(oldPicture, getImagesPath);
     }
 
     private async Task BuildProfilePictureAsync(Bro bro,
@@ -72,7 +80,7 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
     {
         var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
 
-        string normalUrl = (await updateAvatar.ComputeAsync(
+        string normalUrl = (await updateImage.ComputeAsync(
             fileName,
             getImagesPath,
             imageUrlSegments,
@@ -81,7 +89,7 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
                 imageDimensions: new ImageDimensions(Width: 640, Height: 360),
                 resizeMode: ResizeMode.Max))).GetUri();
 
-        string smallUrl = (await updateAvatar.ComputeAsync(
+        string smallUrl = (await updateImage.ComputeAsync(
                 fileName,
                 getImagesPath,
                 imageUrlSegments,
@@ -89,7 +97,7 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
                     newAvatar,
                     imageDimensions: new ImageDimensions(Width: 64, Height: 64),
                     resizeMode: ResizeMode.Max),
-                imageVariant: UpdateAvatar.Small)).GetUri();
+                imageVariant: UpdateImage.Small)).GetUri();
 
         bro.Avatar = new AccountAvatar
         {
@@ -107,21 +115,21 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
 
         var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
 
-        string normalUrl = (await updateAvatar.ComputeAsync(
+        string normalUrl = (await updateImage.ComputeAsync(
             fileName,
             getImagesPath,
             urlSegments,
             preparer: new ImagePreparer(picture))).GetUri();
 
-        var smallUrl = (await updateAvatar.ComputeAsync(
+        var smallUrl = (await updateImage.ComputeAsync(
             fileName,
             getImagesPath,
             urlSegments,
             preparer: new ResizedImagePreparer(
                 picture,
-                imageDimensions: new ImageDimensions(Width: 854, Height: 480),
-                resizeMode: ResizeMode.Max),
-            imageVariant: UpdateAvatar.Small)).GetUri();
+                imageDimensions: new ImageDimensions(Width: 384, Height: 288),
+                resizeMode: ResizeMode.Pad),
+            imageVariant: UpdateImage.Small)).GetUri();
 
         place.AddPicture(new PlaceProfilePicture
         {
@@ -138,34 +146,36 @@ public class AttachImages(UpdateAvatar updateAvatar, DeleteAvatar deleteAvatar, 
     {
         if (pictures is null) return;
 
-        var placePicturesTasks = pictures.Select(async picture =>
+        ICollection<PlaceExtraPicture> placeExtraPictures = [];
+
+        foreach (var picture in pictures)
         {
             var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
 
-            var normalUrl = (await updateAvatar.ComputeAsync(
+            var normalUrl = (await updateImage.ComputeAsync(
                 fileName,
                 getImagesPath,
                 urlSegments,
                 preparer: new ImagePreparer(picture))).GetUri();
 
-            var smallUrl = (await updateAvatar.ComputeAsync(
+            var smallUrl = (await updateImage.ComputeAsync(
                 fileName,
                 getImagesPath,
                 urlSegments,
                 preparer: new ResizedImagePreparer(
                     picture,
-                    imageDimensions: new ImageDimensions(Width: 300, Height: 300),
+                    imageDimensions: new ImageDimensions(Width: 800, Height: 740),
                     resizeMode: ResizeMode.Crop),
-                imageVariant: UpdateAvatar.Small)).GetUri();
+                imageVariant: UpdateImage.Small)).GetUri();
 
-            return new PlaceExtraPicture
+            placeExtraPictures.Add(new PlaceExtraPicture
             {
                 Normal = normalUrl,
                 Small = smallUrl,
                 UploaderId = place.BroId,
-            };
-        }).ToList();
+            });
+        }
 
-        place.AddPictures((await Task.WhenAll(placePicturesTasks)).ToList());
+        place.AddPictures(placeExtraPictures);
     }
 }

@@ -45,4 +45,13 @@ public class RepositoryHelper
     {
         return await context.Place.FirstAsync(p => p.Id == Id);
     }
+
+    public static async Task<PlaceProfilePicture> GetPlacePictureByIdAsync(Guid Id, ApplicationFactory<Program> factory)
+    {
+        using var scope = factory.Services.CreateScope();
+        var scopedServices = scope.ServiceProvider;
+        var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+
+        return await context.PlaceProfilePicture.FirstAsync(p => p.Id == Id);
+    }
 }

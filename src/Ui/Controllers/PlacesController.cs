@@ -1,6 +1,5 @@
 using Core.Dto;
 using Core.Exceptions;
-using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Configuration.Storage.Options;
@@ -27,33 +26,19 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         return context.Place.AsNoTracking()
                             .Include(p => p.ProfilePictures)
-                            .Include(p => p.Pictures)
                             .Where(p => p.CreatedAt < offset)
                             .OrderByDescending(p => p.CreatedAt)
                             .Take(limit)
                             .ToList()
                             .Select(p =>
-                            {// TODO: Check later for memory efficiency
-                                PlaceGeneralPictureDetails? picture = default;
-                                IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
+                            {
+                                PlacePictureLean? picture = default;
 
                                 if (p.Picture is not null)
                                 {
                                     picture = new(Id: p.Picture.Id,
-                                                  Caption: p.Picture.Caption,
-                                                  Normal: p.Picture.Normal,
                                                   Small: p.Picture.Small,
                                                   PlaceId: p.Picture.PlaceId);
-                                }
-
-                                if (p.Pictures.Count != 0)
-                                {
-                                    pictures = p.Pictures.Select(pep =>
-                                        new PlaceGeneralPictureDetails(Id: pep.Id,
-                                                                       Caption: pep.Caption,
-                                                                       Normal: pep.Normal,
-                                                                       Small: pep.Small,
-                                                                       PlaceId: pep.PlaceId)).ToList();
                                 }
                                 return new PlaceDetailsHomePage(Id: p.Id,
                                                                 Name: p.Name,
@@ -68,7 +53,6 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
                                                                 Instagram: p.Instagram,
                                                                 BroId: p.BroId,
                                                                 Picture: picture,
-                                                                Pictures: pictures,
                                                                 CreatedAt: p.CreatedAt);
                             });
     }
@@ -83,26 +67,18 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         if (place is null) return NotFound("❌🏤 Place does not exist.");
 
-        PlaceGeneralPictureDetails? picture = default;
-        IEnumerable<PlaceGeneralPictureDetails> pictures = Enumerable.Empty<PlaceGeneralPictureDetails>();
+        PlacePictureLean? picture = default;
+        IEnumerable<PlacePictureLean> pictures = Enumerable.Empty<PlacePictureLean>();
 
         if (place.Picture is not null)
         {
-            picture = new(Id: place.Picture.Id,
-                          Caption: place.Picture.Caption,
-                          Normal: place.Picture.Normal,
-                          Small: place.Picture.Small,
-                          PlaceId: place.Picture.PlaceId);
+            picture = new(Id: place.Picture.Id, Small: place.Picture.Small, PlaceId: place.Picture.PlaceId);
         }
 
         if (place.Pictures.Count != 0)
         {
             pictures = place.Pictures.Select(p =>
-                new PlaceGeneralPictureDetails(Id: p.Id,
-                                               Caption: p.Caption,
-                                               Normal: p.Normal,
-                                               Small: p.Small,
-                                               PlaceId: p.PlaceId)).ToList();
+                new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId)).ToList();
         }
 
         return new Core.Dto.PlaceDetails(Id: place.Id,
@@ -139,15 +115,11 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to update other people's places.");
         }
 
-        Images images = new(details.Picture, details.Pictures);
-
-        IPathSwapElements paths = options.Get(PlaceImageOptions.Place);
-
         try
         {
             await attachImages.ComputeAsync(place,
-                                            images,
-                                            new GetImagesPath(paths),
+                                            new Images(details.Picture, details.Pictures),
+                                            new GetImagesPath(options.Get(PlaceImageOptions.Place)),
                                             new UrlSegments(Request.Scheme, Request.Host.ToString()));
         }
         catch (ImageTypeException ex)
@@ -201,15 +173,11 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             BroId = bro.Id,
         };
 
-        Images images = new(details.Picture, details.Pictures);
-
-        IPathSwapElements paths = options.Get(PlaceImageOptions.Place);
-
         try
         {
             await attachImages.ComputeAsync(place,
-                                            images,
-                                            new GetImagesPath(paths),
+                                            new Images(details.Picture, details.Pictures),
+                                            new GetImagesPath(options.Get(PlaceImageOptions.Place)),
                                             new UrlSegments(Request.Scheme, Request.Host.ToString()));
         }
         catch (ImageTypeException ex)
@@ -253,17 +221,15 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpDelete("picture/{id}")]
     public async Task<IActionResult> DeletePicture(Guid id,
                                                    IOptionsSnapshot<PlaceImageOptions> options,
-                                                   DeleteAvatar deleteAvatar)
+                                                   DeleteImage deleteImage)
     {
         PlaceProfilePicture? placeProfilePicture = await context.PlaceProfilePicture.FirstOrDefaultAsync(ppp => ppp.Id == id);
 
-        if (placeProfilePicture is null) return NotFound("Cannot find picture.");
-
-        IPathSwapElements paths = options.Get(PlaceImageOptions.Place);
+        if (placeProfilePicture is null) return NotFound("Picture not found.");
 
         try
         {
-            await deleteAvatar.ComputeAsync(placeProfilePicture, new GetImagesPath(paths));
+            await deleteImage.ComputeAsync(placeProfilePicture, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
             await context.SaveChangesAsync();
         }
         catch (DbUpdateException ex)

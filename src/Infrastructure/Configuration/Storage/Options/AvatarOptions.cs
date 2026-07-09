@@ -8,5 +8,8 @@ namespace Infrastructure.Configuration.Storage.Options
 
         public string IncorrectPath { get; set; } = string.Empty;
         public string CorrectPath { get; set; } = string.Empty;
+
+        public string ImageKindSegmentWithWindowsDirectorySeparator { get; set; } = string.Empty;
+        public string ImageKindSegmentWitGeneralDirectorySeparator { get; set; } = string.Empty;
     }
 }

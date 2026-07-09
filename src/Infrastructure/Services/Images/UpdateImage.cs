@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Services.Images;
 
-public class UpdateAvatar()
+public class UpdateImage()
 {
     public const string Small = "small";
     private string _fileName = string.Empty;
@@ -10,7 +10,7 @@ public class UpdateAvatar()
     private UrlSegments _urlSegments = default!;
     private ImagePreparer _preparer = default!;
 
-    public async Task<UpdateAvatar> ComputeAsync(string fileName,
+    public async Task<UpdateImage> ComputeAsync(string fileName,
                                                  GetImagesPath getImagesPath,
                                                  UrlSegments urlSegments,
                                                  ImagePreparer preparer,

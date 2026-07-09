@@ -137,7 +137,7 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     [Authorize]
     [HttpPut("Update-Avatar")]
     public async Task<IActionResult> UpdateAvatarAsync([FromForm] IFormFile avatar,
-                                                       IOptionsSnapshot<AvatarOptions> avatarOptions,
+                                                       IOptionsSnapshot<AvatarOptions> options,
                                                        AttachImages attachImages,
                                                        GenerateToken generateToken,
                                                        ApplicationDbContext context)
@@ -150,11 +150,9 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
         if (_bro is null) return NotFound();
 
-        IPathSwapElements paths = avatarOptions.Get(AvatarOptions.Avatar);
-
         await attachImages.ComputeAsync(_bro,
                                         avatar,
-                                        new GetImagesPath(paths),
+                                        new GetImagesPath(options.Get(AvatarOptions.Avatar)),
                                         new UrlSegments(Request.Scheme, Request.Host.ToString()));
 
         IdentityResult result = await userManager.UpdateAsync(_bro);
