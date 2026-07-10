@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Versioning;
 using System.Security.Claims;
 using Ui.Services;
 using Ui.ViewModels;
@@ -188,7 +187,8 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
                 Status = 404,
                 Title = "Bro not found.",
             });
-        };
+        }
+        ;
 
         if (bro.Avatar is null)
         {
