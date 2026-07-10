@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Versioning;
 using System.Security.Claims;
 using Ui.Services;
 using Ui.ViewModels;
@@ -171,6 +172,48 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
         });
     }
 
+    [Authorize]
+    [HttpDelete("Delete-Avatar")]
+    public async Task<IActionResult> DeleteAvatarAsync(ApplicationDbContext context, DeleteImage deleteImage, GenerateToken generateToken)
+    {
+        string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Bro? bro = await context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == Guid.Parse(broId!));
+
+        if (bro is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Detail = "Bro seems to not exists.",
+                Instance = "DELETE /Accounts/Delete-Avatar",
+                Status = 404,
+                Title = "Bro not found.",
+            });
+        };
+
+        if (bro.Avatar is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Detail = "Could not find avatar, maybe you don't have one.🤷",
+                Instance = "DELETE /Accounts/Delete-Avatar",
+                Title = "Avatar not found, seems to be missing."
+            });
+        }
+
+        await deleteImage.ComputeAsync(bro.Avatar);
+        context.AccountAvatar.Remove(bro.Avatar);
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            return NotFound(new ProblemDetails { Detail = ex.Message });
+        }
+
+        return Ok(new { Token = generateToken.Compute(bro) });
+    }
 
     private async Task<ErrorsParser> SetUserAsync(AccountProfileViewModel model)
     {
