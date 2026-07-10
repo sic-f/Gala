@@ -2,21 +2,20 @@ using Core.Entities;
 using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
-using Infrastructure.Identity;
 using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Infrastructure.Services.Images;
 
-public class AttachImages(UpdateImage updateImage, DeleteImage deleteImage)
+public class AttachPictures(UpdateImage updateImage, DeleteImage deleteImage) : IPicturesAttacher
 {
-    public async Task ComputeAsync(Bro bro, PictureUploads pictureUploads)
+    public async Task ComputeAsync(Brodiebles brodybles, PictureUploads pictureUploads)
     {
         if (IsNotUpdatingPicture(pictureUploads.Picture)) return;
 
-        await RemoveOldProfilePictureAsync(bro.Avatar);
+        await RemoveOldProfilePictureAsync(brodybles.Avatar);
 
-        await BuildProfilePictureAsync(bro, pictureUploads.Picture);
+        await BuildProfilePictureAsync(brodybles, pictureUploads.Picture);
     }
 
     public async Task ComputeAsync(Place place, PictureUploads pictureUploads)
@@ -61,7 +60,7 @@ public class AttachImages(UpdateImage updateImage, DeleteImage deleteImage)
         await deleteImage.ComputeAsync(oldPicture);
     }
 
-    private async Task BuildProfilePictureAsync(Bro bro, PictureUpload picture)
+    private async Task BuildProfilePictureAsync(Brodiebles brodiebles, PictureUpload picture)
     {
         if (picture is null) return;
 
@@ -79,7 +78,7 @@ public class AttachImages(UpdateImage updateImage, DeleteImage deleteImage)
                      imageDimensions: new ImageDimensions(Width: 64, Height: 64),
                      resizeMode: ResizeMode.Max));
 
-        bro.Avatar = new AccountAvatar
+        brodiebles.Avatar = new AccountAvatar
         {
             Normal = picture.Paths.Normal,
             Small = picture.Paths.Small,

@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.Interfaces;
 using Core.Values;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -135,9 +136,8 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     [Authorize]
     [HttpPut("Update-Avatar")]
     public async Task<IActionResult> UpdateAvatarAsync([FromForm] IFormFile avatar,
-                                                       GenerateToken generateToken,
                                                        ApplicationDbContext context,
-                                                       AttachImages attachImages,
+                                                       IPicturesAttacher attachPictures,
                                                        ParseToPictureUploads parseToPictureUploads)
     {
         string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -148,11 +148,14 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
         if (_bro is null) return NotFound();
 
-        await attachImages.ComputeAsync(_bro,
-                                        await parseToPictureUploads.FromFormFilesAsync<AccountAvatar>(new UrlSegments(Request.Scheme, Request.Host.ToString()),
-                                                                                                      avatar));
+        Brodiebles brodybles = new() { BroId = _bro.Id, Avatar = _bro.Avatar };
+        await attachPictures.ComputeAsync(
+            brodybles,
+            await parseToPictureUploads.FromFormFilesAsync<AccountAvatar>(new UrlSegments(
+                Request.Scheme,
+                Request.Host.ToString()), avatar));
 
-
+        _bro.Avatar = brodybles.Avatar;
         IdentityResult result = await userManager.UpdateAsync(_bro);
 
         if (result.Errors.Any())

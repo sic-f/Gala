@@ -1,5 +1,7 @@
+using Context;
 using Core.Dto;
 using Core.Exceptions;
+using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Data;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Ui.Services;
 
 namespace Ui.Controllers;
 
@@ -16,6 +19,8 @@ namespace Ui.Controllers;
 [ApiController]
 public class PlacesController(ApplicationDbContext context, UserManager<Bro> userManager) : ControllerBase
 {
+    private Place Place { get; set; } = default!;
+
     [HttpGet]
     public IEnumerable<PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
     {
@@ -96,7 +101,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPlace(Guid id,
                                               Dto.PlaceDetails details,
-                                              AttachImages attachImages,
+                                              IPicturesAttacher attachPictures,
                                               ParseToPictureUploads parseToPictureUploads)
     {
         Place? place = await context.Place.Include(p => p.ProfilePictures).FirstOrDefaultAsync(p => p.Id == id);
@@ -115,7 +120,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         try
         {
-            await attachImages.ComputeAsync(
+            await attachPictures.ComputeAsync(
                 place,
                 await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
                     new UrlSegments(Request.Scheme, Request.Host.ToString()),
@@ -151,51 +156,36 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Place>> PostPlace(Dto.PlaceDetails details,
-                                                     AttachImages attachImages,
-                                                     ParseToPictureUploads parseToPictureUploads)
+    public async Task<IActionResult> PostPlace(Dto.PlaceDetails details,
+                                               Contribution contribution,
+                                               ParseToPictureUploads parseToPictureUploads)
     {
-        Bro? bro = await userManager.GetUserAsync(User);
-
-        if (bro is null) return NotFound("Bro doesn't exist.");
-
-        Place place = new()
-        {
-            Name = details.Name,
-            Description = details.Description,
-            Information = details.Information,
-            Address = details.Address,
-            Mobile = details.Mobile,
-            Landline = details.Landline,
-            Email = details.Email,
-            Website = details.Website,
-            Facebook = details.Facebook,
-            Instagram = details.Instagram,
-            BroId = bro.Id,
-        };
-
         try
         {
-            await attachImages.ComputeAsync(
-                place,
-                await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
-                    new UrlSegments(Request.Scheme, Request.Host.ToString()),
-                    details.Picture,
-                    details.Pictures,
-                    ModelState));
+            Place = await SubmitPlaceAsync(details, parseToPictureUploads, contribution);
         }
         catch (ImageTypeException)
         {
             return ValidationProblem(ModelState);
         }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            if (!PlaceExists(Place.Id))
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Instance = $"DELETE api/Places/${Place.Id}",
+                    Title = "Db Update Concurrency Exception"
+                });
+            }
+            else
+            {
+                throw;
+            }
+        }
 
-        context.Place.Add(place);
-        await context.SaveChangesAsync();
-
-        return CreatedAtAction(
-            nameof(GetPlace),
-            new { place.Id },
-            new { Message = "Submit successful", place.Id });
+        return CreatedAtAction(nameof(GetPlace), new { Place.Id }, new { Message = "Submit successful", Place.Id });
     }
 
     [Authorize]
@@ -241,5 +231,21 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     private bool PlaceExists(Guid id)
     {
         return context.Place.Any(e => e.Id == id);
+    }
+
+    private async Task<Place> SubmitPlaceAsync(Dto.PlaceDetails details, ParseToPictureUploads pictureUploadsParser, Contribution contribution)
+    {
+        var placePictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
+
+        return await contribution.SubmitAsync(details, placePictureUploads, this.BroId(User));
+    }
+
+    private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads pictureUploadsParser, Dto.PlaceDetails details)
+    {
+        return await pictureUploadsParser.FromFormFilesAsync<PlacePicture>(
+            new UrlSegments(Request.Scheme, Request.Host.ToString()),
+            details.Picture,
+            details.Pictures,
+            ModelState);
     }
 }
