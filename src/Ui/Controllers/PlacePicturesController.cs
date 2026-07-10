@@ -1,11 +1,10 @@
+using Core.Dto;
 using Core.PlaceAggregate;
-using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Services.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace Ui.Controllers
 {
@@ -20,7 +19,7 @@ namespace Ui.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Core.Dto.PlacePicture>> GetPlacePicture(Guid id, int slide)
+        public async Task<ActionResult<PlacePictureDto>> GetPlacePicture(Guid id, int slide)
         {
             var placePicture = await context.PlacePicture.FindAsync(id);
 
@@ -29,17 +28,17 @@ namespace Ui.Controllers
                 return NotFound("Place picture not found.");
             }
 
-            return new Core.Dto.PlacePicture(Id: placePicture.Id,
-                                             Normal: placePicture.Normal,
-                                             PlaceId: placePicture.PlaceId,
-                                             UploaderId: placePicture.UploaderId,
-                                             Index: slide,
-                                             Caption: placePicture?.Caption);
+            return new PlacePictureDto(Id: placePicture.Id,
+                                       Normal: placePicture.Normal,
+                                       PlaceId: placePicture.PlaceId,
+                                       UploaderId: placePicture.UploaderId,
+                                       Index: slide,
+                                       Caption: placePicture?.Caption);
         }
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPlacePicture(Guid id, Core.Dto.PictureCaption pictureCaption)
+        public async Task<IActionResult> PutPlacePicture(Guid id, PictureCaption pictureCaption)
         {
             PlacePicture? picture = await context.PlacePicture.FindAsync(id);
 
@@ -84,21 +83,29 @@ namespace Ui.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePlacePicture(Guid id,
-                                                            IOptionsSnapshot<PlaceImageOptions> options,
-                                                            DeleteImage deleteImage)
+        public async Task<IActionResult> DeletePlacePicture(Guid id, DeleteImage deleteImage)
         {
-            var placePicture = await context.PlacePicture.FindAsync(id);
-            if (placePicture == null) return NotFound("Picture not found.");
+            PlacePicture? placePicture = await context.PlacePicture.FindAsync(id);
+            if (placePicture is null) return NotFound("Picture not found.");
 
             try
             {
-                await deleteImage.ComputeAsync(placePicture, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
+                await deleteImage.ComputeAsync(placePicture);
                 await context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateConcurrencyException ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                if (!PlacePictureExists(id))
+                {
+                    return Problem($"{ex.Message}",
+                                   $"DELETE /place-pictures/{id}",
+                                   404,
+                                   "Something went wrong.");
+                }
+                else
+                {
+                    throw;
+                }
             }
 
             return NoContent();

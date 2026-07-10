@@ -10,7 +10,7 @@ using Utility.Scopes;
 namespace IntegrationTests.Places.Delete;
 
 [Collection("Application Factory Collection")]
-public class DeletePlacePicture(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
+public class DeletePlacePicture(PlacePictureScope app) : BaseTest(app), IClassFixture<PlacePictureScope>
 {
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
@@ -19,8 +19,8 @@ public class DeletePlacePicture(PlaceScope app) : BaseTest(app), IClassFixture<P
     {
         PlaceProfilePicture profilePicture = new()
         {
-            Normal = ImageHelper.TestImageBPath,
-            Small = ImageHelper.TestImageCPath,
+            Normal = "Normal",
+            Small = "Small",
         };
         PlaceAttributes attributes = new()
         {

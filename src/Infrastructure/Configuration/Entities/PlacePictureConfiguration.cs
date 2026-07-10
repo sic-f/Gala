@@ -20,6 +20,14 @@ public class PlacePictureConfiguration : IEntityTypeConfiguration<PlacePicture>
                .HasMaxLength(2083)
                .IsRequired();
 
+        builder.Property(pp => pp.NormalLocal)
+               .HasMaxLength(2083)
+               .IsRequired();
+
+        builder.Property(pp => pp.SmallLocal)
+               .HasMaxLength(2083)
+               .IsRequired();
+
         builder.Property(pp => pp.CreatedAt).HasDefaultValueSql<DateTimeOffset>("GETUTCDATE()");
         builder.Property(pp => pp.LastModified).HasDefaultValueSql<DateTimeOffset>("GETUTCDATE()");
     }

@@ -22,7 +22,13 @@ public class Upate(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
             Name = "Test Name",
             Address = "Test Address",
             BroId = app.Bro.Id,
-            Picture = new PlaceProfilePicture { Normal = ImageHelper.TestImageAPath, Small = ImageHelper.TestImageBPath },
+            Picture = new PlaceProfilePicture
+            {
+                Normal = ImageHelper.TestImageAPath,
+                Small = ImageHelper.TestImageBPath,
+                NormalLocal = ImageHelper.TestImageAPath,
+                SmallLocal = ImageHelper.TestImageBPath
+            },
         };
 
         Place place = await PlaceFactory.CreatePlaceAsync(attributes, app);

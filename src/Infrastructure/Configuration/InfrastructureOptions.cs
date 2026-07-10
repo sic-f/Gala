@@ -1,4 +1,6 @@
-﻿using Infrastructure.Configuration.Storage.Options;
+﻿using Core.Interfaces;
+using Core.Services;
+using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Services.Images;
 using Infrastructure.Services.Jwt;
 using Microsoft.Extensions.Configuration;
@@ -21,5 +23,7 @@ public static class InfrastructureOptions
         services.AddScoped<ValidateImageType>();
         services.AddScoped<UpdateImage>();
         services.AddScoped<DeleteImage>();
+        services.AddScoped<ParseToPictureUploads>();
+        services.AddScoped<IGetImagePaths, GetImagePaths>();
     }
 }

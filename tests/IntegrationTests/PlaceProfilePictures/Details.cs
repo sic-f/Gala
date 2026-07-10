@@ -1,4 +1,5 @@
-﻿using Core.PlaceAggregate;
+﻿using Core.Dto;
+using Core.PlaceAggregate;
 using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
@@ -28,7 +29,7 @@ public class Details(PlacePictureScope app) : BaseTest(app), IClassFixture<Place
         };
         Place place = await PlaceFactory.CreatePlaceAsync(attributes, app);
 
-        Core.Dto.PlacePicture placePicture = await app.GetPlaceProfilePictureAsync(place.Picture!.Id);
+        PlacePictureDto placePicture = await app.GetPlaceProfilePictureAsync(place.Picture!.Id);
 
         Assert.True(app.Response.IsSuccessStatusCode);
         Assert.Equal(ImageHelper.TestImageBPath, placePicture.Normal);

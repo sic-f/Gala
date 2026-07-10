@@ -5,12 +5,12 @@ namespace Core.Dto;
 
 public record PlacePictureLean(Guid Id, string Small, Guid PlaceId);
 
-public record PlacePicture(Guid Id,
-                           string Normal,
-                           Guid PlaceId,
-                           Guid? UploaderId,
-                           int Index,
-                           string? Caption = null);
+public record PlacePictureDto(Guid Id,
+                              string Normal,
+                              Guid PlaceId,
+                              Guid? UploaderId,
+                              int Index,
+                              string? Caption = null);
 
 public record PictureCaption
 {

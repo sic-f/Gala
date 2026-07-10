@@ -3,146 +3,117 @@ using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Identity;
-using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Infrastructure.Services.Images;
 
-public class AttachImages(UpdateImage updateImage, DeleteImage deleteImage, ValidateImageType validateImageType)
+public class AttachImages(UpdateImage updateImage, DeleteImage deleteImage)
 {
-    public async Task ComputeAsync(Bro bro,
-                                   IFormFile? newAvatar,
-                                   GetImagesPath getImagesPath,
-                                   UrlSegments imageUrlSegments)
+    public async Task ComputeAsync(Bro bro, PictureUploads pictureUploads)
     {
-        if (IsNotUpdatingPicture(newAvatar)) return;
+        if (IsNotUpdatingPicture(pictureUploads.Picture)) return;
 
-        validateImageType.Validate(newAvatar);
+        await RemoveOldProfilePictureAsync(bro.Avatar);
 
-        await RemoveOldProfilePictureAsync(bro.Avatar, getImagesPath);
-
-        await BuildProfilePictureAsync(bro, newAvatar, getImagesPath, imageUrlSegments);
+        await BuildProfilePictureAsync(bro, pictureUploads.Picture);
     }
 
-    public async Task ComputeAsync(Place place,
-                                   Values.Images images,
-                                   GetImagesPath getImagesPath,
-                                   UrlSegments urlSegments)
+    public async Task ComputeAsync(Place place, PictureUploads pictureUploads)
     {
-        if (HasNoPicturesToUpdate(images.Picture, images.Pictures)) return;
+        if (HasNoPicturesToUpdate(pictureUploads.Picture, pictureUploads.Pictures)) return;
 
-        validateImageType.Validate(images);
-
-        if (IsUpdatingPicture(images.Picture))
+        if (IsUpdatingPicture(pictureUploads.Picture))
         {
-            await RemoveOldProfilePictureAsync(place.Picture, getImagesPath);
+            await RemoveOldProfilePictureAsync(place.Picture);
         }
 
-        await BuildPlacePictureAsync(place, images.Picture, getImagesPath, urlSegments);
+        await BuildPlacePictureAsync(place, pictureUploads.Picture);
 
-        await BuildPicturesAsync(place, images.Pictures, getImagesPath, urlSegments);
+        await BuildPicturesAsync(place, pictureUploads.Pictures);
     }
 
-    private static bool HasNoPicturesToUpdate([NotNullWhen(false)] IFormFile? picture,
-                                              [NotNullWhen(false)] IFormFileCollection? pictures)
+    private static bool HasNoPicturesToUpdate([NotNullWhen(false)] PictureUpload? picture,
+                                              [NotNullWhen(false)] IEnumerable<PictureUpload>? pictures)
     {
         return IsNotUpdatingPicture(picture) && IsNotAddingPictures(pictures);
     }
 
-    private static bool IsNotUpdatingPicture([NotNullWhen(false)] IFormFile? picture)
+    private static bool IsNotUpdatingPicture([NotNullWhen(false)] PictureUpload? picture)
     {
         return picture is null;
     }
 
-    private static bool IsNotAddingPictures([NotNullWhen(false)] IFormFileCollection? pictures)
+    private static bool IsNotAddingPictures([NotNullWhen(false)] IEnumerable<PictureUpload>? pictures)
     {
         return pictures is null;
     }
 
-    private static bool IsUpdatingPicture([NotNullWhen(false)] IFormFile? picture)
+    private static bool IsUpdatingPicture([NotNullWhen(false)] PictureUpload? picture)
     {
         return picture is not null;
     }
 
-    private async Task RemoveOldProfilePictureAsync(IImageDeletable? oldPicture,
-                                                    GetImagesPath getImagesPath)
+    private async Task RemoveOldProfilePictureAsync(IImageDeletable? oldPicture)
     {
         if (oldPicture is null) return;
 
-        await deleteImage.ComputeAsync(oldPicture, getImagesPath);
+        await deleteImage.ComputeAsync(oldPicture);
     }
 
-    private async Task BuildProfilePictureAsync(Bro bro,
-                                                IFormFile newAvatar,
-                                                GetImagesPath getImagesPath,
-                                                UrlSegments imageUrlSegments)
-    {
-        var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
-
-        string normalUrl = (await updateImage.ComputeAsync(
-            fileName,
-            getImagesPath,
-            imageUrlSegments,
-            preparer: new ResizedImagePreparer(
-                newAvatar,
-                imageDimensions: new ImageDimensions(Width: 640, Height: 360),
-                resizeMode: ResizeMode.Max))).GetUri();
-
-        string smallUrl = (await updateImage.ComputeAsync(
-                fileName,
-                getImagesPath,
-                imageUrlSegments,
-                preparer: new ResizedImagePreparer(
-                    newAvatar,
-                    imageDimensions: new ImageDimensions(Width: 64, Height: 64),
-                    resizeMode: ResizeMode.Max),
-                imageVariant: UpdateImage.Small)).GetUri();
-
-        bro.Avatar = new AccountAvatar
-        {
-            Normal = normalUrl,
-            Small = smallUrl,
-        };
-    }
-
-    private async Task BuildPlacePictureAsync(Place place,
-                                              IFormFile picture,
-                                              GetImagesPath getImagesPath,
-                                              UrlSegments urlSegments)
+    private async Task BuildProfilePictureAsync(Bro bro, PictureUpload picture)
     {
         if (picture is null) return;
 
-        var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
-
-        string normalUrl = (await updateImage.ComputeAsync(
-            fileName,
-            getImagesPath,
-            urlSegments,
-            preparer: new ImagePreparer(picture))).GetUri();
-
-        var smallUrl = (await updateImage.ComputeAsync(
-            fileName,
-            getImagesPath,
-            urlSegments,
+        await updateImage.ComputeAsync(
+            picture.Paths.NormalLocal,
             preparer: new ResizedImagePreparer(
-                picture,
+                picture.Stream,
+                imageDimensions: new ImageDimensions(Width: 640, Height: 360),
+                resizeMode: ResizeMode.Max));
+
+        await updateImage.ComputeAsync(
+                 picture.Paths.SmallLocal,
+                 preparer: new ResizedImagePreparer(
+                     picture.Stream,
+                     imageDimensions: new ImageDimensions(Width: 64, Height: 64),
+                     resizeMode: ResizeMode.Max));
+
+        bro.Avatar = new AccountAvatar
+        {
+            Normal = picture.Paths.Normal,
+            Small = picture.Paths.Small,
+            NormalLocal = picture.Paths.NormalLocal,
+            SmallLocal = picture.Paths.SmallLocal,
+        };
+    }
+
+    private async Task BuildPlacePictureAsync(Place place, PictureUpload picture)
+    {
+        if (picture is null) return;
+
+        await updateImage.ComputeAsync(
+            picture.Paths.NormalLocal,
+            preparer: new ImagePreparer(picture.Stream));
+
+        await updateImage.ComputeAsync(
+            picture.Paths.SmallLocal,
+            preparer: new ResizedImagePreparer(
+                picture.Stream,
                 imageDimensions: new ImageDimensions(Width: 384, Height: 288),
-                resizeMode: ResizeMode.Pad),
-            imageVariant: UpdateImage.Small)).GetUri();
+                resizeMode: ResizeMode.Pad));
 
         place.AddPicture(new PlaceProfilePicture
         {
-            Normal = normalUrl,
-            Small = smallUrl,
+            Normal = picture.Paths.Normal,
+            Small = picture.Paths.Small,
+            NormalLocal = picture.Paths.NormalLocal,
+            SmallLocal = picture.Paths.SmallLocal,
             UploaderId = place.BroId,
         });
     }
 
-    private async Task BuildPicturesAsync(Place place,
-                                          IFormFileCollection pictures,
-                                          GetImagesPath getImagesPath,
-                                          UrlSegments urlSegments)
+    private async Task BuildPicturesAsync(Place place, IEnumerable<PictureUpload> pictures)
     {
         if (pictures is null) return;
 
@@ -150,28 +121,24 @@ public class AttachImages(UpdateImage updateImage, DeleteImage deleteImage, Vali
 
         foreach (var picture in pictures)
         {
-            var fileName = Math.Abs(Guid.NewGuid().GetHashCode()).ToString();
+            await updateImage.ComputeAsync(
+                picture.Paths.NormalLocal,
+                preparer: new ImagePreparer(picture.Stream));
 
-            var normalUrl = (await updateImage.ComputeAsync(
-                fileName,
-                getImagesPath,
-                urlSegments,
-                preparer: new ImagePreparer(picture))).GetUri();
-
-            var smallUrl = (await updateImage.ComputeAsync(
-                fileName,
-                getImagesPath,
-                urlSegments,
+            await updateImage.ComputeAsync(
+                picture.Paths.SmallLocal,
                 preparer: new ResizedImagePreparer(
-                    picture,
+                    picture.Stream,
                     imageDimensions: new ImageDimensions(Width: 800, Height: 740),
-                    resizeMode: ResizeMode.Crop),
-                imageVariant: UpdateImage.Small)).GetUri();
+                    resizeMode: ResizeMode.Crop));
+
 
             placeExtraPictures.Add(new PlaceExtraPicture
             {
-                Normal = normalUrl,
-                Small = smallUrl,
+                Normal = picture.Paths.Normal,
+                Small = picture.Paths.Small,
+                NormalLocal = picture.Paths.NormalLocal,
+                SmallLocal = picture.Paths.SmallLocal,
                 UploaderId = place.BroId,
             });
         }

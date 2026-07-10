@@ -1,48 +1,33 @@
-﻿using Core.Values;
-
-namespace Infrastructure.Services.Images;
+﻿namespace Infrastructure.Services.Images;
 
 public class UpdateImage()
 {
-    public const string Small = "small";
-    private string _fileName = string.Empty;
-    private GetImagesPath _getImagesPath = default!;
-    private UrlSegments _urlSegments = default!;
     private ImagePreparer _preparer = default!;
+    private string _fileName = default!;
 
-    public async Task<UpdateImage> ComputeAsync(string fileName,
-                                                 GetImagesPath getImagesPath,
-                                                 UrlSegments urlSegments,
-                                                 ImagePreparer preparer,
-                                                 string? imageVariant = null)
+    public async Task<UpdateImage> ComputeAsync(string fileName, ImagePreparer preparer)
     {
-        SetFields(fileName, getImagesPath, urlSegments, preparer, imageVariant);
+        SetFields(fileName, preparer);
 
         await PersistAvatarAsync();
 
         return this;
     }
 
-    public string GetUri()
-    {
-        return $"{_urlSegments.Scheme}://{_urlSegments.Host}/{_getImagesPath.GetImageKindSegment()}/{_fileName}";
-    }
-
     private async Task PersistAvatarAsync()
     {
-        using var stream = new FileStream(_getImagesPath.FileNamePath(_fileName), FileMode.Create);
+        if (!Directory.Exists(_fileName))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_fileName)!);
+        }
+
+        using var stream = new FileStream(_fileName, FileMode.Create);
         await _preparer.PrepareAsync(stream);
     }
 
-    private void SetFields(string fileName,
-                           GetImagesPath getImagesPath,
-                           UrlSegments urlSegments,
-                           ImagePreparer preparer,
-                           string? imageVariant)
+    private void SetFields(string fileName, ImagePreparer preparer)
     {
-        _fileName = imageVariant is null ? $"{fileName}.jpg" : $"{fileName}-{imageVariant}.jpg";
-        _getImagesPath = getImagesPath;
-        _urlSegments = urlSegments;
+        _fileName = fileName;
         _preparer = preparer;
     }
 }

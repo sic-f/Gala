@@ -2,6 +2,8 @@
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
+using System.Text.Json;
 using Ui.Dto;
 using Utility.Dto;
 using Utility.Factories;
@@ -51,7 +53,9 @@ public class ExclusiveUpdate(PlaceScope app) : BaseTest(app), IClassFixture<Plac
 
     private async Task ThenBroWillNotBeAbleToUpdateThePlace(Guid placeId)
     {
-        Assert.Equal("❌👦🏣 Bro not allowed to update other people's places.", await app.Response.Content.ReadAsStringAsync());
+        Assert.Equal(
+            "❌👦🏣 Bro not allowed to update other people's places.",
+            (await app.Response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("detail").ToString());
         var exception = Record.Exception(() => app.Response.EnsureSuccessStatusCode());
         Assert.NotNull(exception);
 

@@ -2,16 +2,13 @@ using Core.Dto;
 using Core.Exceptions;
 using Core.PlaceAggregate;
 using Core.Values;
-using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.Services.Images;
-using Infrastructure.Values;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace Ui.Controllers;
 
@@ -22,8 +19,6 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpGet]
     public IEnumerable<PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
     {
-
-
         return context.Place.AsNoTracking()
                             .Include(p => p.ProfilePictures)
                             .Where(p => p.CreatedAt < offset)
@@ -58,7 +53,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Core.Dto.PlaceDetails>> GetPlace(Guid id)
+    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id)
     {
         Place? place = context.Place.AsNoTracking()
                                     .Include(p => p.ProfilePictures)
@@ -68,7 +63,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         if (place is null) return NotFound("❌🏤 Place does not exist.");
 
         PlacePictureLean? picture = default;
-        IEnumerable<PlacePictureLean> pictures = Enumerable.Empty<PlacePictureLean>();
+        IEnumerable<PlacePictureLean> pictures = [];
 
         if (place.Picture is not null)
         {
@@ -81,28 +76,28 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
                 new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId)).ToList();
         }
 
-        return new Core.Dto.PlaceDetails(Id: place.Id,
-                                         Name: place.Name,
-                                         Description: place.Description,
-                                         Information: place.Information,
-                                         Address: place.Address,
-                                         Mobile: place.Mobile,
-                                         Landline: place.Landline,
-                                         Email: place.Email,
-                                         Website: place.Website,
-                                         Facebook: place.Facebook,
-                                         Instagram: place.Instagram,
-                                         BroId: place.BroId,
-                                         Picture: picture,
-                                         Pictures: pictures);
+        return new PlaceDetails(Id: place.Id,
+                                Name: place.Name,
+                                Description: place.Description,
+                                Information: place.Information,
+                                Address: place.Address,
+                                Mobile: place.Mobile,
+                                Landline: place.Landline,
+                                Email: place.Email,
+                                Website: place.Website,
+                                Facebook: place.Facebook,
+                                Instagram: place.Instagram,
+                                BroId: place.BroId,
+                                Picture: picture,
+                                Pictures: pictures);
     }
 
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPlace(Guid id,
                                               Dto.PlaceDetails details,
-                                              IOptionsSnapshot<PlaceImageOptions> options,
-                                              AttachImages attachImages)
+                                              AttachImages attachImages,
+                                              ParseToPictureUploads parseToPictureUploads)
     {
         Place? place = await context.Place.Include(p => p.ProfilePictures).FirstOrDefaultAsync(p => p.Id == id);
 
@@ -112,19 +107,25 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         if (bro is not null && place.BroId != bro.Id)
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to update other people's places.");
+            return Problem("❌👦🏣 Bro not allowed to update other people's places.",
+                           $"PUT /places/{id}",
+                           403,
+                           "Forbidden action");
         }
 
         try
         {
-            await attachImages.ComputeAsync(place,
-                                            new Images(details.Picture, details.Pictures),
-                                            new GetImagesPath(options.Get(PlaceImageOptions.Place)),
-                                            new UrlSegments(Request.Scheme, Request.Host.ToString()));
+            await attachImages.ComputeAsync(
+                place,
+                await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
+                    new UrlSegments(Request.Scheme, Request.Host.ToString()),
+                    details.Picture,
+                    details.Pictures,
+                    ModelState));
         }
-        catch (ImageTypeException ex)
+        catch (ImageTypeException)
         {
-            return BadRequest(new { Errors = new { Picture = new string[] { ex.Message } } });
+            return ValidationProblem(ModelState);
         }
 
         place.UpdateDetails(details);
@@ -152,7 +153,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpPost]
     public async Task<ActionResult<Place>> PostPlace(Dto.PlaceDetails details,
                                                      AttachImages attachImages,
-                                                     IOptionsSnapshot<PlaceImageOptions> options)
+                                                     ParseToPictureUploads parseToPictureUploads)
     {
         Bro? bro = await userManager.GetUserAsync(User);
 
@@ -175,14 +176,17 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
         try
         {
-            await attachImages.ComputeAsync(place,
-                                            new Images(details.Picture, details.Pictures),
-                                            new GetImagesPath(options.Get(PlaceImageOptions.Place)),
-                                            new UrlSegments(Request.Scheme, Request.Host.ToString()));
+            await attachImages.ComputeAsync(
+                place,
+                await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
+                    new UrlSegments(Request.Scheme, Request.Host.ToString()),
+                    details.Picture,
+                    details.Pictures,
+                    ModelState));
         }
-        catch (ImageTypeException ex)
+        catch (ImageTypeException)
         {
-            return BadRequest(new { Errors = new { Picture = new string[] { ex.Message } } });
+            return ValidationProblem(ModelState);
         }
 
         context.Place.Add(place);
@@ -196,9 +200,7 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePlace(Guid id,
-                                                 IOptionsSnapshot<PlaceImageOptions> options,
-                                                 DeleteImage deleteImage)
+    public async Task<IActionResult> DeletePlace(Guid id, DeleteImage deleteImage)
     {
         var place = await context.Place.FindAsync(id);
         if (place == null)
@@ -213,35 +215,24 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
             return BadRequest("❌👦🏣 Bro not allowed to delete other people's places");
         }
 
-        IEnumerable<Core.PlaceAggregate.PlacePicture> placePictures = 
-            context.PlacePicture.Where(pp => pp.PlaceId == place.Id);
+        IEnumerable<PlacePicture> placePictures = context.PlacePicture.Where(pp => pp.PlaceId == place.Id);
 
-        await deleteImage.DeleteAllAsync(placePictures, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
-
+        await deleteImage.DeleteAllAsync(placePictures);
         context.Place.Remove(place);
-        await context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    [Authorize]
-    [HttpDelete("picture/{id}")]
-    public async Task<IActionResult> DeletePicture(Guid id,
-                                                   IOptionsSnapshot<PlaceImageOptions> options,
-                                                   DeleteImage deleteImage)
-    {
-        PlaceProfilePicture? placeProfilePicture = await context.PlaceProfilePicture.FirstOrDefaultAsync(ppp => ppp.Id == id);
-
-        if (placeProfilePicture is null) return NotFound("Picture not found.");
-
         try
         {
-            await deleteImage.ComputeAsync(placeProfilePicture, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
             await context.SaveChangesAsync();
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            if (!PlaceExists(id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
         }
 
         return NoContent();

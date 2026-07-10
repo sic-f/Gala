@@ -41,7 +41,17 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(2083)
                         .HasColumnType("nvarchar(2083)");
 
+                    b.Property<string>("NormalLocal")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
                     b.Property<string>("Small")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.Property<string>("SmallLocal")
                         .IsRequired()
                         .HasMaxLength(2083)
                         .HasColumnType("nvarchar(2083)");
@@ -205,10 +215,20 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(2083)
                         .HasColumnType("nvarchar(2083)");
 
+                    b.Property<string>("NormalLocal")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
                     b.Property<Guid>("PlaceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Small")
+                        .IsRequired()
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
+                    b.Property<string>("SmallLocal")
                         .IsRequired()
                         .HasMaxLength(2083)
                         .HasColumnType("nvarchar(2083)");

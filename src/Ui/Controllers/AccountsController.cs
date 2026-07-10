@@ -1,6 +1,5 @@
-﻿using Core.Interfaces;
+﻿using Core.Entities;
 using Core.Values;
-using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.Services.Images;
@@ -10,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Ui.Services;
 using Ui.ViewModels;
@@ -137,10 +135,10 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     [Authorize]
     [HttpPut("Update-Avatar")]
     public async Task<IActionResult> UpdateAvatarAsync([FromForm] IFormFile avatar,
-                                                       IOptionsSnapshot<AvatarOptions> options,
-                                                       AttachImages attachImages,
                                                        GenerateToken generateToken,
-                                                       ApplicationDbContext context)
+                                                       ApplicationDbContext context,
+                                                       AttachImages attachImages,
+                                                       ParseToPictureUploads parseToPictureUploads)
     {
         string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -151,9 +149,9 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
         if (_bro is null) return NotFound();
 
         await attachImages.ComputeAsync(_bro,
-                                        avatar,
-                                        new GetImagesPath(options.Get(AvatarOptions.Avatar)),
-                                        new UrlSegments(Request.Scheme, Request.Host.ToString()));
+                                        await parseToPictureUploads.FromFormFilesAsync<AccountAvatar>(new UrlSegments(Request.Scheme, Request.Host.ToString()),
+                                                                                                      avatar));
+
 
         IdentityResult result = await userManager.UpdateAsync(_bro);
 

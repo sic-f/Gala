@@ -44,9 +44,4 @@ public class PlaceScope : ApplicationFactory<Program>
     {
         return await Client.GetFromJsonAsync<IEnumerable<Place>>($"{DefaultStartUrl}/?offset={lastModifiedDate}&limit={fetchLimit}");
     }
-
-    public async Task DeletePictureAsync(Guid id)
-    {
-        Response = await Client.DeleteAsync($"{DefaultStartUrl}/picture/{id}");
-    }
 }
