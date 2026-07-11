@@ -1,10 +1,12 @@
-﻿using Core.Interfaces;
+﻿using Core.Exceptions;
+using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
+using System.Numerics;
 
 namespace Context;
 
-public class Contribution(IPicturesAttacher attachImages, IPlaceService repository)
+public class Contribution(IPicturesAttacher attachPictures, IPlaceService repository)
 {
     private Place Place { get; set; } = default!;
 
@@ -12,9 +14,28 @@ public class Contribution(IPicturesAttacher attachImages, IPlaceService reposito
     {
         BuildPlace(details, broId);
 
-        await attachImages.ComputeAsync(Place, pictureUploads);
+        await attachPictures.ComputeAsync(Place, pictureUploads);
 
-        return await repository.SavePlaceAsync(Place);
+        return await repository.CreatePlaceAsync(Place);
+    }
+
+    public async Task<Place> ModifyAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid id, Guid broId)
+    {
+        Place = await repository.FetchPlaceAsync(id);
+
+        if (Place.BroId != broId)
+        {
+            throw new UnauthorizedContributionAccessException(
+                "❌👦🏣 You did not submit this place and is not the owner, you are not allowed to modify it.");
+        }
+
+        await attachPictures.ComputeAsync(Place, pictureUploads);
+
+        Place.UpdateDetails(details);
+
+        await repository.ModifyPlaceAsync();
+
+        return Place;
     }
 
     private void BuildPlace(IPlaceUpdater details, Guid broId)

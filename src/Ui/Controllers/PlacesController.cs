@@ -1,7 +1,6 @@
 using Context;
 using Core.Dto;
 using Core.Exceptions;
-using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Data;
@@ -101,49 +100,34 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPlace(Guid id,
                                               Dto.PlaceDetails details,
-                                              IPicturesAttacher attachPictures,
-                                              ParseToPictureUploads parseToPictureUploads)
+                                              ParseToPictureUploads parseToPictureUploads,
+                                              Contribution contribution)
     {
-        Place? place = await context.Place.Include(p => p.ProfilePictures).FirstOrDefaultAsync(p => p.Id == id);
-
-        if (place is null) return NotFound("❌🏤 Place does not exist.");
-
-        Bro? bro = await userManager.GetUserAsync(User);
-
-        if (bro is not null && place.BroId != bro.Id)
-        {
-            return Problem("❌👦🏣 Bro not allowed to update other people's places.",
-                           $"PUT /places/{id}",
-                           403,
-                           "Forbidden action");
-        }
-
         try
         {
-            await attachPictures.ComputeAsync(
-                place,
-                await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
-                    new UrlSegments(Request.Scheme, Request.Host.ToString()),
-                    details.Picture,
-                    details.Pictures,
-                    ModelState));
+            await ModifyPlaceAsync(details, contribution, parseToPictureUploads, id, this.BroId(User));
         }
         catch (ImageTypeException)
         {
             return ValidationProblem(ModelState);
         }
-
-        place.UpdateDetails(details);
-
-        try
+        catch (UnauthorizedContributionAccessException ex)
         {
-            await context.SaveChangesAsync();
+            return Problem(ex.Message,
+                           $"PUT /places/{id}",
+                           403,
+                           "You do not have permission to modify this resource.");
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DbUpdateConcurrencyException ex)
         {
             if (!PlaceExists(id))
             {
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Instance = $"PUT api/Places/${Place.Id}",
+                    Title = "Db Update Concurrency Exception"
+                });
             }
             else
             {
@@ -233,11 +217,24 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
         return context.Place.Any(e => e.Id == id);
     }
 
-    private async Task<Place> SubmitPlaceAsync(Dto.PlaceDetails details, ParseToPictureUploads pictureUploadsParser, Contribution contribution)
+    private async Task<Place> SubmitPlaceAsync(Dto.PlaceDetails details,
+                                               ParseToPictureUploads pictureUploadsParser,
+                                               Contribution contribution)
     {
         var placePictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
 
         return await contribution.SubmitAsync(details, placePictureUploads, this.BroId(User));
+    }
+
+    private async Task ModifyPlaceAsync(Dto.PlaceDetails details,
+                                        Contribution contribution,
+                                        ParseToPictureUploads parseToPictureUploads,
+                                        Guid placeId,
+                                        Guid broId)
+    {
+        var pictureUploads = await PlacePictureUploadsAsync(parseToPictureUploads, details);
+
+        await contribution.ModifyAsync(details, pictureUploads, placeId, broId);
     }
 
     private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads pictureUploadsParser, Dto.PlaceDetails details)

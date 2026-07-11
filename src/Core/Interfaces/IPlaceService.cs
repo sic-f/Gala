@@ -4,5 +4,7 @@ namespace Core.Interfaces;
 
 public interface IPlaceService
 {
-    Task<Place> SavePlaceAsync(Place place);
+    Task<Place> CreatePlaceAsync(Place place);
+    Task<Place> FetchPlaceAsync(Guid id);
+    Task ModifyPlaceAsync();
 }
