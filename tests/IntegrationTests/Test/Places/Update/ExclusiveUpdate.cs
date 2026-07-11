@@ -53,7 +53,7 @@ public class ExclusiveUpdate(PlaceScope app) : BaseTest(app), IClassFixture<Plac
     private async Task ThenBroWillNotBeAbleToUpdateThePlace(Guid placeId)
     {
         Assert.Equal(
-            "❌👦🏣 Bro not allowed to update other people's places.",
+            "❌👦🏣 You did not submit this place and is not the owner, you are not allowed to modify it.",
             (await app.Response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("detail").ToString());
         var exception = Record.Exception(() => app.Response.EnsureSuccessStatusCode());
         Assert.NotNull(exception);

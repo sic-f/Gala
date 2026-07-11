@@ -23,12 +23,12 @@ public class PlaceService(ApplicationDbContext context) : IPlaceService
         }
     }
 
-    public async Task<Place> FetchPlaceAsync(Guid id)
+    public async Task<Place> FetchPlaceWithPictureAsync(Guid id)
     {
-        return await context.Place.FirstAsync<Place>(p => p.Id == id);
+        return await context.Place.Include(p => p.ProfilePictures).FirstAsync<Place>(p => p.Id == id);
     }
 
-    public async Task ModifyPlaceAsync()
+    public async Task ModifyPlaceAsync(Place place)
     {
         await context.SaveChangesAsync();
     }

@@ -2,7 +2,6 @@
 using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
-using System.Numerics;
 
 namespace Context;
 
@@ -21,7 +20,7 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
 
     public async Task<Place> ModifyAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid id, Guid broId)
     {
-        Place = await repository.FetchPlaceAsync(id);
+        Place = await repository.FetchPlaceWithPictureAsync(id);
 
         if (Place.BroId != broId)
         {
@@ -33,7 +32,7 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
 
         Place.UpdateDetails(details);
 
-        await repository.ModifyPlaceAsync();
+        await repository.ModifyPlaceAsync(Place);
 
         return Place;
     }
