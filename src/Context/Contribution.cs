@@ -5,7 +5,7 @@ using Core.Values;
 
 namespace Context;
 
-public class Contribution(IPicturesAttacher attachPictures, IPlaceService repository)
+public class Contribution(IPicturesAttacher attachPictures, IPlaceService repository, IDeletePicture deleteImage)
 {
     private Place Place { get; set; } = default!;
 
@@ -35,6 +35,22 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
         await repository.ModifyPlaceAsync(Place);
 
         return Place;
+    }
+
+    public async Task DeleteAsync(Guid id, Guid broId)
+    {
+        Place = await repository.FetchPlaceAsync(id);
+
+        if (broId != Place.BroId)
+        {
+            throw new UnauthorizedContributionAccessException("❌👦🏣 Bro not allowed to delete other people's places.");
+        }
+
+        IEnumerable<PlacePicture> placePictures = repository.FetchPlacePictureAndPictures(id);
+
+        await deleteImage.DeleteAllAsync(placePictures);
+
+        await repository.DeletePlaceAsync(Place);
     }
 
     private void BuildPlace(IPlaceUpdater details, Guid broId)

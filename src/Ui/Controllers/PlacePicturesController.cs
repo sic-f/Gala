@@ -1,7 +1,7 @@
 using Core.Dto;
+using Core.Interfaces;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
-using Infrastructure.Services.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -83,7 +83,7 @@ namespace Ui.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePlacePicture(Guid id, DeleteImage deleteImage)
+        public async Task<IActionResult> DeletePlacePicture(Guid id, IDeletePicture deleteImage)
         {
             PlacePicture? placePicture = await context.PlacePicture.FindAsync(id);
             if (placePicture is null) return NotFound("Picture not found.");

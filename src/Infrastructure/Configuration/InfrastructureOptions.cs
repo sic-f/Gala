@@ -23,7 +23,7 @@ public static class InfrastructureOptions
         services.AddScoped<IPicturesAttacher, AttachPictures>();
         services.AddScoped<ValidateImageType>();
         services.AddScoped<UpdateImage>();
-        services.AddScoped<DeleteImage>();
+        services.AddScoped<IDeletePicture, DeleteImage>();
         services.AddScoped<ParseToPictureUploads>();
         services.AddScoped<IGetImagePaths, GetImagePaths>();
 

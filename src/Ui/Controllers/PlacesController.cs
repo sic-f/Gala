@@ -4,10 +4,8 @@ using Core.Exceptions;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Data;
-using Infrastructure.Identity;
 using Infrastructure.Services.Images;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ui.Services;
@@ -16,7 +14,7 @@ namespace Ui.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlacesController(ApplicationDbContext context, UserManager<Bro> userManager) : ControllerBase
+public class PlacesController(ApplicationDbContext context) : ControllerBase
 {
     private Place Place { get; set; } = default!;
 
@@ -174,34 +172,29 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePlace(Guid id, DeleteImage deleteImage)
+    public async Task<IActionResult> DeletePlace(Guid id, Contribution contribution)
     {
-        var place = await context.Place.FindAsync(id);
-        if (place == null)
-        {
-            return NotFound("❌🏤 Can't delete a place that does not exist.");
-        }
-
-        Bro? bro = await userManager.GetUserAsync(User);
-
-        if (bro is not null && bro.Id != place.BroId)
-        {
-            return BadRequest("❌👦🏣 Bro not allowed to delete other people's places");
-        }
-
-        IEnumerable<PlacePicture> placePictures = context.PlacePicture.Where(pp => pp.PlaceId == place.Id);
-
-        await deleteImage.DeleteAllAsync(placePictures);
-        context.Place.Remove(place);
         try
         {
-            await context.SaveChangesAsync();
+            await contribution.DeleteAsync(id, this.BroId(User));
         }
-        catch (DbUpdateConcurrencyException)
+        catch (UnauthorizedContributionAccessException ex)
+        {
+            return Problem(ex.Message,
+                $"DELETE api/Places/{id}",
+                403,
+                "Unauthorized delete.");
+        }
+        catch (DbUpdateConcurrencyException ex)
         {
             if (!PlaceExists(id))
             {
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Instance = $"DELETE api/Places/${id}",
+                    Title = "Db Update Concurrency Exception"
+                });
             }
             else
             {

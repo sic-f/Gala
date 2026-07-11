@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Infrastructure.Services.Images;
 
-public class AttachPictures(UpdateImage updateImage, DeleteImage deleteImage) : IPicturesAttacher
+public class AttachPictures(UpdateImage updateImage, IDeletePicture deleteImage) : IPicturesAttacher
 {
     public async Task ComputeAsync(Brodiebles brodybles, PictureUploads pictureUploads)
     {
