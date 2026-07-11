@@ -8,7 +8,7 @@ public class Contribution(IPicturesAttacher attachImages, IPlaceService reposito
 {
     private Place Place { get; set; } = default!;
 
-    public async Task<Place> SubmitAsync(IPlaceDetailer details, PictureUploads pictureUploads, Guid broId)
+    public async Task<Place> SubmitAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid broId)
     {
         BuildPlace(details, broId);
 
@@ -17,7 +17,7 @@ public class Contribution(IPicturesAttacher attachImages, IPlaceService reposito
         return await repository.SavePlaceAsync(Place);
     }
 
-    private void BuildPlace(IPlaceDetailer details, Guid broId)
+    private void BuildPlace(IPlaceUpdater details, Guid broId)
     {
         Place = new()
         {
