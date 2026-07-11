@@ -1,7 +1,8 @@
-﻿using System.Reflection;
-using Ui.Dto;
+﻿using Microsoft.AspNetCore.Http;
+using System.Reflection;
+using Utility.Dto;
 
-namespace Ui.Services;
+namespace IntegrationTests.Services;
 
 public class BuildPayload
 {
