@@ -103,12 +103,17 @@ public class PlaceFactory
 
     private static void CreatePictureFile(PlaceProfilePicture picture, string testDirectory)
     {
-        var normalFilePath = Path.Combine(testDirectory, $"{picture.Normal}.jpg");
-        var smallFilePath = Path.Combine(testDirectory, $"{picture.Small}.jpg");
+        var normalFileName = Path.GetFileName(picture.Normal);
+        var smallFileName = Path.GetFileName(picture.Small);
+        var normalFilePath = Path.Combine(testDirectory, $"{normalFileName}");
+        var smallFilePath = Path.Combine(testDirectory, $"{smallFileName}");
 
         using var sourceStream = File.OpenRead(ImageHelper.TestImageAPath);
         using var destinationStream = File.Create(normalFilePath);
         using var destinationStreamSmall = File.Create(smallFilePath);
+        sourceStream.CopyTo(destinationStream);
+        sourceStream.Seek(0, SeekOrigin.Begin);
+        sourceStream.CopyTo(destinationStreamSmall);
 
         picture.NormalLocal = normalFilePath;
         picture.SmallLocal = smallFilePath;
