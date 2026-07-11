@@ -1,6 +1,7 @@
 ﻿using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
+using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -8,7 +9,6 @@ using Ui.Dto;
 using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
-using Utility.Scopes;
 
 namespace IntegrationTests.Places.Update;
 
@@ -27,14 +27,14 @@ public class ExclusiveUpdate(PlaceScope app) : BaseTest(app), IClassFixture<Plac
 
     private async Task<(PlaceAttributes attributes, Place place)> GivenPlaceOwnedByAnotherBroAsync()
     {
-        Bro placeOwner = await BroFactory.CreateBroAsync("test@example.org", "Hey@123", app);
+        Bro placeOwner = await BroFactory.CreateBroAsync("test@example.org", "Hey@123", app.Services);
         PlaceAttributes attributes = new()
         {
             Name = "Test Name",
             Address = "Test Address",
             BroId = placeOwner.Id
         };
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app);
+        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
 
         return (attributes, place);
     }

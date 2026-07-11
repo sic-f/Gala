@@ -1,11 +1,11 @@
 ﻿using Core.PlaceAggregate;
 using Infrastructure.Data;
+using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
-using Utility.Scopes;
 
 namespace IntegrationTests.Places.Delete;
 
@@ -29,7 +29,7 @@ public class DeletePlacePicture(PlacePictureScope app) : BaseTest(app), IClassFi
             Picture = profilePicture,
             BroId = app.Bro.Id,
         };
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app);
+        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
 
         await app.DeletePictureAsync(place.Picture!.Id);
 

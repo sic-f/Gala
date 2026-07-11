@@ -1,6 +1,7 @@
 ﻿using Core.PlaceAggregate;
-using Utility.Scopes;
-namespace Utility.Errors;
+using IntegrationTests.Scopes;
+
+namespace IntegrationTests.Errors;
 
 public class PlaceErrors(PlaceScope app) : BaseErrors(app)
 {

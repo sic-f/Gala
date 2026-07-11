@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using Ui.Dto;
 using Ui.Services;
 
-namespace Utility.Scopes;
+namespace IntegrationTests.Scopes;
 
 public class PlaceScope : ApplicationFactory<Program>
 {

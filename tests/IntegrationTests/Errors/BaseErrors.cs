@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Utility.Errors;
+namespace IntegrationTests.Errors;
 
 public class BaseErrors(ApplicationFactory<Program> app)
 {

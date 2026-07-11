@@ -1,7 +1,7 @@
 ﻿using Core.PlaceAggregate;
 using Infrastructure.Data;
+using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
-using Utility.Scopes;
 
 namespace IntegrationTests.Places.Fetch;
 

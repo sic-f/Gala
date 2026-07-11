@@ -1,11 +1,11 @@
 ﻿using Core.Entities;
 using Infrastructure.Data;
 using Infrastructure.Identity;
+using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Security.Cryptography;
 using Utility.Factories;
-using Utility.Scopes;
 using static Core.Dto.Session;
 
 namespace IntegrationTests.Session;
@@ -18,7 +18,7 @@ public class RefreshTokenTests(SessionScope app) : BaseTest(app, isAuthenticated
     [Fact]
     public async Task RefreshTokenTestAsync()
     {
-        Bro bro = await BroFactory.CreateBroAsync("token@example.net", "Hey@123", app);
+        Bro bro = await BroFactory.CreateBroAsync("token@example.net", "Hey@123", app.Services);
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         RefreshToken refreshToken = new()
         {
@@ -45,7 +45,7 @@ public class RefreshTokenTests(SessionScope app) : BaseTest(app, isAuthenticated
     [Fact]
     public async Task RevokeExistingRefreshTokensWhenCurrentIsStolenTestAsync()
     {
-        Bro bro = await BroFactory.CreateBroAsync("token@example.net", "Hey@123", app);
+        Bro bro = await BroFactory.CreateBroAsync("token@example.net", "Hey@123", app.Services);
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         RefreshToken refreshToken = new()
         {

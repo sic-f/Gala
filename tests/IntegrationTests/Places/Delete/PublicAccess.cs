@@ -1,11 +1,11 @@
 ﻿using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
+using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Utility.Dto;
 using Utility.Factories;
-using Utility.Scopes;
 
 namespace IntegrationTests.Places.Delete;
 
@@ -24,10 +24,10 @@ public class PublicAccess(PlaceScope app) : BaseTest(app, isAuthenticated: false
 
     private async Task<Place> GivenPlaceAsync()
     {
-        Bro bro = await BroFactory.CreateBroAsync("test@example.net", "Hey@123", app);
+        Bro bro = await BroFactory.CreateBroAsync("test@example.net", "Hey@123", app.Services);
         PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Adress", BroId = bro.Id };
 
-        return await PlaceFactory.CreatePlaceAsync(attributes, app);
+        return await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
     }
 
     private async Task WhenBroDeletesPlaceUnauthenticatedOrUnregisteredAsync(Guid placeId)

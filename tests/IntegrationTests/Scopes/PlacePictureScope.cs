@@ -1,7 +1,7 @@
 ﻿using Core.Dto;
 using System.Net.Http.Json;
 
-namespace Utility.Scopes;
+namespace IntegrationTests.Scopes;
 
 public class PlacePictureScope : ApplicationFactory<Program>
 {

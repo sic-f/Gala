@@ -1,11 +1,11 @@
 ﻿using Core.PlaceAggregate;
 using Infrastructure.Data;
+using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using Ui.Dto;
 using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
-using Utility.Scopes;
 
 namespace IntegrationTests.Places.Update;
 
@@ -31,7 +31,7 @@ public class Upate(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
             },
         };
 
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app);
+        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
 
         PlaceDetails details = new()
         {

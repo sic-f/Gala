@@ -1,13 +1,14 @@
-﻿using Ui.Dto;
+﻿using IntegrationTests.Errors;
+using IntegrationTests.Scopes;
+using Ui.Dto;
 using Utility.Helpers;
-using Utility.Scopes;
 
 namespace IntegrationTests.Places.Submit;
 
 [Collection("Application Factory Collection")]
 public class InvalidLength(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
 {
-    private readonly Utility.Errors.PlaceErrors _errors = new(app);
+    private readonly PlaceErrors _errors = new(app);
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
     [Fact]

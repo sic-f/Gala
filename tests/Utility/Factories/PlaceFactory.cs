@@ -8,7 +8,7 @@ namespace Utility.Factories;
 
 public class PlaceFactory
 {
-    public static async Task<Place> CreatePlaceAsync(PlaceAttributes attributes, ApplicationFactory<Program> app)
+    public static async Task<Place> CreatePlaceAsync(PlaceAttributes attributes, IServiceProvider services)
     {
         Place place = new()
         {
@@ -40,7 +40,7 @@ public class PlaceFactory
         }
 
 
-        using var scope = app.Services.CreateScope();
+        using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 
@@ -50,7 +50,7 @@ public class PlaceFactory
         return place;
     }
 
-    public static async Task<Place> CreatePlaceCompleteDetails(Guid broId, ApplicationFactory<Program> app)
+    public static async Task<Place> CreatePlaceCompleteDetails(Guid broId, IServiceProvider services)
     {
         Place place = new()
         {
@@ -77,7 +77,7 @@ public class PlaceFactory
         CreatePictureFile(picture, testDirectory);
         CreatePicturesFiles(pictures, testDirectory);
 
-        using var scope = app.Services.CreateScope();
+        using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 

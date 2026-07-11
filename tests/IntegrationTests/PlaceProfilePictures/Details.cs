@@ -1,9 +1,9 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
+using IntegrationTests.Scopes;
 using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
-using Utility.Scopes;
 
 namespace IntegrationTests.PlaceProfilePictures;
 
@@ -27,7 +27,7 @@ public class Details(PlacePictureScope app) : BaseTest(app), IClassFixture<Place
                 Small = ImageHelper.TestImageCPath,
             }
         };
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app);
+        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
 
         PlacePictureDto placePicture = await app.GetPlaceProfilePictureAsync(place.Picture!.Id);
 

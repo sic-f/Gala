@@ -1,6 +1,6 @@
-﻿using Ui.Dto;
-using Utility.Errors;
-using Utility.Scopes;
+﻿using IntegrationTests.Errors;
+using IntegrationTests.Scopes;
+using Ui.Dto;
 
 namespace IntegrationTests.Places.Submit;
 

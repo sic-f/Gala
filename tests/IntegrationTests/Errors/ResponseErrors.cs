@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Utility.Errors;
+namespace IntegrationTests.Errors;
 
 public class ResponseErrors(ApplicationFactory<Program> app)
 {

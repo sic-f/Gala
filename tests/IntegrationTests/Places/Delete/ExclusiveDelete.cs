@@ -1,10 +1,10 @@
 ﻿using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
+using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using Utility.Dto;
 using Utility.Factories;
-using Utility.Scopes;
 
 namespace IntegrationTests.Places.Delete;
 
@@ -23,10 +23,10 @@ public class ExclusiveDelete(PlaceScope app) : BaseTest(app), IClassFixture<Plac
 
     private async Task<Place> GivenPlaceAndBroNotThePlaceOwnerAsync()
     {
-        Bro placeOwner = await BroFactory.CreateBroAsync("test@example.org", "Hey@123", app);
+        Bro placeOwner = await BroFactory.CreateBroAsync("test@example.org", "Hey@123", app.Services);
         PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Address", BroId = placeOwner.Id };
 
-        return await PlaceFactory.CreatePlaceAsync(attributes, app);
+        return await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
     }
 
     private async Task WhenPlaceIsDeletedByNotTheOwnerAsync(Guid placeId)

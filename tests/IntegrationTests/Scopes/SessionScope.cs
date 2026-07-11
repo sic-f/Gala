@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using static Core.Dto.Session;
 
-namespace Utility.Scopes;
+namespace IntegrationTests.Scopes;
 
 public class SessionScope() : ApplicationFactory<Program>
 {
