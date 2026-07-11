@@ -1,6 +1,6 @@
 ﻿using IntegrationTests.Scopes;
 using System.Net;
-using Ui.Dto;
+using Utility.Dto;
 
 namespace IntegrationTests.Test.Places.Submit;
 

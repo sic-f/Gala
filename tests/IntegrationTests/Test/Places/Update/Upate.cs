@@ -2,7 +2,6 @@
 using Infrastructure.Data;
 using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
-using Ui.Dto;
 using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;

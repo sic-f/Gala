@@ -5,7 +5,6 @@ using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Ui.Dto;
 using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
