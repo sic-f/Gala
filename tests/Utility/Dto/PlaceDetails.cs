@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Utility.Dto;
 
-public record PlaceDetails : IPlaceDetailer
+public record PlaceDetails : IPlaceUpdater
 {
     public string Name { get; set; } = null!;
     public string? Description { get; set; }

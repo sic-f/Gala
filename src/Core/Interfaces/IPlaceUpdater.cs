@@ -1,6 +1,6 @@
 ﻿namespace Core.Interfaces;
 
-public interface IPlaceDetailer
+public interface IPlaceUpdater
 {
     string Name { get; set; }
     string? Description { get; set; }

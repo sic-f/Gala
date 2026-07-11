@@ -22,7 +22,7 @@ public class Place
     public DateTimeOffset LastModified { get; set; }
     public PlaceProfilePicture? Picture => ProfilePictures.FirstOrDefault();
 
-    public void UpdateDetails(IPlaceDetailer details)
+    public void UpdateDetails(IPlaceUpdater details)
     {
         Name = details.Name;
         Description = details.Description;

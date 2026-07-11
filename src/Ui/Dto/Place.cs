@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ui.Dto;
 
-public record PlaceDetails : IPlaceDetailer
+public record PlaceDetails : IPlaceUpdater
 {
     [Required(ErrorMessage = "Name of place is required")]
     [MaxLength(75, ErrorMessage = "Exceeds 75 characters")]

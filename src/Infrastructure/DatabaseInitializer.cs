@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Respawn;
 
-namespace Utility;
+namespace Infrastructure;
 
 public class DatabaseInitializer
 {

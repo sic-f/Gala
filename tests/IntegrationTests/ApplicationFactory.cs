@@ -1,4 +1,5 @@
 ﻿using Core.Dto;
+using Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +11,6 @@ using System.Data.Common;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Utility;
 using Utility.Factories;
 using static Core.Dto.Response;
 
