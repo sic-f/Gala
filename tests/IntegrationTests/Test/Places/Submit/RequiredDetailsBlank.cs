@@ -2,7 +2,7 @@
 using IntegrationTests.Scopes;
 using Ui.Dto;
 
-namespace IntegrationTests.Places.Submit;
+namespace IntegrationTests.Test.Places.Submit;
 
 [Collection("Application Factory Collection")]
 public class RequiredDetailsBlank(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>

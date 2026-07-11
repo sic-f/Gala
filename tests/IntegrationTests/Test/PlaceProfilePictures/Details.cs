@@ -5,7 +5,7 @@ using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
 
-namespace IntegrationTests.PlaceProfilePictures;
+namespace IntegrationTests.Test.PlaceProfilePictures;
 
 [Collection("Application Factory Collection")]
 public class Details(PlacePictureScope app) : BaseTest(app), IClassFixture<PlacePictureScope>

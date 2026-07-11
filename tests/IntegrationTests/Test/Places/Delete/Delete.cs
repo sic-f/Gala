@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Utility.Dto;
 using Utility.Factories;
 
-namespace IntegrationTests.Places.Delete;
+namespace IntegrationTests.Test.Places.Delete;
 
 [Collection("Application Factory Collection")]
 public class Delete(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>

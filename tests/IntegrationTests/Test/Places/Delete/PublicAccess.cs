@@ -7,7 +7,7 @@ using System.Net;
 using Utility.Dto;
 using Utility.Factories;
 
-namespace IntegrationTests.Places.Delete;
+namespace IntegrationTests.Test.Places.Delete;
 
 [Collection("Application Factory Collection")]
 public class PublicAccess(PlaceScope app) : BaseTest(app, isAuthenticated: false), IClassFixture<PlaceScope>

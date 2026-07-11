@@ -3,7 +3,7 @@ using Infrastructure.Data;
 using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.Places.Fetch;
+namespace IntegrationTests.Test.Places.Fetch;
 
 public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
 {

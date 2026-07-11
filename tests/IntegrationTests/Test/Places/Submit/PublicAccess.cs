@@ -2,7 +2,7 @@
 using System.Net;
 using Ui.Dto;
 
-namespace IntegrationTests.Places.Submit;
+namespace IntegrationTests.Test.Places.Submit;
 
 [Collection("Application Factory Collection")]
 public class PublicAccess(PlaceScope app) : BaseTest(app, isAuthenticated: false), IClassFixture<PlaceScope>

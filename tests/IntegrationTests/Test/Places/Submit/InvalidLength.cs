@@ -3,7 +3,7 @@ using IntegrationTests.Scopes;
 using Ui.Dto;
 using Utility.Helpers;
 
-namespace IntegrationTests.Places.Submit;
+namespace IntegrationTests.Test.Places.Submit;
 
 [Collection("Application Factory Collection")]
 public class InvalidLength(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>

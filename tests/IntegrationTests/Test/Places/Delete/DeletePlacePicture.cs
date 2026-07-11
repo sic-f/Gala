@@ -7,7 +7,7 @@ using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
 
-namespace IntegrationTests.Places.Delete;
+namespace IntegrationTests.Test.Places.Delete;
 
 [Collection("Application Factory Collection")]
 public class DeletePlacePicture(PlacePictureScope app) : BaseTest(app), IClassFixture<PlacePictureScope>

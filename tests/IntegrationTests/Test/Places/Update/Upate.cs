@@ -7,7 +7,7 @@ using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
 
-namespace IntegrationTests.Places.Update;
+namespace IntegrationTests.Test.Places.Update;
 
 [Collection("Application Factory Collection")]
 public class Upate(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
