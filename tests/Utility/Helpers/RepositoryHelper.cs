@@ -9,18 +9,18 @@ namespace Utility.Helpers;
 
 public class RepositoryHelper
 {
-    public static T GetFirstRecord<T>(ApplicationFactory<Program> factory) where T : class
+    public static T GetFirstRecord<T>(IServiceProvider services) where T : class
     {
-        using var scope = factory.Services.CreateScope();
+        using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 
         return context.Set<T>().First();
     }
 
-    public static async Task<Bro> GetUserBy(string email, ApplicationFactory<Program> factory)
+    public static async Task<Bro> GetUserBy(string email, IServiceProvider services)
     {
-        using var scope = factory.Services.CreateScope();
+        using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var userManager = scopedServices.GetRequiredService<UserManager<Bro>>();
 
@@ -32,9 +32,9 @@ public class RepositoryHelper
         return context.Users.FirstOrDefault<Bro>(bro => bro.Email == email)!;
     }
 
-    public static async Task<Place> GetPlaceByIdAsync(Guid Id, ApplicationFactory<Program> factory)
+    public static async Task<Place> GetPlaceByIdAsync(Guid Id, IServiceProvider services)
     {
-        using var scope = factory.Services.CreateScope();
+        using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 
@@ -46,9 +46,9 @@ public class RepositoryHelper
         return await context.Place.FirstAsync(p => p.Id == Id);
     }
 
-    public static async Task<PlaceProfilePicture> GetPlacePictureByIdAsync(Guid Id, ApplicationFactory<Program> factory)
+    public static async Task<PlaceProfilePicture> GetPlacePictureByIdAsync(Guid Id, IServiceProvider services)
     {
-        using var scope = factory.Services.CreateScope();
+        using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 

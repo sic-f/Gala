@@ -10,10 +10,11 @@ using System.Data.Common;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Utility;
 using Utility.Factories;
 using static Core.Dto.Response;
 
-namespace Utility;
+namespace IntegrationTests;
 
 public abstract class ApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
 {
@@ -40,10 +41,10 @@ public abstract class ApplicationFactory<TProgram> : WebApplicationFactory<TProg
         });
     }
 
-    public async Task InitAndSetTokenAsync(ApplicationFactory<Program> app)
+    public async Task InitAndSetTokenAsync()
     {
         Initialize();
-        await LoginThenSetBearerTokenInClientForRequests(app);
+        await LoginThenSetBearerTokenInClientForRequests();
     }
 
     public async Task ResetDatabase()
@@ -81,9 +82,9 @@ public abstract class ApplicationFactory<TProgram> : WebApplicationFactory<TProg
         builder.UseEnvironment("Test");
     }
 
-    private async Task LoginThenSetBearerTokenInClientForRequests(ApplicationFactory<Program> app)
+    private async Task LoginThenSetBearerTokenInClientForRequests()
     {
-        Bro = await BroFactory.CreateBroAsync("test@example.net", "Hey@123", app);
+        Bro = await BroFactory.CreateBroAsync("test@example.net", "Hey@123", Services);
         var credentials = new LoginCredentials("test@example.net", "Hey@123");
         Response = await Client.PostAsJsonAsync("api/Sessions", credentials);
 

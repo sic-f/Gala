@@ -9,22 +9,22 @@ namespace Utility.Factories;
 
 public class BroFactory
 {
-    public static async Task<Bro> CreateBroAsync(string email, string password, ApplicationFactory<Program> factory)
+    public static async Task<Bro> CreateBroAsync(string email, string password, IServiceProvider services)
     {
         Bro bro = new() { UserName = email, Email = email };
 
-        await CreateBroAsync(bro, password, factory);
+        await CreateBroAsync(bro, password, services);
 
-        return await RepositoryHelper.GetUserBy(email, factory);
+        return await RepositoryHelper.GetUserBy(email, services);
     }
 
-    public static async Task<Bro> CreateBroAsync(BroWithFullName broDetails, ApplicationFactory<Program> factory)
+    public static async Task<Bro> CreateBroAsync(BroWithFullName broDetails, IServiceProvider services)
     {
         Bro bro = new() { UserName = broDetails.Email, Email = broDetails.Email, FirstName = broDetails.FirstName, LastName = broDetails.LastName };
 
-        await CreateBroAsync(bro, broDetails.Password, factory);
+        await CreateBroAsync(bro, broDetails.Password, services);
 
-        return await RepositoryHelper.GetUserBy(broDetails.Email, factory);
+        return await RepositoryHelper.GetUserBy(broDetails.Email, services);
     }
 
     public static async Task<Bro> CreateBroAsync(BroWithFullName broDetails, ApplicationDbContext context)
@@ -36,9 +36,9 @@ public class BroFactory
         return await RepositoryHelper.GetUserBy(broDetails.Email, context);
     }
 
-    private static async Task CreateBroAsync(Bro bro, string password, ApplicationFactory<Program> factory)
+    private static async Task CreateBroAsync(Bro bro, string password, IServiceProvider services)
     {
-        using var scope = factory.Services.CreateScope();
+        using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var userManager = scopedServices.GetRequiredService<UserManager<Bro>>();
 
