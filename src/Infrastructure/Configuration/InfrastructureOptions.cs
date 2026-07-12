@@ -23,10 +23,11 @@ public static class InfrastructureOptions
         services.AddScoped<IPicturesAttacher, AttachPictures>();
         services.AddScoped<ValidateImageType>();
         services.AddScoped<UpdateImage>();
-        services.AddScoped<IDeletePicture, DeleteImage>();
+        services.AddScoped<IDeletePicture, DeletePicture>();
         services.AddScoped<ParseToPictureUploads>();
         services.AddScoped<IGetImagePaths, GetImagePaths>();
 
         services.AddScoped<IPlaceService, PlaceService>();
+        services.AddScoped<IPlacePictureService, PlacePictureService>();
     }
 }

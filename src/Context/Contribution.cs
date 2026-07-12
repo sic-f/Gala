@@ -88,7 +88,7 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
             throw new UnauthorizedContributionAccessException("❌👦🏣 Bro not allowed to delete other people's places.");
         }
 
-        IEnumerable<PlacePicture> placePictures = repository.FetchPlacePictureAndPictures(id);
+        IEnumerable<Core.PlaceAggregate.PlacePicture> placePictures = repository.FetchPlacePictureAndPictures(id);
 
         await deleteImage.DeleteAllAsync(placePictures);
 

@@ -1,4 +1,3 @@
-using Context;
 using Infrastructure.Configuration;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -6,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Ui;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +45,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructureOptions(builder.Configuration);
-builder.Services.AddScoped<Contribution>();
+builder.Services.AddContextServices();
 
 var app = builder.Build();
 

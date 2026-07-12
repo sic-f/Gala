@@ -17,3 +17,5 @@ public record PictureCaption
     [MaxLength(155, ErrorMessage = "Can't exceed more than 155 characters.")]
     public string? Caption { get; set; }
 }
+
+public record ModifyPlacePictureCaption(Guid Id, string? Caption, Guid? UploaderId, string Message);

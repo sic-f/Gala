@@ -58,7 +58,7 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
                 return NotFound(new ProblemDetails
                 {
                     Detail = ex.Message,
-                    Instance = $"PUT api/Places/${Place.Id}",
+                    Instance = $"PUT api/Places/${id}",
                     Title = "Db Update Concurrency Exception"
                 });
             }
@@ -163,7 +163,7 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
 
     private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads parseToPictureUploads, Dto.PlaceDetails details)
     {
-        return await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
+        return await parseToPictureUploads.FromFormFilesAsync<Core.PlaceAggregate.PlacePicture>(
             new UrlSegments(Request.Scheme, Request.Host.ToString()),
             details.Picture,
             details.Pictures,

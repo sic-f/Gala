@@ -176,7 +176,7 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
     [Authorize]
     [HttpDelete("Delete-Avatar")]
-    public async Task<IActionResult> DeleteAvatarAsync(ApplicationDbContext context, DeleteImage deleteImage, GenerateToken generateToken)
+    public async Task<IActionResult> DeleteAvatarAsync(ApplicationDbContext context, DeletePicture deleteImage, GenerateToken generateToken)
     {
         string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         Bro? bro = await context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == Guid.Parse(broId!));

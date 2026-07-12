@@ -3,7 +3,7 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Services.Images;
 
-public class DeleteImage(ApplicationDbContext context) : IDeletePicture
+public class DeletePicture(ApplicationDbContext context) : IDeletePicture
 {
     /// <summary>
     /// Deletes physical image file on disk.🗑️🖼️
