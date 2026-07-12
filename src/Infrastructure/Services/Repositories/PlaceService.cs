@@ -7,6 +7,15 @@ namespace Infrastructure.Services.Repositories;
 
 public class PlaceService(ApplicationDbContext context) : IPlaceService
 {
+    public IEnumerable<Place> FetchPlacePaginatedWithPicture(DateTimeOffset offset, int limit)
+    {
+        return context.Place.AsNoTracking()
+                            .Include(p => p.ProfilePictures)
+                            .Where(p => p.CreatedAt < offset)
+                            .OrderByDescending(p => p.CreatedAt)
+                            .Take(limit);
+    }
+
     public async Task<Place> CreatePlaceAsync(Place place)
     {
         Place entity = (await context.Place.AddAsync(place)).Entity;
@@ -21,6 +30,14 @@ public class PlaceService(ApplicationDbContext context) : IPlaceService
         return await context.Place.Include(p => p.ProfilePictures).FirstAsync<Place>(p => p.Id == id);
     }
 
+    public Place FetchPlaceComplete(Guid id)
+    {
+        return context.Place.AsNoTracking()
+                            .Include(p => p.ProfilePictures)
+                            .Include(p => p.Pictures)
+                            .First(p => p.Id == id);
+    }
+
     public async Task<Place> FetchPlaceAsync(Guid id)
     {
         return await context.Place.FirstAsync(p => p.Id == id);
@@ -29,14 +46,6 @@ public class PlaceService(ApplicationDbContext context) : IPlaceService
     public IEnumerable<PlacePicture> FetchPlacePictureAndPictures(Guid id)
     {
         return context.PlacePicture.Where(pp => pp.PlaceId == id);
-    }
-
-    public Place FetchPlaceComplete(Guid id)
-    {
-        return context.Place.AsNoTracking()
-                            .Include(p => p.ProfilePictures)
-                            .Include(p => p.Pictures)
-                            .First(p => p.Id == id);
     }
 
     public async Task ModifyPlaceAsync(Place place)

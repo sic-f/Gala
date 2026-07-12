@@ -10,6 +10,27 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
 {
     private Place Place { get; set; } = default!;
 
+    public IEnumerable<PlaceDetailsHomePage> ShowPlaceInHomePage(DateTimeOffset offset, int limit)
+    {
+        return repository.FetchPlacePaginatedWithPicture(offset, limit).Select(p =>
+        {
+            return new PlaceDetailsHomePage(Id: p.Id,
+                                            Name: p.Name,
+                                            Description: p.Description,
+                                            Information: p.Information,
+                                            Address: p.Address,
+                                            Mobile: p.Mobile,
+                                            Landline: p.Landline,
+                                            Email: p.Email,
+                                            Website: p.Website,
+                                            Facebook: p.Facebook,
+                                            Instagram: p.Instagram,
+                                            BroId: p.BroId,
+                                            Picture: GetPicture(p),
+                                            CreatedAt: p.CreatedAt);
+        });
+    }
+
     public async Task<Place> SubmitAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid broId)
     {
         BuildPlace(details, broId);
@@ -17,6 +38,25 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
         await attachPictures.ComputeAsync(Place, pictureUploads);
 
         return await repository.CreatePlaceAsync(Place);
+    }
+
+    public async Task<Place> ModifyAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid id, Guid broId)
+    {
+        Place = await repository.FetchPlaceWithPictureAsync(id);
+
+        if (Place.BroId != broId)
+        {
+            throw new UnauthorizedContributionAccessException(
+                "❌👦🏣 You did not submit this place and is not the owner, you are not allowed to modify it.");
+        }
+
+        await attachPictures.ComputeAsync(Place, pictureUploads);
+
+        Place.UpdateDetails(details);
+
+        await repository.ModifyPlaceAsync(Place);
+
+        return Place;
     }
 
     public PlaceDetails DisplayPlace(Guid id)
@@ -37,25 +77,6 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
                                 BroId: Place.BroId,
                                 Picture: GetPicture(),
                                 Pictures: GetPictures());
-    }
-
-    public async Task<Place> ModifyAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid id, Guid broId)
-    {
-        Place = await repository.FetchPlaceWithPictureAsync(id);
-
-        if (Place.BroId != broId)
-        {
-            throw new UnauthorizedContributionAccessException(
-                "❌👦🏣 You did not submit this place and is not the owner, you are not allowed to modify it.");
-        }
-
-        await attachPictures.ComputeAsync(Place, pictureUploads);
-
-        Place.UpdateDetails(details);
-
-        await repository.ModifyPlaceAsync(Place);
-
-        return Place;
     }
 
     public async Task DeleteAsync(Guid id, Guid broId)
@@ -97,6 +118,13 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
         if (Place.Picture is null) return null;
 
         return new(Id: Place.Picture.Id, Small: Place.Picture.Small, PlaceId: Place.Picture.PlaceId);
+    }
+
+    private static PlacePictureLean? GetPicture(Place place)
+    {
+        if (place.Picture is null) return null;
+
+        return new(Id: place.Picture.Id, Small: place.Picture.Small, PlaceId: place.Picture.PlaceId);
     }
 
     private IEnumerable<PlacePictureLean> GetPictures()

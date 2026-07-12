@@ -14,48 +14,18 @@ namespace Ui.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlacesController(ApplicationDbContext context) : ControllerBase
+public class PlacesController(ApplicationDbContext context, Contribution contribution) : ControllerBase
 {
     private Place Place { get; set; } = default!;
 
     [HttpGet]
     public IEnumerable<PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
     {
-        return context.Place.AsNoTracking()
-                            .Include(p => p.ProfilePictures)
-                            .Where(p => p.CreatedAt < offset)
-                            .OrderByDescending(p => p.CreatedAt)
-                            .Take(limit)
-                            .ToList()
-                            .Select(p =>
-                            {
-                                PlacePictureLean? picture = default;
-
-                                if (p.Picture is not null)
-                                {
-                                    picture = new(Id: p.Picture.Id,
-                                                  Small: p.Picture.Small,
-                                                  PlaceId: p.Picture.PlaceId);
-                                }
-                                return new PlaceDetailsHomePage(Id: p.Id,
-                                                                Name: p.Name,
-                                                                Description: p.Description,
-                                                                Information: p.Information,
-                                                                Address: p.Address,
-                                                                Mobile: p.Mobile,
-                                                                Landline: p.Landline,
-                                                                Email: p.Email,
-                                                                Website: p.Website,
-                                                                Facebook: p.Facebook,
-                                                                Instagram: p.Instagram,
-                                                                BroId: p.BroId,
-                                                                Picture: picture,
-                                                                CreatedAt: p.CreatedAt);
-                            });
+        return contribution.ShowPlaceInHomePage(offset, limit);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id, Contribution contribution)
+    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id)
     {
         return contribution.DisplayPlace(id);
     }
@@ -64,12 +34,11 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPlace(Guid id,
                                               Dto.PlaceDetails details,
-                                              ParseToPictureUploads parseToPictureUploads,
-                                              Contribution contribution)
+                                              ParseToPictureUploads parseToPictureUploads)
     {
         try
         {
-            await ModifyPlaceAsync(details, contribution, parseToPictureUploads, id, this.BroId(User));
+            await ModifyPlaceAsync(details, parseToPictureUploads, id, this.BroId(User));
         }
         catch (ImageTypeException)
         {
@@ -104,13 +73,11 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> PostPlace(Dto.PlaceDetails details,
-                                               Contribution contribution,
-                                               ParseToPictureUploads parseToPictureUploads)
+    public async Task<IActionResult> PostPlace(Dto.PlaceDetails details, ParseToPictureUploads parseToPictureUploads)
     {
         try
         {
-            Place = await SubmitPlaceAsync(details, parseToPictureUploads, contribution);
+            Place = await SubmitPlaceAsync(details, parseToPictureUploads);
         }
         catch (ImageTypeException)
         {
@@ -138,7 +105,7 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePlace(Guid id, Contribution contribution)
+    public async Task<IActionResult> DeletePlace(Guid id)
     {
         try
         {
@@ -177,8 +144,7 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
     }
 
     private async Task<Place> SubmitPlaceAsync(Dto.PlaceDetails details,
-                                               ParseToPictureUploads pictureUploadsParser,
-                                               Contribution contribution)
+                                               ParseToPictureUploads pictureUploadsParser)
     {
         var placePictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
 
@@ -186,7 +152,6 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
     }
 
     private async Task ModifyPlaceAsync(Dto.PlaceDetails details,
-                                        Contribution contribution,
                                         ParseToPictureUploads pictureUploadsParser,
                                         Guid placeId,
                                         Guid broId)
