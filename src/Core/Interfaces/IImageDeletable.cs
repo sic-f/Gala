@@ -2,6 +2,6 @@
 
 public interface IImageDeletable
 {
-    string Normal { get; }
-    string Small { get; }
+    string NormalLocal { get; }
+    string SmallLocal { get; }
 }

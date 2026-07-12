@@ -1,13 +1,12 @@
 ﻿using Core.Values;
-using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
 namespace Infrastructure.Services.Images;
 
-public class ResizedImagePreparer(IFormFile formFile,
+public class ResizedImagePreparer(Stream pictureStream,
                                   ImageDimensions imageDimensions,
-                                  ResizeMode resizeMode) : ImagePreparer(formFile)
+                                  ResizeMode resizeMode) : ImagePreparer(pictureStream)
 {
     public override async Task PrepareAsync(FileStream stream)
     {
@@ -17,11 +16,10 @@ public class ResizedImagePreparer(IFormFile formFile,
             Mode = resizeMode
         };
 
-        var image = await Image.LoadAsync(_formFile.OpenReadStream());
+        using var image = await Image.LoadAsync(_pictureStream);
+        _pictureStream.Seek(0, SeekOrigin.Begin);
 
         image.Mutate(x => x.Resize(resizeOptions));
         await image.SaveAsJpegAsync(stream);
-
-        stream.Position = 0;
     }
 }

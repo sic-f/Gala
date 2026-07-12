@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿namespace Infrastructure.Services.Images;
 
-namespace Infrastructure.Services.Images;
-
-public class ImagePreparer(IFormFile formFile)
+public class ImagePreparer(Stream pictureStream)
 {
-    protected readonly IFormFile _formFile = formFile;
+    protected readonly Stream _pictureStream = pictureStream;
 
     public virtual async Task PrepareAsync(FileStream stream)
     {
-        await _formFile.CopyToAsync(stream);
-
-        stream.Position = 0;
+        await _pictureStream.CopyToAsync(stream);
+        _pictureStream.Seek(0, SeekOrigin.Begin);
     }
 }

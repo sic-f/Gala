@@ -1,5 +1,5 @@
 ﻿using Core.PlaceAggregate;
-using Ui.Dto;
+using Utility.Dto;
 
 namespace UnitTests.Entities;
 

@@ -1,3 +1,5 @@
+using Core.Dto;
+using Core.Exceptions;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -8,59 +10,41 @@ namespace Ui.Controllers
 {
     [Route("api/Place-Pictures")]
     [ApiController]
-    public class PlacePicturesController(ApplicationDbContext context) : ControllerBase
+    public class PlacePicturesController(ApplicationDbContext context, Context.PlacePicture placePicture) : ControllerBase
     {
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlacePicture>>> GetPlacePicture()
-        {
-            return await context.PlacePicture.ToListAsync();
-        }
+        private PlacePicture Picture { get; set; } = default!;
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Core.Dto.PlacePicture>> GetPlacePicture(Guid id, int slide)
+        public async Task<ActionResult<PlacePictureDto>> GetPlacePicture(Guid id, int slide)
         {
-            var placePicture = await context.PlacePicture.FindAsync(id);
-
-            if (placePicture is null)
-            {
-                return NotFound("Place picture not found.");
-            }
-
-            return new Core.Dto.PlacePicture(Id: placePicture.Id,
-                                             Normal: placePicture.Normal,
-                                             PlaceId: placePicture.PlaceId,
-                                             UploaderId: placePicture.UploaderId,
-                                             Index: slide,
-                                             Caption: placePicture?.Caption);
+            return placePicture.DisplayPicture(id, slide);
         }
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPlacePicture(Guid id, Core.Dto.PictureCaption pictureCaption)
+        public async Task<IActionResult> PutPlacePicture(Guid id, PictureCaption pictureCaption)
         {
-            PlacePicture? picture = await context.PlacePicture.FindAsync(id);
-
-            if (picture is null) return NotFound("Picture does not exist.");
-            if (string.IsNullOrEmpty(picture.Caption) && string.IsNullOrEmpty(pictureCaption.Caption))
-            {
-                ModelState.AddModelError(nameof(PlacePicture.Caption), "Content is blank. Either input content or cancel.");
-                return ValidationProblem(ModelState);
-            }
-
-            picture.Caption = pictureCaption.Caption;
-            picture.LastModified = DateTimeOffset.UtcNow;
-
-            context.PlacePicture.Update(picture);
-
             try
             {
-                await context.SaveChangesAsync();
+                Picture = placePicture.ModifyCaption(id, pictureCaption.Caption);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (BlankPictureCaptionException ex)
+            {
+
+                ModelState.AddModelError(nameof(PlacePicture.Caption),
+                                         ex.Message);
+                return ValidationProblem(ModelState);
+            }
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!PlacePictureExists(id))
                 {
-                    return NotFound();
+                    return NotFound(new ProblemDetails
+                    {
+                        Detail = ex.Message,
+                        Instance = $"PUT api/PlacePictures/${id}",
+                        Title = "Db Update Concurrency Exception"
+                    });
                 }
                 else
                 {
@@ -68,29 +52,33 @@ namespace Ui.Controllers
                 }
             }
 
-            return Ok(new { Picture = picture, Message = "Updated successfuly." });
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<PlacePicture>> PostPlacePicture(PlacePicture placePicture)
-        {
-            context.PlacePicture.Add(placePicture);
-            await context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPlacePicture", new { id = placePicture.Id }, placePicture);
+            return Ok(new ModifyPlacePictureCaption(Id: id,
+                                                    Caption: Picture.Caption,
+                                                    UploaderId: Picture.UploaderId,
+                                                    Message: "Updated successfuly."));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePlacePicture(Guid id)
         {
-            var placePicture = await context.PlacePicture.FindAsync(id);
-            if (placePicture == null)
+            try
             {
-                return NotFound();
+                placePicture.DeletePicture(id);
             }
-
-            context.PlacePicture.Remove(placePicture);
-            await context.SaveChangesAsync();
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!PlacePictureExists(id))
+                {
+                    return Problem($"{ex.Message}",
+                                   $"DELETE /place-pictures/{id}",
+                                   404,
+                                   "Something went wrong.");
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return NoContent();
         }

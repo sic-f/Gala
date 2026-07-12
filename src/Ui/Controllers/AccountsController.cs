@@ -1,6 +1,6 @@
-﻿using Core.Interfaces;
+﻿using Core.Entities;
+using Core.Interfaces;
 using Core.Values;
-using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.Services.Images;
@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Ui.Services;
 using Ui.ViewModels;
@@ -137,10 +136,9 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
     [Authorize]
     [HttpPut("Update-Avatar")]
     public async Task<IActionResult> UpdateAvatarAsync([FromForm] IFormFile avatar,
-                                                       IOptionsSnapshot<AvatarOptions> options,
-                                                       AttachImages attachImages,
-                                                       GenerateToken generateToken,
-                                                       ApplicationDbContext context)
+                                                       ApplicationDbContext context,
+                                                       IPicturesAttacher attachPictures,
+                                                       ParseToPictureUploads parseToPictureUploads)
     {
         string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -150,11 +148,14 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
 
         if (_bro is null) return NotFound();
 
-        await attachImages.ComputeAsync(_bro,
-                                        avatar,
-                                        new GetImagesPath(options.Get(AvatarOptions.Avatar)),
-                                        new UrlSegments(Request.Scheme, Request.Host.ToString()));
+        Brodiebles brodybles = new() { BroId = _bro.Id, Avatar = _bro.Avatar };
+        await attachPictures.ComputeAsync(
+            brodybles,
+            await parseToPictureUploads.FromFormFilesAsync<AccountAvatar>(new UrlSegments(
+                Request.Scheme,
+                Request.Host.ToString()), avatar));
 
+        _bro.Avatar = brodybles.Avatar;
         IdentityResult result = await userManager.UpdateAsync(_bro);
 
         if (result.Errors.Any())
@@ -173,6 +174,49 @@ public class AccountsController(UserManager<Bro> userManager, GenerateToken gene
         });
     }
 
+    [Authorize]
+    [HttpDelete("Delete-Avatar")]
+    public async Task<IActionResult> DeleteAvatarAsync(ApplicationDbContext context, DeletePicture deleteImage, GenerateToken generateToken)
+    {
+        string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Bro? bro = await context.Users.Include(u => u.Avatar).FirstOrDefaultAsync(u => u.Id == Guid.Parse(broId!));
+
+        if (bro is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Detail = "Bro seems to not exists.",
+                Instance = "DELETE /Accounts/Delete-Avatar",
+                Status = 404,
+                Title = "Bro not found.",
+            });
+        }
+        ;
+
+        if (bro.Avatar is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Detail = "Could not find avatar, maybe you don't have one.🤷",
+                Instance = "DELETE /Accounts/Delete-Avatar",
+                Title = "Avatar not found, seems to be missing."
+            });
+        }
+
+        await deleteImage.ComputeAsync(bro.Avatar);
+        context.AccountAvatar.Remove(bro.Avatar);
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            return NotFound(new ProblemDetails { Detail = ex.Message });
+        }
+
+        return Ok(new { Token = generateToken.Compute(bro) });
+    }
 
     private async Task<ErrorsParser> SetUserAsync(AccountProfileViewModel model)
     {

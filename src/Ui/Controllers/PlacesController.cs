@@ -1,143 +1,66 @@
+using Context;
 using Core.Dto;
 using Core.Exceptions;
 using Core.PlaceAggregate;
 using Core.Values;
-using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Data;
-using Infrastructure.Identity;
 using Infrastructure.Services.Images;
-using Infrastructure.Values;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using Ui.Services;
 
 namespace Ui.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlacesController(ApplicationDbContext context, UserManager<Bro> userManager) : ControllerBase
+public class PlacesController(ApplicationDbContext context, Contribution contribution) : ControllerBase
 {
+    private Place Place { get; set; } = default!;
+
     [HttpGet]
     public IEnumerable<PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
     {
-
-
-        return context.Place.AsNoTracking()
-                            .Include(p => p.ProfilePictures)
-                            .Where(p => p.CreatedAt < offset)
-                            .OrderByDescending(p => p.CreatedAt)
-                            .Take(limit)
-                            .ToList()
-                            .Select(p =>
-                            {
-                                PlacePictureLean? picture = default;
-
-                                if (p.Picture is not null)
-                                {
-                                    picture = new(Id: p.Picture.Id,
-                                                  Small: p.Picture.Small,
-                                                  PlaceId: p.Picture.PlaceId);
-                                }
-                                return new PlaceDetailsHomePage(Id: p.Id,
-                                                                Name: p.Name,
-                                                                Description: p.Description,
-                                                                Information: p.Information,
-                                                                Address: p.Address,
-                                                                Mobile: p.Mobile,
-                                                                Landline: p.Landline,
-                                                                Email: p.Email,
-                                                                Website: p.Website,
-                                                                Facebook: p.Facebook,
-                                                                Instagram: p.Instagram,
-                                                                BroId: p.BroId,
-                                                                Picture: picture,
-                                                                CreatedAt: p.CreatedAt);
-                            });
+        return contribution.ShowPlaceInHomePage(offset, limit);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Core.Dto.PlaceDetails>> GetPlace(Guid id)
+    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id)
     {
-        Place? place = context.Place.AsNoTracking()
-                                    .Include(p => p.ProfilePictures)
-                                    .Include(p => p.Pictures)
-                                    .FirstOrDefault(p => p.Id == id);
-
-        if (place is null) return NotFound("❌🏤 Place does not exist.");
-
-        PlacePictureLean? picture = default;
-        IEnumerable<PlacePictureLean> pictures = Enumerable.Empty<PlacePictureLean>();
-
-        if (place.Picture is not null)
-        {
-            picture = new(Id: place.Picture.Id, Small: place.Picture.Small, PlaceId: place.Picture.PlaceId);
-        }
-
-        if (place.Pictures.Count != 0)
-        {
-            pictures = place.Pictures.Select(p =>
-                new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId)).ToList();
-        }
-
-        return new Core.Dto.PlaceDetails(Id: place.Id,
-                                         Name: place.Name,
-                                         Description: place.Description,
-                                         Information: place.Information,
-                                         Address: place.Address,
-                                         Mobile: place.Mobile,
-                                         Landline: place.Landline,
-                                         Email: place.Email,
-                                         Website: place.Website,
-                                         Facebook: place.Facebook,
-                                         Instagram: place.Instagram,
-                                         BroId: place.BroId,
-                                         Picture: picture,
-                                         Pictures: pictures);
+        return contribution.DisplayPlace(id);
     }
 
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPlace(Guid id,
                                               Dto.PlaceDetails details,
-                                              IOptionsSnapshot<PlaceImageOptions> options,
-                                              AttachImages attachImages)
+                                              ParseToPictureUploads parseToPictureUploads)
     {
-        Place? place = await context.Place.Include(p => p.ProfilePictures).FirstOrDefaultAsync(p => p.Id == id);
-
-        if (place is null) return NotFound("❌🏤 Place does not exist.");
-
-        Bro? bro = await userManager.GetUserAsync(User);
-
-        if (bro is not null && place.BroId != bro.Id)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to update other people's places.");
-        }
-
         try
         {
-            await attachImages.ComputeAsync(place,
-                                            new Images(details.Picture, details.Pictures),
-                                            new GetImagesPath(options.Get(PlaceImageOptions.Place)),
-                                            new UrlSegments(Request.Scheme, Request.Host.ToString()));
+            await ModifyPlaceAsync(details, parseToPictureUploads, id, this.BroId(User));
         }
-        catch (ImageTypeException ex)
+        catch (ImageTypeException)
         {
-            return BadRequest(new { Errors = new { Picture = new string[] { ex.Message } } });
+            return ValidationProblem(ModelState);
         }
-
-        place.UpdateDetails(details);
-
-        try
+        catch (UnauthorizedContributionAccessException ex)
         {
-            await context.SaveChangesAsync();
+            return Problem(ex.Message,
+                           $"PUT /places/{id}",
+                           403,
+                           "You do not have permission to modify this resource.");
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DbUpdateConcurrencyException ex)
         {
             if (!PlaceExists(id))
             {
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Instance = $"PUT api/Places/${id}",
+                    Title = "Db Update Concurrency Exception"
+                });
             }
             else
             {
@@ -150,91 +73,66 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Place>> PostPlace(Dto.PlaceDetails details,
-                                                     AttachImages attachImages,
-                                                     IOptionsSnapshot<PlaceImageOptions> options)
+    public async Task<IActionResult> PostPlace(Dto.PlaceDetails details, ParseToPictureUploads parseToPictureUploads)
     {
-        Bro? bro = await userManager.GetUserAsync(User);
-
-        if (bro is null) return NotFound("Bro doesn't exist.");
-
-        Place place = new()
-        {
-            Name = details.Name,
-            Description = details.Description,
-            Information = details.Information,
-            Address = details.Address,
-            Mobile = details.Mobile,
-            Landline = details.Landline,
-            Email = details.Email,
-            Website = details.Website,
-            Facebook = details.Facebook,
-            Instagram = details.Instagram,
-            BroId = bro.Id,
-        };
-
         try
         {
-            await attachImages.ComputeAsync(place,
-                                            new Images(details.Picture, details.Pictures),
-                                            new GetImagesPath(options.Get(PlaceImageOptions.Place)),
-                                            new UrlSegments(Request.Scheme, Request.Host.ToString()));
+            Place = await SubmitPlaceAsync(details, parseToPictureUploads);
         }
-        catch (ImageTypeException ex)
+        catch (ImageTypeException)
         {
-            return BadRequest(new { Errors = new { Picture = new string[] { ex.Message } } });
+            return ValidationProblem(ModelState);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            if (!PlaceExists(Place.Id))
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Instance = $"DELETE api/Places/${Place.Id}",
+                    Title = "Db Update Concurrency Exception"
+                });
+            }
+            else
+            {
+                throw;
+            }
         }
 
-        context.Place.Add(place);
-        await context.SaveChangesAsync();
-
-        return CreatedAtAction(
-            nameof(GetPlace),
-            new { place.Id },
-            new { Message = "Submit successful", place.Id });
+        return CreatedAtAction(nameof(GetPlace), new { Place.Id }, new { Message = "Submit successful", Place.Id });
     }
 
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePlace(Guid id)
     {
-        var place = await context.Place.FindAsync(id);
-        if (place == null)
-        {
-            return NotFound("❌🏤 Can't delete a place that does not exist.");
-        }
-
-        Bro? bro = await userManager.GetUserAsync(User);
-
-        if (bro is not null && bro.Id != place.BroId)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, "❌👦🏣 Bro not allowed to delete other people's places");
-        }
-
-        context.Place.Remove(place);
-        await context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    [Authorize]
-    [HttpDelete("picture/{id}")]
-    public async Task<IActionResult> DeletePicture(Guid id,
-                                                   IOptionsSnapshot<PlaceImageOptions> options,
-                                                   DeleteImage deleteImage)
-    {
-        PlaceProfilePicture? placeProfilePicture = await context.PlaceProfilePicture.FirstOrDefaultAsync(ppp => ppp.Id == id);
-
-        if (placeProfilePicture is null) return NotFound("Picture not found.");
-
         try
         {
-            await deleteImage.ComputeAsync(placeProfilePicture, new GetImagesPath(options.Get(PlaceImageOptions.Place)));
-            await context.SaveChangesAsync();
+            await contribution.DeleteAsync(id, this.BroId(User));
         }
-        catch (DbUpdateException ex)
+        catch (UnauthorizedContributionAccessException ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            return Problem(ex.Message,
+                $"DELETE api/Places/{id}",
+                403,
+                "Unauthorized delete.");
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            if (!PlaceExists(id))
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Instance = $"DELETE api/Places/${id}",
+                    Title = "Db Update Concurrency Exception"
+                });
+            }
+            else
+            {
+                throw;
+            }
         }
 
         return NoContent();
@@ -243,5 +141,32 @@ public class PlacesController(ApplicationDbContext context, UserManager<Bro> use
     private bool PlaceExists(Guid id)
     {
         return context.Place.Any(e => e.Id == id);
+    }
+
+    private async Task<Place> SubmitPlaceAsync(Dto.PlaceDetails details,
+                                               ParseToPictureUploads pictureUploadsParser)
+    {
+        var placePictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
+
+        return await contribution.SubmitAsync(details, placePictureUploads, this.BroId(User));
+    }
+
+    private async Task ModifyPlaceAsync(Dto.PlaceDetails details,
+                                        ParseToPictureUploads pictureUploadsParser,
+                                        Guid placeId,
+                                        Guid broId)
+    {
+        var pictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
+
+        await contribution.ModifyAsync(details, pictureUploads, placeId, broId);
+    }
+
+    private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads parseToPictureUploads, Dto.PlaceDetails details)
+    {
+        return await parseToPictureUploads.FromFormFilesAsync<Core.PlaceAggregate.PlacePicture>(
+            new UrlSegments(Request.Scheme, Request.Host.ToString()),
+            details.Picture,
+            details.Pictures,
+            ModelState);
     }
 }

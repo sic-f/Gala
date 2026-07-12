@@ -1,0 +1,47 @@
+﻿using Core.PlaceAggregate;
+using Infrastructure.Data;
+using IntegrationTests.Scopes;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using Utility.Dto;
+using Utility.Factories;
+using Utility.Helpers;
+
+namespace IntegrationTests.Test.Places.Delete;
+
+[Collection("Application Factory Collection")]
+public class DeletePlacePicture(PlacePictureScope app) : BaseTest(app), IClassFixture<PlacePictureScope>
+{
+    public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+    [Fact]
+    public async Task DeletePlacePictureTestAync()
+    {
+        PlaceProfilePicture profilePicture = new()
+        {
+            Normal = "Normal",
+            Small = "Small",
+        };
+        PlaceAttributes attributes = new()
+        {
+            Name = "Name",
+            Address = "Address",
+            Picture = profilePicture,
+            BroId = app.Bro.Id,
+        };
+        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+
+        await app.DeletePictureAsync(place.Picture!.Id);
+
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var updatedPlace = await RepositoryHelper.GetPlaceByIdAsync(place.Id, context);
+
+        await context.Entry(updatedPlace).Collection(p => p.ProfilePictures).LoadAsync();
+
+        Assert.True(app.Response.IsSuccessStatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, app.ResponseStatusCode);
+        Assert.Empty(updatedPlace.ProfilePictures);
+    }
+}

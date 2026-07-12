@@ -1,6 +1,4 @@
-﻿using Utility;
-
-namespace IntegrationTests;
+﻿namespace IntegrationTests;
 
 public class BaseTest(ApplicationFactory<Program> app, bool isAuthenticated = true) : IAsyncLifetime
 {
@@ -16,7 +14,7 @@ public class BaseTest(ApplicationFactory<Program> app, bool isAuthenticated = tr
     {
         if (isAuthenticated)
         {
-            await app.InitAndSetTokenAsync(app);
+            await app.InitAndSetTokenAsync();
         }
         else
         {

@@ -1,6 +1,9 @@
-﻿using Infrastructure.Configuration.Storage.Options;
+﻿using Core.Interfaces;
+using Core.Services;
+using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Services.Images;
 using Infrastructure.Services.Jwt;
+using Infrastructure.Services.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,9 +20,14 @@ public static class InfrastructureOptions
 
         services.Configure<AvatarOptions>(AvatarOptions.Avatar, configuration.GetSection("Images:Avatar"));
         services.Configure<PlaceImageOptions>(PlaceImageOptions.Place, configuration.GetSection("Images:Place"));
-        services.AddScoped<AttachImages>();
+        services.AddScoped<IPicturesAttacher, AttachPictures>();
         services.AddScoped<ValidateImageType>();
         services.AddScoped<UpdateImage>();
-        services.AddScoped<DeleteImage>();
+        services.AddScoped<IDeletePicture, DeletePicture>();
+        services.AddScoped<ParseToPictureUploads>();
+        services.AddScoped<IGetImagePaths, GetImagePaths>();
+
+        services.AddScoped<IPlaceService, PlaceService>();
+        services.AddScoped<IPlacePictureService, PlacePictureService>();
     }
 }

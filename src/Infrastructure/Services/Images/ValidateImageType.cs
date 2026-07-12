@@ -5,7 +5,7 @@ namespace Infrastructure.Services.Images;
 
 public class ValidateImageType
 {
-    public string[] ValidTypes { get; } = ["image/jpeg", "image/jpg", "image/png"];
+    public string[] ValidTypes { get; } = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
     public void Validate(IFormFile image)
     {
