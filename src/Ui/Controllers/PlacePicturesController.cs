@@ -12,12 +12,6 @@ namespace Ui.Controllers
     [ApiController]
     public class PlacePicturesController(ApplicationDbContext context) : ControllerBase
     {
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlacePicture>>> GetPlacePicture()
-        {
-            return await context.PlacePicture.ToListAsync();
-        }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<PlacePictureDto>> GetPlacePicture(Guid id, int slide)
         {
@@ -71,15 +65,6 @@ namespace Ui.Controllers
             }
 
             return Ok(new { Picture = picture, Message = "Updated successfuly." });
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<PlacePicture>> PostPlacePicture(PlacePicture placePicture)
-        {
-            context.PlacePicture.Add(placePicture);
-            await context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPlacePicture", new { id = placePicture.Id }, placePicture);
         }
 
         [HttpDelete("{id}")]
