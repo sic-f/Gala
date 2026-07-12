@@ -1,4 +1,5 @@
-﻿using Core.Exceptions;
+﻿using Core.Dto;
+using Core.Exceptions;
 using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
@@ -16,6 +17,26 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
         await attachPictures.ComputeAsync(Place, pictureUploads);
 
         return await repository.CreatePlaceAsync(Place);
+    }
+
+    public PlaceDetails DisplayPlace(Guid id)
+    {
+        Place = repository.FetchPlaceComplete(id);
+
+        return new PlaceDetails(Id: Place.Id,
+                                Name: Place.Name,
+                                Description: Place.Description,
+                                Information: Place.Information,
+                                Address: Place.Address,
+                                Mobile: Place.Mobile,
+                                Landline: Place.Landline,
+                                Email: Place.Email,
+                                Website: Place.Website,
+                                Facebook: Place.Facebook,
+                                Instagram: Place.Instagram,
+                                BroId: Place.BroId,
+                                Picture: GetPicture(),
+                                Pictures: GetPictures());
     }
 
     public async Task<Place> ModifyAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid id, Guid broId)
@@ -69,5 +90,23 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
             Instagram = details.Instagram,
             BroId = broId,
         };
+    }
+
+    private PlacePictureLean? GetPicture()
+    {
+        if (Place.Picture is null) return null;
+
+        return new(Id: Place.Picture.Id, Small: Place.Picture.Small, PlaceId: Place.Picture.PlaceId);
+    }
+
+    private IEnumerable<PlacePictureLean> GetPictures()
+    {
+        if (Place.Pictures.Count != 0)
+        {
+            return Place.Pictures.Select(p =>
+                new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId));
+        }
+
+        return [];
     }
 }

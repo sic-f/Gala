@@ -31,6 +31,14 @@ public class PlaceService(ApplicationDbContext context) : IPlaceService
         return context.PlacePicture.Where(pp => pp.PlaceId == id);
     }
 
+    public Place FetchPlaceComplete(Guid id)
+    {
+        return context.Place.AsNoTracking()
+                            .Include(p => p.ProfilePictures)
+                            .Include(p => p.Pictures)
+                            .First(p => p.Id == id);
+    }
+
     public async Task ModifyPlaceAsync(Place place)
     {
         await context.SaveChangesAsync();

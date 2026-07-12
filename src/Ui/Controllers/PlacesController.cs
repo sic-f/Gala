@@ -55,45 +55,9 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id)
+    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id, Contribution contribution)
     {
-        Place? place = context.Place.AsNoTracking()
-                                    .Include(p => p.ProfilePictures)
-                                    .Include(p => p.Pictures)
-                                    .FirstOrDefault(p => p.Id == id);
-
-        if (place is null) return NotFound("❌🏤 Place does not exist.");
-
-        PlacePictureLean? picture = default;
-        IEnumerable<PlacePictureLean> pictures = [];
-
-        if (place.Picture is not null)
-        {
-            picture = new(Id: place.Picture.Id, Small: place.Picture.Small, PlaceId: place.Picture.PlaceId);
-        }
-
-        if (place.Pictures.Count != 0)
-        {
-            pictures = place.Pictures.Select(p =>
-                new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId)).ToList();
-        }
-
-        contribution.DisplayPlace();
-
-        return new PlaceDetails(Id: place.Id,
-                                Name: place.Name,
-                                Description: place.Description,
-                                Information: place.Information,
-                                Address: place.Address,
-                                Mobile: place.Mobile,
-                                Landline: place.Landline,
-                                Email: place.Email,
-                                Website: place.Website,
-                                Facebook: place.Facebook,
-                                Instagram: place.Instagram,
-                                BroId: place.BroId,
-                                Picture: picture,
-                                Pictures: pictures);
+        return contribution.DisplayPlace(id);
     }
 
     [Authorize]
