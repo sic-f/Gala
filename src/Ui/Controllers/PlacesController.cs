@@ -78,6 +78,8 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
                 new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId)).ToList();
         }
 
+        contribution.DisplayPlace();
+
         return new PlaceDetails(Id: place.Id,
                                 Name: place.Name,
                                 Description: place.Description,
@@ -221,18 +223,18 @@ public class PlacesController(ApplicationDbContext context) : ControllerBase
 
     private async Task ModifyPlaceAsync(Dto.PlaceDetails details,
                                         Contribution contribution,
-                                        ParseToPictureUploads parseToPictureUploads,
+                                        ParseToPictureUploads pictureUploadsParser,
                                         Guid placeId,
                                         Guid broId)
     {
-        var pictureUploads = await PlacePictureUploadsAsync(parseToPictureUploads, details);
+        var pictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
 
         await contribution.ModifyAsync(details, pictureUploads, placeId, broId);
     }
 
-    private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads pictureUploadsParser, Dto.PlaceDetails details)
+    private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads parseToPictureUploads, Dto.PlaceDetails details)
     {
-        return await pictureUploadsParser.FromFormFilesAsync<PlacePicture>(
+        return await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
             new UrlSegments(Request.Scheme, Request.Host.ToString()),
             details.Picture,
             details.Pictures,
