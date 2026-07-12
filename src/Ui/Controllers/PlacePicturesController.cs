@@ -15,9 +15,9 @@ namespace Ui.Controllers
         private PlacePicture Picture { get; set; } = default!;
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PlacePictureDto>> GetPlacePicture(Guid id, int slideIndex)
+        public async Task<ActionResult<PlacePictureDto>> GetPlacePicture(Guid id, int slide)
         {
-            return placePicture.DisplayPicture(id, slideIndex);
+            return placePicture.DisplayPicture(id, slide);
         }
 
         [Authorize]
