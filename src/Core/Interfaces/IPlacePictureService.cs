@@ -5,6 +5,7 @@ namespace Core.Interfaces;
 public interface IPlacePictureService
 {
     PlacePicture Fetch(Guid id);
+    PlacePicture NoTrackingFetch(Guid id);
     void ModifyCaption();
     void DeletePicture();
 }

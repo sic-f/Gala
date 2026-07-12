@@ -40,12 +40,12 @@ public class PlaceService(ApplicationDbContext context) : IPlaceService
 
     public async Task<Place> FetchPlaceAsync(Guid id)
     {
-        return await context.Place.FirstAsync(p => p.Id == id);
+        return await context.Place.AsNoTracking().FirstAsync(p => p.Id == id);
     }
 
     public IEnumerable<PlacePicture> FetchPlacePictureAndPictures(Guid id)
     {
-        return context.PlacePicture.Where(pp => pp.PlaceId == id);
+        return context.PlacePicture.AsNoTracking().Where(pp => pp.PlaceId == id);
     }
 
     public async Task ModifyPlaceAsync(Place place)

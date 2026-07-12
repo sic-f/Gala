@@ -10,7 +10,7 @@ public class PlacePicture(IPlacePictureService repository, IDeletePicture delete
 
     public PlacePictureDto DisplayPicture(Guid id, int slideIndex)
     {
-        Picture = repository.Fetch(id);
+        Picture = repository.NoTrackingFetch(id);
 
         return new PlacePictureDto(Id: Picture.Id,
                                    Normal: Picture.Normal,
@@ -39,7 +39,7 @@ public class PlacePicture(IPlacePictureService repository, IDeletePicture delete
 
     public void DeletePicture(Guid id)
     {
-        Picture = repository.Fetch(id);
+        Picture = repository.NoTrackingFetch(id);
 
         deletePicture.ComputeAsync(Picture);
 
