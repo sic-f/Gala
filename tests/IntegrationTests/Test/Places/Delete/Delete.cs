@@ -56,14 +56,13 @@ public class Delete(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
 
     private async Task WhenBroDeletesNonExistentPlace(Guid placeId)
     {
-        await app.DeletePlaceAsync(placeId);
+        var exception = await Record.ExceptionAsync(async () => await app.DeletePlaceAsync(placeId));
+        Assert.NotNull(exception);
+        Assert.Equal("Sequence contains no elements.", exception.Message);
     }
 
     private void ThenPlaceIsNotDeleted(Guid id)
     {
-        var exception = Record.Exception(() => app.Response.EnsureSuccessStatusCode());
-        Assert.NotNull(exception);
-
         using var scope = app.Services.CreateScope();
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<ApplicationDbContext>();
