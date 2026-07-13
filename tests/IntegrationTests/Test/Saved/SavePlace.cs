@@ -6,6 +6,7 @@ using Utility.Factories;
 
 namespace IntegrationTests.Test.Saved;
 
+[Collection("Application Factory Collection")]
 public class SavePlace(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
 {
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());

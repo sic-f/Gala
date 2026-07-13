@@ -18,7 +18,7 @@ public class Place
     public ICollection<PlaceProfilePicture> ProfilePictures { get; } = Enumerable.Empty<PlaceProfilePicture>().ToList();
     public List<PlaceExtraPicture> Pictures { get; } = new List<PlaceExtraPicture>();
     public Guid BroId { get; set; }
-    public DateTimeOffset CreatedAt { get; }
+    public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset LastModified { get; set; }
     public PlaceProfilePicture? Picture => ProfilePictures.FirstOrDefault();
 
