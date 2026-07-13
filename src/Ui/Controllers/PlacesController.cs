@@ -25,9 +25,9 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id)
+    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id, Guid broId)
     {
-        return await contribution.DisplayPlaceAsync(id, this.BroId(User));
+        return await contribution.DisplayPlaceAsync(id, broId);
     }
 
     [Authorize]
