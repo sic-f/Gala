@@ -6,7 +6,7 @@ namespace UnitTests.Entities;
 public class PlaceTest
 {
     [Fact]
-    public void UpdateDetailsTest()
+    public void SetDetailsTest()
     {
         Place place = new()
         {
@@ -17,7 +17,7 @@ public class PlaceTest
 
         PlaceDetails details = new() { Name = "Updated", Address = "Updated" };
 
-        place.UpdateDetails(details);
+        place.SetDetails(details);
 
         Assert.Equal("Updated", place.Name);
         Assert.Equal("Updated", place.Address);
