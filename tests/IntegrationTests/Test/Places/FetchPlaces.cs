@@ -165,6 +165,7 @@ public class FetchPlaces()
         }
     }
 
+    [Collection("Application Factory Collection")]
     public class FetchPlace(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
     {
         public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
