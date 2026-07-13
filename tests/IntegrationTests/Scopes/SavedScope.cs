@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using Core.Dto;
+using System.Net.Http.Json;
 
 namespace IntegrationTests.Scopes;
 
@@ -6,8 +7,13 @@ public class SavedScope : ApplicationFactory<Program>
 {
     protected override string DefaultStartUrl => $"api/Saves";
 
-    internal async Task SavePlaceAsync(Guid id)
+    internal async Task SavePlaceAsync(Guid placeId)
     {
-        Response = await Client.PostAsJsonAsync(DefaultStartUrl, id);
+        Response = await Client.PostAsJsonAsync(DefaultStartUrl, new { placeId });
+    }
+
+    internal async Task<SavedResponse> SavePlaceSuccessResponseAsync()
+    {
+        return (await Response.Content.ReadFromJsonAsync<SavedResponse>())!;
     }
 }

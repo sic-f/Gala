@@ -8,5 +8,6 @@ public static class ServicesRegistration
     {
         services.AddScoped<Contribution>();
         services.AddScoped<PlacePicture>();
+        services.AddScoped<Saved>();
     }
 }

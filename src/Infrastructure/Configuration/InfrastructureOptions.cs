@@ -29,5 +29,6 @@ public static class InfrastructureOptions
 
         services.AddScoped<IPlaceService, PlaceService>();
         services.AddScoped<IPlacePictureService, PlacePictureService>();
+        services.AddScoped<ISavedPlaceService, SavedService>();
     }
 }

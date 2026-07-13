@@ -18,6 +18,10 @@ public class SavePlace(SavedScope app) : BaseTest(app), IClassFixture<SavedScope
 
         await app.SavePlaceAsync(place.Id);
 
+        var responseBody = await app.SavePlaceSuccessResponseAsync();
+
         Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
+        Assert.Equal(place.Id, responseBody.SaveableId);
+        Assert.Equal(app.Bro.Id, responseBody.SaverId);
     }
 }

@@ -1,38 +1,27 @@
+using Core.Dto;
 using Core.SavedAggregate;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Ui.Services;
 
 namespace Ui.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SavesController(ApplicationDbContext context) : ControllerBase
+    public class SavesController(ApplicationDbContext context, Context.Saved bookmark) : ControllerBase
     {
+        private SavedPlace _savedPlace = default!;
 
-        // GET: api/Saves
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Saved>>> GetSaved()
         {
             return await context.Saved.ToListAsync();
         }
 
-        // GET: api/Saves/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Saved>> GetSaved(Guid id)
-        {
-            var saved = await context.Saved.FindAsync(id);
-
-            if (saved == null)
-            {
-                return NotFound();
-            }
-
-            return saved;
-        }
-
-        // PUT: api/Saves/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSaved(Guid id, Saved saved)
         {
@@ -62,18 +51,16 @@ namespace Ui.Controllers
             return NoContent();
         }
 
-        // POST: api/Saves
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Saved>> PostSaved(Saved saved)
+        public async Task<ActionResult<Saved>> PostSaved(SavedDto saved)
         {
-            context.Saved.Add(saved);
-            await context.SaveChangesAsync();
+            _savedPlace = await bookmark.SavePlaceAsync(saved.PlaceId, this.BroId(User));
 
-            return CreatedAtAction("GetSaved", new { id = saved.Id }, saved);
+            return CreatedAtAction("GetSaved", new { id = _savedPlace.Id }, _savedPlace);
         }
 
-        // DELETE: api/Saves/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSaved(Guid id)
         {
