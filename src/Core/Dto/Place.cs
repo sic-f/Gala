@@ -26,5 +26,6 @@ public record PlaceDetails(Guid Id,
                            string? Facebook,
                            string? Instagram,
                            Guid BroId,
+                           bool IsSaved,
                            PlacePictureLean? Picture,
                            IEnumerable<PlacePictureLean> Pictures);

@@ -2,52 +2,56 @@
 using Infrastructure.Data;
 using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
+using Utility.Dto;
+using Utility.Factories;
 
 namespace IntegrationTests.Test.Places;
 
 [Collection("Application Factory Collection")]
-public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
+public class FetchPlaces()
 {
-    public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
-
-    [Fact]
-    public async Task FetchPlacesTestAsync()
+    public class PaginatedTest(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
     {
-        IEnumerable<Place> newPlaces = BuildNewPlaces();
+        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
-        using var scope = app.Services.CreateScope();
-        var scopedServices = scope.ServiceProvider;
-        var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+        [Fact]
+        public async Task FetchPlacesTestAsync()
+        {
+            IEnumerable<Place> newPlaces = BuildNewPlaces();
 
-        context.Place.AddRange(newPlaces);
-        await context.SaveChangesAsync();
+            using var scope = app.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+            var context = scopedServices.GetRequiredService<ApplicationDbContext>();
 
-        DateTimeOffset? createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "2nd Batch A")?.CreatedAt;
-        var fetchLimit = 5;
-        IEnumerable<Place>? places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
+            context.Place.AddRange(newPlaces);
+            await context.SaveChangesAsync();
 
-        Assert.Collection(places!,
-            p => Assert.Equal("1st Batch E", p.Name),
-            p => Assert.Equal("1st Batch D", p.Name),
-            p => Assert.Equal("1st Batch C", p.Name),
-            p => Assert.Equal("1st Batch B", p.Name),
-            p => Assert.Equal("1st Batch A", p.Name));
+            DateTimeOffset? createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "2nd Batch A")?.CreatedAt;
+            var fetchLimit = 5;
+            IEnumerable<Place>? places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
 
-        createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "3rd Batch A")?.CreatedAt;
-        places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
+            Assert.Collection(places!,
+                p => Assert.Equal("1st Batch E", p.Name),
+                p => Assert.Equal("1st Batch D", p.Name),
+                p => Assert.Equal("1st Batch C", p.Name),
+                p => Assert.Equal("1st Batch B", p.Name),
+                p => Assert.Equal("1st Batch A", p.Name));
 
-        Assert.Collection(places!,
-            p => Assert.Equal("2nd Batch E", p.Name),
-            p => Assert.Equal("2nd Batch D", p.Name),
-            p => Assert.Equal("2nd Batch C", p.Name),
-            p => Assert.Equal("2nd Batch B", p.Name),
-            p => Assert.Equal("2nd Batch A", p.Name));
-    }
+            createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "3rd Batch A")?.CreatedAt;
+            places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
 
-    private IEnumerable<Place> BuildNewPlaces()
-    {
-        return [
-            new Place
+            Assert.Collection(places!,
+                p => Assert.Equal("2nd Batch E", p.Name),
+                p => Assert.Equal("2nd Batch D", p.Name),
+                p => Assert.Equal("2nd Batch C", p.Name),
+                p => Assert.Equal("2nd Batch B", p.Name),
+                p => Assert.Equal("2nd Batch A", p.Name));
+        }
+
+        private IEnumerable<Place> BuildNewPlaces()
+        {
+            return [
+                new Place
             {
                 Name = "1st Batch A",
                 Address = string.Empty,
@@ -153,10 +157,29 @@ public class FetchPlaces(PlaceScope app) : BaseTest(app), IClassFixture<PlaceSco
                 CreatedAt = DateTimeOffset.UtcNow.AddSeconds(29),
             },
         ];
+        }
+
+        private static string? GetFormattedDateTimeOffset(DateTimeOffset? dateTime)
+        {
+            return dateTime?.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
+        }
     }
 
-    private static string? GetFormattedDateTimeOffset(DateTimeOffset? dateTime)
+    public class FetchPlace(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
     {
-        return dateTime?.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
+        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+        [Fact]
+        public async Task FetchPlaceTestAsync()
+        {
+            PlaceAttributes attributes = new() { Name = "Name Test", Address = "Address Test", BroId = app.Bro.Id };
+            Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+
+            Core.Dto.PlaceDetails details = await app.GetPlaceAsync(place.Id);
+
+            Assert.Equal("Name Test", details.Name);
+            Assert.Equal("Address Test", details.Address);
+            Assert.False(details.IsSaved);
+        }
     }
 }

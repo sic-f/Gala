@@ -6,7 +6,10 @@ using Core.Values;
 
 namespace Context;
 
-public class Contribution(IPicturesAttacher attachPictures, IPlaceService repository, IDeletePicture deleteImage)
+public class Contribution(IPicturesAttacher attachPictures,
+                          IPlaceService repository,
+                          ISavedPlaceService savedPlaceRepository,
+                          IDeletePicture deleteImage)
 {
     private Place Place { get; set; } = default!;
 
@@ -52,14 +55,14 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
 
         await attachPictures.ComputeAsync(Place, pictureUploads);
 
-        Place.UpdateDetails(details);
+        Place.SetDetails(details);
 
         await repository.ModifyPlaceAsync(Place);
 
         return Place;
     }
 
-    public PlaceDetails DisplayPlace(Guid id)
+    public async Task<PlaceDetails> DisplayPlaceAsync(Guid id, Guid broId)
     {
         Place = repository.FetchPlaceComplete(id);
 
@@ -75,8 +78,14 @@ public class Contribution(IPicturesAttacher attachPictures, IPlaceService reposi
                                 Facebook: Place.Facebook,
                                 Instagram: Place.Instagram,
                                 BroId: Place.BroId,
+                                IsSaved: await GetIsSavedAsync(id, broId),
                                 Picture: GetPicture(),
                                 Pictures: GetPictures());
+    }
+
+    private async Task<bool> GetIsSavedAsync(Guid id, Guid broId)
+    {
+        return await savedPlaceRepository.AnySavedPlaceAsync(placeId: id, broId);
     }
 
     public async Task DeleteAsync(Guid id, Guid broId)

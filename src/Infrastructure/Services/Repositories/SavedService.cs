@@ -1,6 +1,7 @@
 ﻿using Core.Interfaces;
 using Core.SavedAggregate;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Repositories;
 
@@ -24,5 +25,11 @@ public class SavedService(ApplicationDbContext context) : ISavedPlaceService
     public void DeleteSavedPlace(Guid id)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<bool> AnySavedPlaceAsync(Guid placeId, Guid broId)
+    {
+        return await context.SavedPlace.AnyAsync<SavedPlace>(sp => 
+            sp.SaveableId == placeId && sp.SaverId == broId);
     }
 }
