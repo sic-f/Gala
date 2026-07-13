@@ -1,5 +1,6 @@
 ﻿using Core.Entities;
 using Core.PlaceAggregate;
+using Core.SavedAggregate;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -19,6 +20,8 @@ public class ApplicationDbContext : IdentityDbContext<Bro, IdentityRole<Guid>, G
     public DbSet<PlacePicture> PlacePicture => Set<PlacePicture>();
     public DbSet<PlaceProfilePicture> PlaceProfilePicture => Set<PlaceProfilePicture>();
     public DbSet<PlaceExtraPicture> PlaceExtraPicture => Set<PlaceExtraPicture>();
+    public DbSet<Saved> Saved => Set<Saved>();
+    public DbSet<SavedPlace> SavedPlace => Set<SavedPlace>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

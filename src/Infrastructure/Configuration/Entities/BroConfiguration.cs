@@ -20,7 +20,7 @@ public class BroConfiguration : IEntityTypeConfiguration<Bro>
                .HasForeignKey(p => p.BroId)
                .OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasOne<AccountAvatar>(b => b.Avatar)
+        builder.HasOne(b => b.Avatar)
                .WithOne()
                .HasForeignKey<AccountAvatar>(aa => aa.BroId)
                .IsRequired()
@@ -37,5 +37,10 @@ public class BroConfiguration : IEntityTypeConfiguration<Bro>
                .HasForeignKey(pep => pep.UploaderId)
                .IsRequired(false)
                .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasMany(b => b.SavedPlaces)
+               .WithOne()
+               .HasForeignKey(sp => sp.SaverId)
+               .IsRequired();
     }
 }

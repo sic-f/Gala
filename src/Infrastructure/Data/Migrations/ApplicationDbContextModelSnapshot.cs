@@ -245,6 +245,39 @@ namespace Infrastructure.Data.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Core.SavedAggregate.Saved", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
+                    b.Property<Guid>("SaveableId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SaverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SaveableId");
+
+                    b.ToTable("Saved");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Saved");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
                 {
                     b.Property<Guid>("Id")
@@ -472,6 +505,15 @@ namespace Infrastructure.Data.Migrations
                     b.HasDiscriminator().HasValue("PlaceProfilePicture");
                 });
 
+            modelBuilder.Entity("Core.SavedAggregate.SavedPlace", b =>
+                {
+                    b.HasBaseType("Core.SavedAggregate.Saved");
+
+                    b.HasIndex("SaverId");
+
+                    b.HasDiscriminator().HasValue("SavedPlace");
+                });
+
             modelBuilder.Entity("Core.Entities.AccountAvatar", b =>
                 {
                     b.HasOne("Infrastructure.Identity.Bro", null)
@@ -578,6 +620,15 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
                 });
 
+            modelBuilder.Entity("Core.SavedAggregate.SavedPlace", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.Bro", null)
+                        .WithMany("SavedPlaces")
+                        .HasForeignKey("SaverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Core.PlaceAggregate.Place", b =>
                 {
                     b.Navigation("Pictures");
@@ -588,6 +639,8 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>
                 {
                     b.Navigation("Avatar");
+
+                    b.Navigation("SavedPlaces");
                 });
 #pragma warning restore 612, 618
         }

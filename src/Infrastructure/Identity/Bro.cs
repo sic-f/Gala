@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.SavedAggregate;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,6 +12,7 @@ public class Bro : IdentityUser<Guid>
     [StringLength(60)]
     public string? LastName { get; set; }
     public AccountAvatar? Avatar { get; set; }
+    public ICollection<SavedPlace> SavedPlaces { get; } = Enumerable.Empty<SavedPlace>().ToList();
 
     public string Name()
     {
