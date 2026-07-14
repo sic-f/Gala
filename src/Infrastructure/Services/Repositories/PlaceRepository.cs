@@ -50,6 +50,10 @@ public class PlaceRepository(ApplicationDbContext context) : IPlaceRepository
 
     public async Task ModifyPlaceAsync(Place place)
     {
+        if (place.Picture is not null)
+        {
+            context.PlacePicture.Remove(place.Picture);
+        }
         await context.SaveChangesAsync();
     }
 

@@ -1,9 +1,8 @@
 ﻿using Core.Interfaces;
-using Infrastructure.Data;
 
 namespace Infrastructure.Services.Images;
 
-public class DeletePicture(ApplicationDbContext context) : IDeletePicture
+public class DeletePicture() : IDeletePicture
 {
     /// <summary>
     /// Deletes physical image file on disk.🗑️🖼️
@@ -15,8 +14,6 @@ public class DeletePicture(ApplicationDbContext context) : IDeletePicture
     {
         File.Delete(picture.NormalLocal);
         File.Delete(picture.SmallLocal);
-
-        context.Remove(picture);
     }
 
     /// <summary>

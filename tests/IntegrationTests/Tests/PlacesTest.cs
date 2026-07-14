@@ -391,8 +391,7 @@ public class PlacesTest
                 Assert.True(app.Response.IsSuccessStatusCode);
 
                 using var scope = app.Services.CreateScope();
-                var scopedServices = scope.ServiceProvider;
-                var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
                 Place updatedPlace = await RepositoryHelper.GetPlaceByIdAsync(place.Id, context);
                 await context.Entry(updatedPlace).Collection(p => p.ProfilePictures).LoadAsync();
