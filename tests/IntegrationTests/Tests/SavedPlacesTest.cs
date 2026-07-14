@@ -6,7 +6,7 @@ using System.Net;
 using Utility.Dto;
 using Utility.Factories;
 
-namespace IntegrationTests.Test;
+namespace IntegrationTests.Tests;
 
 public class SavedPlacesTest()
 {

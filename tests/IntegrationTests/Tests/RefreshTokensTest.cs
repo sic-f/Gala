@@ -8,10 +8,10 @@ using System.Security.Cryptography;
 using Utility.Factories;
 using static Core.Dto.Session;
 
-namespace IntegrationTests.Test.Session;
+namespace IntegrationTests.Tests;
 
 [Collection("Application Factory Collection")]
-public class RefreshTokenTests(SessionScope app) : BaseTest(app, isAuthenticated: false), IClassFixture<SessionScope>
+public class RefreshTokensTest(SessionScope app) : BaseTest(app, isAuthenticated: false), IClassFixture<SessionScope>
 {
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
