@@ -1,5 +1,5 @@
-﻿using Core.PlaceAggregate;
-using Core.Values;
+﻿using Core.Dto;
+using Core.PlaceAggregate;
 
 namespace Core.Interfaces;
 

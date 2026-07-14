@@ -1,4 +1,4 @@
-﻿using Core.Values;
+﻿using Core.Dto;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 

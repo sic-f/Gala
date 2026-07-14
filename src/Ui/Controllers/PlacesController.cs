@@ -1,8 +1,6 @@
 using Core.Dto;
 using Core.Exceptions;
-using Core.Interfaces;
 using Core.PlaceAggregate;
-using Core.Values;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

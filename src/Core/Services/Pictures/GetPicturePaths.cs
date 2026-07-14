@@ -1,5 +1,5 @@
-﻿using Core.Interfaces;
-using Core.Values;
+﻿using Core.Dto;
+using Core.Interfaces;
 
 namespace Core.Services.Pictures;
 

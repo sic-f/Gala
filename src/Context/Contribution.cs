@@ -2,7 +2,6 @@
 using Core.Exceptions;
 using Core.Interfaces;
 using Core.PlaceAggregate;
-using Core.Values;
 
 namespace Context;
 

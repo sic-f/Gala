@@ -1,4 +1,4 @@
-﻿using Core.Values;
+﻿using Core.Dto;
 
 namespace Core.Interfaces;
 
