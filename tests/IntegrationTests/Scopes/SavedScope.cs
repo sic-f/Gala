@@ -1,6 +1,6 @@
 ﻿using Core.Dto;
+using IntegrationTests.Dto;
 using System.Net.Http.Json;
-using Utility.Dto;
 
 namespace IntegrationTests.Scopes;
 

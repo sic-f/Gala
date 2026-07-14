@@ -1,7 +1,7 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
+using IntegrationTests.Dto;
 using IntegrationTests.Scopes;
-using Utility.Dto;
 using Utility.Factories;
 using Utility.Helpers;
 
@@ -17,19 +17,7 @@ public class PlaceProfilePicturesTest
         [Fact]
         public async Task GetPlacePictureTestAsync()
         {
-            PlaceAttributes attributes = new()
-            {
-                Name = "Test Name",
-                Address = "Test Adress",
-                BroId = app.Bro.Id,
-                Picture = new PlaceProfilePicture
-                {
-                    Caption = "Test Caption",
-                    Normal = ImageHelper.TestImageBPath,
-                    Small = ImageHelper.TestImageCPath,
-                }
-            };
-            Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+            Place place = await PlaceFactory.CreateAsync(BuildPlace(), app.Services);
 
             PlacePictureDto placePicture = await app.GetPlaceProfilePictureAsync(place.Picture!.Id);
 
@@ -38,6 +26,26 @@ public class PlaceProfilePicturesTest
             Assert.Equal("Test Caption", placePicture.Caption);
             Assert.Equal(place.Id, placePicture.PlaceId);
 
+        }
+
+        private Place BuildPlace()
+        {
+            PlaceProfilePicture picture = new()
+            {
+                Caption = "Test Caption",
+                Normal = ImageHelper.TestImageBPath,
+                Small = ImageHelper.TestImageCPath,
+            };
+            Place place = new()
+            {
+                Name = "Test Name",
+                Address = "Test Adress",
+                BroId = app.Bro.Id,
+            };
+
+            place.AddPicture(picture);
+
+            return place;
         }
     }
 
@@ -54,14 +62,14 @@ public class PlaceProfilePicturesTest
                 Normal = "Normal",
                 Small = "Small",
             };
-            PlaceAttributes attributes = new()
+            Place newPlace = new()
             {
                 Name = "Name",
                 Address = "Address",
                 BroId = app.Bro.Id,
-                Picture = profilePicture,
             };
-            Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+            newPlace.AddPicture(profilePicture);
+            Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
             await app.UpdatePictureCaptionAsync(place.Picture!.Id, caption: "New caption");
 

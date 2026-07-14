@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Utility.Dto;
+using Ui.Dto;
 using Utility.Factories;
 using Utility.Helpers;
 
@@ -281,8 +281,8 @@ public class PlacesTest
             [Fact]
             public async Task FetchPlaceTestAsync()
             {
-                PlaceAttributes attributes = new() { Name = "Name Test", Address = "Address Test", BroId = app.Bro.Id };
-                Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+                Place newPlace = new() { Name = "Name Test", Address = "Address Test", BroId = app.Bro.Id };
+                Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
                 Core.Dto.PlaceDetails details = await app.GetPlaceAsync(place.Id);
 
@@ -291,8 +291,6 @@ public class PlacesTest
                 Assert.Null(details.BookmarkId);
             }
         }
-
-
     }
 
     public class UpdateTest
@@ -305,23 +303,23 @@ public class PlacesTest
             [Fact]
             public async Task ExclusivePlaceUpdateTestAsync()
             {
-                (PlaceAttributes _, Place place) = await GivenPlaceOwnedByAnotherBroAsync();
+                Place place = await GivenPlaceOwnedByAnotherBroAsync();
                 await WhenBroTriesToUpdatePlaceOwnedByAnotherBroAsync(place.Id);
                 await ThenBroWillNotBeAbleToUpdateThePlace(place.Id);
             }
 
-            private async Task<(PlaceAttributes attributes, Place place)> GivenPlaceOwnedByAnotherBroAsync()
+            private async Task<Place> GivenPlaceOwnedByAnotherBroAsync()
             {
                 Bro placeOwner = await BroFactory.CreateAsync("test@example.org", "Hey@123", app.Services);
-                PlaceAttributes attributes = new()
+                Place newPlace = new()
                 {
                     Name = "Test Name",
                     Address = "Test Address",
-                    BroId = placeOwner.Id
+                    BroId = placeOwner.Id,
                 };
-                Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+                Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
-                return (attributes, place);
+                return place;
             }
 
             private async Task WhenBroTriesToUpdatePlaceOwnedByAnotherBroAsync(Guid placeId)
@@ -363,21 +361,23 @@ public class PlacesTest
             [Fact]
             public async Task UpdateTestAsync()
             {
-                PlaceAttributes attributes = new()
+                PlaceProfilePicture picture = new()
+                {
+                    Normal = ImageHelper.TestImageAPath,
+                    Small = ImageHelper.TestImageBPath,
+                    NormalLocal = ImageHelper.TestImageAPath,
+                    SmallLocal = ImageHelper.TestImageBPath,
+                };
+                Place newPlace = new()
                 {
                     Name = "Test Name",
                     Address = "Test Address",
                     BroId = app.Bro.Id,
-                    Picture = new PlaceProfilePicture
-                    {
-                        Normal = ImageHelper.TestImageAPath,
-                        Small = ImageHelper.TestImageBPath,
-                        NormalLocal = ImageHelper.TestImageAPath,
-                        SmallLocal = ImageHelper.TestImageBPath
-                    },
                 };
 
-                Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+                newPlace.AddPicture(picture);
+
+                Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
                 PlaceDetails details = new()
                 {
@@ -420,9 +420,9 @@ public class PlacesTest
             private async Task<Place> GivenPlaceAsync()
             {
                 Bro bro = await BroFactory.CreateAsync("test@example.net", "Hey@123", app.Services);
-                PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Adress", BroId = bro.Id };
+                Place place = new() { Name = "Test Name", Address = "Test Adress", BroId = bro.Id };
 
-                return await PlaceFactory.CreateAsync(attributes, app.Services);
+                return await PlaceFactory.CreateAsync(place, app.Services);
             }
 
             private async Task WhenBroDeletesPlaceUnauthenticatedOrUnregisteredAsync(Guid placeId)
@@ -461,9 +461,9 @@ public class PlacesTest
 
             private async Task<Place> GivenPlaceAsync()
             {
-                PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Address", BroId = app.Bro.Id };
+                Place place = new() { Name = "Test Name", Address = "Test Address", BroId = app.Bro.Id };
 
-                return await PlaceFactory.CreateAsync(attributes, app.Services);
+                return await PlaceFactory.CreateAsync(place, app.Services);
             }
 
             private async Task WhenBroDeletesPlace(Guid placeId)
@@ -519,19 +519,20 @@ public class PlacesTest
             [Fact]
             public async Task DeletePlacePictureTestAync()
             {
-                PlaceProfilePicture profilePicture = new()
+                PlaceProfilePicture picture = new()
                 {
                     Normal = "Normal",
                     Small = "Small",
                 };
-                PlaceAttributes attributes = new()
+                Place newPlace = new()
                 {
                     Name = "Name",
                     Address = "Address",
-                    Picture = profilePicture,
                     BroId = app.Bro.Id,
                 };
-                Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+                newPlace.AddPicture(picture);
+
+                Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
                 await app.DeletePictureAsync(place.Picture!.Id);
 
@@ -564,9 +565,9 @@ public class PlacesTest
             private async Task<Place> GivenPlaceAndBroNotThePlaceOwnerAsync()
             {
                 Bro placeOwner = await BroFactory.CreateAsync("test@example.org", "Hey@123", app.Services);
-                PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Address", BroId = placeOwner.Id };
+                Place place = new() { Name = "Test Name", Address = "Test Address", BroId = placeOwner.Id };
 
-                return await PlaceFactory.CreateAsync(attributes, app.Services);
+                return await PlaceFactory.CreateAsync(place, app.Services);
             }
 
             private async Task WhenPlaceIsDeletedByNotTheOwnerAsync(Guid placeId)

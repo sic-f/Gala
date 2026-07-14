@@ -19,8 +19,8 @@ public class SavedPlacesTest()
             [Fact]
             public async Task SavePlaceTestAsync()
             {
-                Utility.Dto.PlaceAttributes attributes = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
-                Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+                Place newPlace = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
+                Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
                 await app.SavePlaceAsync(place.Id);
 
@@ -38,7 +38,7 @@ public class SavedPlacesTest()
         [Collection("Application Factory Collection")]
         public class FetchSavedPlacesTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
         {
-            private IEnumerable<Utility.Dto.SavedPlaceResponse> _response = default!;
+            private IEnumerable<Dto.SavedPlaceResponse> _response = default!;
             private Bro _bro = default!;
 
             public override async Task InitializeAsync()

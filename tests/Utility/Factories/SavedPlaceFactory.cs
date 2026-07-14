@@ -6,14 +6,8 @@ namespace Utility.Factories;
 
 public class SavedPlaceFactory
 {
-    public static async Task<SavedPlace> CreateAsync(Dto.SavedPlace attributes, IServiceProvider services)
+    public static async Task<SavedPlace> CreateAsync(SavedPlace savedPlace, IServiceProvider services)
     {
-        SavedPlace savedPlace = new()
-        {
-            SaveableId = attributes.SaveableId,
-            SaverId = attributes.SaverId,
-        };
-
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 

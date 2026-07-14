@@ -1,3 +1,3 @@
 ﻿namespace Core.Values;
 
-public record UrlSegments(string Scheme, String Host);
+public record UrlSegments(string Scheme, string Host);

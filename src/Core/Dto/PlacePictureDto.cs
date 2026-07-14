@@ -2,7 +2,6 @@
 
 namespace Core.Dto;
 
-
 public record PlacePictureLean(Guid Id, string Small, Guid PlaceId);
 
 public record PlacePictureDto(Guid Id,

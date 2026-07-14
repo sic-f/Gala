@@ -44,7 +44,7 @@ public class Contribution(IPicturesAttacher attachPictures,
         return result;
     }
 
-    public async Task<Place> SubmitAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid broId)
+    public async Task<Place> SubmitAsync(IPlaceSetter details, PictureUploads pictureUploads, Guid broId)
     {
         BuildPlace(details, broId);
 
@@ -53,7 +53,7 @@ public class Contribution(IPicturesAttacher attachPictures,
         return await repository.CreatePlaceAsync(Place);
     }
 
-    public async Task<Place> ModifyAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid id, Guid broId)
+    public async Task<Place> ModifyAsync(IPlaceSetter details, PictureUploads pictureUploads, Guid id, Guid broId)
     {
         Place = await repository.FetchPlaceWithPictureAsync(id);
 
@@ -65,7 +65,7 @@ public class Contribution(IPicturesAttacher attachPictures,
 
         await attachPictures.ComputeAsync(Place, pictureUploads);
 
-        Place.SetDetails(details);
+        SetDetails(details);
 
         await repository.ModifyPlaceAsync(Place);
 
@@ -109,7 +109,7 @@ public class Contribution(IPicturesAttacher attachPictures,
         await repository.DeletePlaceAsync(Place);
     }
 
-    private void BuildPlace(IPlaceUpdater details, Guid broId)
+    private void BuildPlace(IPlaceSetter details, Guid broId)
     {
         Place = new()
         {
@@ -125,6 +125,21 @@ public class Contribution(IPicturesAttacher attachPictures,
             Instagram = details.Instagram,
             BroId = broId,
         };
+    }
+
+    public void SetDetails(IPlaceSetter details)
+    {
+        Place.Name = details.Name;
+        Place.Description = details.Description;
+        Place.Information = details.Information;
+        Place.Address = details.Address;
+        Place.Mobile = details.Mobile;
+        Place.Landline = details.Landline;
+        Place.Email = details.Email;
+        Place.Website = details.Website;
+        Place.Facebook = details.Facebook;
+        Place.Instagram = details.Instagram;
+        Place.LastModified = DateTimeOffset.UtcNow;
     }
 
     private PlacePictureLean? GetPicture()

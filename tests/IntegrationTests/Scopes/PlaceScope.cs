@@ -1,7 +1,7 @@
 ﻿using Core.PlaceAggregate;
+using Ui.Dto;
 using IntegrationTests.Services;
 using System.Net.Http.Json;
-using Utility.Dto;
 
 namespace IntegrationTests.Scopes;
 
@@ -16,7 +16,7 @@ public class PlaceScope : ApplicationFactory<Program>
 
     public async Task SubmitRequiredDetailsBlankAsync(PlaceDetails placeDetails)
     {
-        Response = await Client.PostAsJsonAsync<PlaceDetails>(DefaultStartUrl, placeDetails);
+        Response = await Client.PostAsJsonAsync(DefaultStartUrl, placeDetails);
     }
 
     public async Task SubmitPlaceWithLongInvalidValuesAsync(PlaceDetails details)

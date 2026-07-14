@@ -1,48 +1,28 @@
 ﻿using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection;
-using Utility.Dto;
 using Utility.Helpers;
 
 namespace Utility.Factories;
 
 public class PlaceFactory
 {
-    public static async Task<Place> CreateAsync(PlaceAttributes attributes, IServiceProvider services)
+    public static async Task<Place> CreateAsync(Place place, IServiceProvider services)
     {
-        Place place = new()
+        if (place.Picture is not null)
         {
-            Name = attributes.Name,
-            Description = attributes.Description,
-            Information = attributes.Information,
-            Address = attributes.Address,
-            Mobile = attributes.Mobile,
-            Landline = attributes.Landline,
-            Email = attributes.Email,
-            Website = attributes.Website,
-            Facebook = attributes.Facebook,
-            Instagram = attributes.Instagram,
-            BroId = attributes.BroId
-        };
-
-        if (attributes.Picture is not null)
-        {
-            place.AddPicture(attributes.Picture!);
             string testDirectory = CreateTestDirectory();
             CreatePictureFile(place.Picture!, testDirectory);
         }
 
-        if (attributes.Pictures.Any())
+        if (place.Pictures.Count != 0)
         {
-            place.AddPictures(attributes.Pictures);
             string testDirectory = CreateTestDirectory();
             CreatePicturesFiles(place.Pictures, testDirectory);
         }
 
-
         using var scope = services.CreateScope();
-        var scopedServices = scope.ServiceProvider;
-        var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         place = context.Place.Add(place).Entity;
         await context.SaveChangesAsync();

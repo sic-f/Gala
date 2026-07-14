@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Ui.Dto;
+using Microsoft.AspNetCore.Http;
 using System.Reflection;
-using Utility.Dto;
 
 namespace IntegrationTests.Services;
 
