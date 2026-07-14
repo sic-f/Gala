@@ -3,59 +3,80 @@ using Core.SavedAggregate;
 using Infrastructure.Identity;
 using IntegrationTests.Scopes;
 using System.Net;
-using Utility.Dto;
 using Utility.Factories;
 
 namespace IntegrationTests.Tests;
 
 public class SavedPlacesTest()
 {
-    [Collection("Application Factory Collection")]
-    public class SavePlaceTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+    public class SaveTest
     {
-        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
-
-        [Fact]
-        public async Task SavePlaceTestAsync()
+        [Collection("Application Factory Collection")]
+        public class SavePlaceTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
         {
-            PlaceAttributes attributes = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
-            Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
+            public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
-            await app.SavePlaceAsync(place.Id);
+            [Fact]
+            public async Task SavePlaceTestAsync()
+            {
+                Utility.Dto.PlaceAttributes attributes = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
+                Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
-            var responseBody = await app.SavePlaceSuccessResponseAsync();
+                await app.SavePlaceAsync(place.Id);
 
-            Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
-            Assert.Equal(place.Id, responseBody.SaveableId);
-            Assert.Equal(app.Bro.Id, responseBody.SaverId);
+                var responseBody = await app.SavePlaceSuccessResponseAsync();
+
+                Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
+                Assert.Equal(place.Id, responseBody.SaveableId);
+                Assert.Equal(app.Bro.Id, responseBody.SaverId);
+            }
         }
     }
 
-    [Collection("Application Factory Collection")]
-    public class FetchSavedPlacesTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+    public class FetchTest
     {
-        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
-
-        [Fact]
-        public async Task FetchTestAsync()
+        [Collection("Application Factory Collection")]
+        public class FetchSavedPlacesTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
         {
-            Bro bro = await BroFactory.CreateAsync(app.Services);
-            IEnumerable<SavedPlace> builtSavedPlaces =
-            [
-                new SavedPlace() { SaverId = bro.Id },
-                new SavedPlace() { SaverId = bro.Id },
-                new SavedPlace() { SaverId = bro.Id },
-            ];
+            private IEnumerable<Utility.Dto.SavedPlaceResponse> _response = default!;
+            private Bro _bro = default!;
 
-            await SavedPlaceFactory.CreateAsync(builtSavedPlaces, app.Services);
+            public override async Task InitializeAsync()
+            {
+                await base.InitializeAsync();
+                _bro = await BroFactory.CreateAsync(app.Services);
+                IEnumerable<SavedPlace> builtSavedPlaces =
+                [
+                    new SavedPlace() { SaverId = _bro.Id },
+                    new SavedPlace() { SaverId = _bro.Id },
+                    new SavedPlace() { SaverId = _bro.Id },
+                ];
 
-            var response = await app.GetAllSavedPlacesAsync();
+                await SavedPlaceFactory.CreateAsync(builtSavedPlaces, app.Services);
 
-            Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
-            Assert.Collection(response,
-                sp => Assert.NotEqual(app.Bro.Id, sp.SaverId),
-                sp => Assert.NotEqual(app.Bro.Id, sp.SaverId),
-                sp => Assert.NotEqual(app.Bro.Id, sp.SaverId));
+                _response = await app.GetAllSavedPlacesAsync(_bro.Id);
+            }
+            public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+            [Fact]
+            public async Task FetchTestAsync()
+            {
+                Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
+                Assert.Collection(_response,
+                    sp => Assert.Equal(_bro.Id, sp.SaverId),
+                    sp => Assert.Equal(_bro.Id, sp.SaverId),
+                    sp => Assert.Equal(_bro.Id, sp.SaverId));
+            }
+
+            [Fact]
+            public async Task FetchWithIncorrectBroIdTestAsync()
+            {
+                Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
+                Assert.Collection(_response,
+                    sp => Assert.NotEqual(app.Bro.Id, sp.SaverId),
+                    sp => Assert.NotEqual(app.Bro.Id, sp.SaverId),
+                    sp => Assert.NotEqual(app.Bro.Id, sp.SaverId));
+            }
         }
     }
 }

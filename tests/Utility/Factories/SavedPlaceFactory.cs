@@ -1,13 +1,12 @@
 ﻿using Core.SavedAggregate;
 using Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection;
-using Utility.Dto;
 
 namespace Utility.Factories;
 
 public class SavedPlaceFactory
 {
-    public static async Task<SavedPlace> CreateAsync(SavedPlaceAttributes attributes, IServiceProvider services)
+    public static async Task<SavedPlace> CreateAsync(Dto.SavedPlace attributes, IServiceProvider services)
     {
         SavedPlace savedPlace = new()
         {
