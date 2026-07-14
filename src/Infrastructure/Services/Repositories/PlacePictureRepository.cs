@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Repositories;
 
-public class PlacePictureService(ApplicationDbContext context) : IPlacePictureService
+public class PlacePictureRepository(ApplicationDbContext context) : IPlacePictureRepository
 {
     public PlacePicture Fetch(Guid id)
     {
@@ -22,8 +22,9 @@ public class PlacePictureService(ApplicationDbContext context) : IPlacePictureSe
         context.SaveChanges();
     }
 
-    public void DeletePicture()
+    public void DeletePicture(PlacePicture picture)
     {
+        context.PlacePicture.Remove(picture);
         context.SaveChanges();
     }
 }

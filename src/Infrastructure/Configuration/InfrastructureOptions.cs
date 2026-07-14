@@ -21,8 +21,8 @@ public static class InfrastructureOptions
         services.AddScoped<IDeletePicture, DeletePicture>();
         services.AddScoped<IGetImagePaths, GetImagePaths>();
 
-        services.AddScoped<IPlaceService, PlaceService>();
-        services.AddScoped<IPlacePictureService, PlacePictureService>();
-        services.AddScoped<ISavedPlaceService, SavedService>();
+        services.AddScoped<IPlaceRepository, PlaceRepository>();
+        services.AddScoped<IPlacePictureRepository, PlacePictureRepository>();
+        services.AddScoped<ISavedPlaceRepository, SavedPlaceRepository>();
     }
 }

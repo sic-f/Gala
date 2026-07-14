@@ -7,8 +7,8 @@ using Core.Values;
 namespace Context;
 
 public class Contribution(IPicturesAttacher attachPictures,
-                          IPlaceService repository,
-                          ISavedPlaceService savedPlaceRepository,
+                          IPlaceRepository repository,
+                          ISavedPlaceRepository savedPlaceRepository,
                           IDeletePicture deleteImage)
 {
     private Place Place { get; set; } = default!;

@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces;
 
-public interface ISavedPlaceService
+public interface ISavedPlaceRepository
 {
     IEnumerable<SavedPlace> FetchSavedPlaces(Guid saverId);
     Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace);

@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces;
 
-public interface IPlaceService
+public interface IPlaceRepository
 {
     Task<Place> CreatePlaceAsync(Place place);
     Task<Place> FetchPlaceWithPictureAsync(Guid id);

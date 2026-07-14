@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Repositories;
 
-public class PlaceService(ApplicationDbContext context) : IPlaceService
+public class PlaceRepository(ApplicationDbContext context) : IPlaceRepository
 {
     public IEnumerable<Place> FetchPlacePaginatedWithPicture(DateTimeOffset offset, int limit)
     {

@@ -4,7 +4,7 @@ using Core.Interfaces;
 
 namespace Context;
 
-public class PlacePicture(IPlacePictureService repository, IDeletePicture deletePicture)
+public class PlacePicture(IPlacePictureRepository repository, IDeletePicture deletePicture)
 {
     private Core.PlaceAggregate.PlacePicture Picture { get; set; } = default!;
 
@@ -43,6 +43,6 @@ public class PlacePicture(IPlacePictureService repository, IDeletePicture delete
 
         deletePicture.ComputeAsync(Picture);
 
-        repository.DeletePicture();
+        repository.DeletePicture(Picture);
     }
 }

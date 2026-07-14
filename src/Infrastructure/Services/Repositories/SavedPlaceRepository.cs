@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Repositories;
 
-public class SavedService(ApplicationDbContext context) : ISavedPlaceService
+public class SavedPlaceRepository(ApplicationDbContext context) : ISavedPlaceRepository
 {
     private SavedPlace _savedPlace = default!;
 
