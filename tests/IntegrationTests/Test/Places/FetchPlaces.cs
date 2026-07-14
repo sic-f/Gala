@@ -7,9 +7,9 @@ using Utility.Factories;
 
 namespace IntegrationTests.Test.Places;
 
-[Collection("Application Factory Collection")]
 public class FetchPlaces()
 {
+    [Collection("Application Factory Collection")]
     public class PaginatedTest(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
     {
         public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
