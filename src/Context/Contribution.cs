@@ -13,25 +13,35 @@ public class Contribution(IPicturesAttacher attachPictures,
 {
     private Place Place { get; set; } = default!;
 
-    public IEnumerable<PlaceDetailsHomePage> ShowPlaceInHomePage(DateTimeOffset offset, int limit)
+    public async Task<IEnumerable<PlaceDetailsHomePage>> ShowPlaceInHomePageAsync(DateTimeOffset offset, int limit, Guid broId)
     {
-        return repository.FetchPlacePaginatedWithPicture(offset, limit).Select(p =>
+        IEnumerable<PlaceDetailsHomePage> result = [.. repository.FetchPlacePaginatedWithPicture(offset, limit).Select(p =>
         {
-            return new PlaceDetailsHomePage(Id: p.Id,
-                                            Name: p.Name,
-                                            Description: p.Description,
-                                            Information: p.Information,
-                                            Address: p.Address,
-                                            Mobile: p.Mobile,
-                                            Landline: p.Landline,
-                                            Email: p.Email,
-                                            Website: p.Website,
-                                            Facebook: p.Facebook,
-                                            Instagram: p.Instagram,
-                                            BroId: p.BroId,
-                                            Picture: GetPicture(p),
-                                            CreatedAt: p.CreatedAt);
-        });
+            return new PlaceDetailsHomePage()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Information = p.Information,
+                Address = p.Address,
+                Mobile = p.Mobile,
+                Landline = p.Landline,
+                Email = p.Email,
+                Website = p.Website,
+                Facebook = p.Facebook,
+                Instagram = p.Instagram,
+                BroId = p.BroId,
+                Picture = GetPicture(p),
+                CreatedAt = p.CreatedAt
+            };
+        })];
+
+        foreach (PlaceDetailsHomePage details in result)
+        {
+            details.BookmarkId = await GetIsSavedIdAsync(details.Id, broId);
+        }
+
+        return result;
     }
 
     public async Task<Place> SubmitAsync(IPlaceUpdater details, PictureUploads pictureUploads, Guid broId)
@@ -78,14 +88,9 @@ public class Contribution(IPicturesAttacher attachPictures,
                                 Facebook: Place.Facebook,
                                 Instagram: Place.Instagram,
                                 BroId: Place.BroId,
-                                IsSaved: await GetIsSavedAsync(id, broId),
+                                BookmarkId: await GetIsSavedIdAsync(id, broId),
                                 Picture: GetPicture(),
                                 Pictures: GetPictures());
-    }
-
-    private async Task<bool> GetIsSavedAsync(Guid id, Guid broId)
-    {
-        return await savedPlaceRepository.AnySavedPlaceAsync(placeId: id, broId);
     }
 
     public async Task DeleteAsync(Guid id, Guid broId)
@@ -145,5 +150,10 @@ public class Contribution(IPicturesAttacher attachPictures,
         }
 
         return [];
+    }
+
+    private async Task<Guid?> GetIsSavedIdAsync(Guid placeId, Guid broId)
+    {
+        return await savedPlaceRepository.GetSavedPlaceId(placeId, broId);
     }
 }

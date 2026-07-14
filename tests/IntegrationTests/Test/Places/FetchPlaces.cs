@@ -180,7 +180,7 @@ public class FetchPlaces()
 
             Assert.Equal("Name Test", details.Name);
             Assert.Equal("Address Test", details.Address);
-            Assert.False(details.IsSaved);
+            Assert.Null(details.BookmarkId);
         }
     }
 }

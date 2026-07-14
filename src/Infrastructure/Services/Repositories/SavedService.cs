@@ -27,9 +27,9 @@ public class SavedService(ApplicationDbContext context) : ISavedPlaceService
         throw new NotImplementedException();
     }
 
-    public async Task<bool> AnySavedPlaceAsync(Guid placeId, Guid broId)
+    public async Task<Guid?> GetSavedPlaceId(Guid placeId, Guid broId)
     {
-        return await context.SavedPlace.AnyAsync<SavedPlace>(sp => 
-            sp.SaveableId == placeId && sp.SaverId == broId);
+        return (await context.SavedPlace.FirstOrDefaultAsync<SavedPlace>(sp => 
+            sp.SaveableId == placeId && sp.SaverId == broId))?.Id;
     }
 }

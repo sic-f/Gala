@@ -19,9 +19,9 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
     private Place Place { get; set; } = default!;
 
     [HttpGet]
-    public IEnumerable<PlaceDetailsHomePage> GetPlace(DateTimeOffset offset, int limit)
+    public async Task<IEnumerable<PlaceDetailsHomePage>> GetPlaceAsync(DateTimeOffset offset, int limit, Guid broId)
     {
-        return contribution.ShowPlaceInHomePage(offset, limit);
+        return await contribution.ShowPlaceInHomePageAsync(offset, limit, broId);
     }
 
     [HttpGet("{id}")]
