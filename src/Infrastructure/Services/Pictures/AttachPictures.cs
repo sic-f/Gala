@@ -1,13 +1,14 @@
 using Core.Entities;
 using Core.Interfaces;
 using Core.PlaceAggregate;
+using Core.Services.Pictures;
 using Core.Values;
 using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Infrastructure.Services.Images;
+namespace Infrastructure.Services.Pictures;
 
-public class AttachPictures(UpdateImage updateImage, IDeletePicture deleteImage) : IPicturesAttacher
+public class AttachPictures(PersistPicture persistPicture, IDeletePicture deleteImage) : IPicturesAttacher
 {
     public async Task ComputeAsync(Brodiebles brodybles, PictureUploads pictureUploads)
     {
@@ -60,23 +61,21 @@ public class AttachPictures(UpdateImage updateImage, IDeletePicture deleteImage)
         await deleteImage.ComputeAsync(oldPicture);
     }
 
-    private async Task BuildProfilePictureAsync(Brodiebles brodiebles, PictureUpload picture)
+    private static async Task BuildProfilePictureAsync(Brodiebles brodiebles, PictureUpload picture)
     {
         if (picture is null) return;
 
-        await updateImage.ComputeAsync(
-            picture.Paths.NormalLocal,
-            preparer: new ResizedImagePreparer(
-                picture.Stream,
-                imageDimensions: new ImageDimensions(Width: 640, Height: 360),
-                resizeMode: ResizeMode.Max));
+        await new ResizePersistPicture(
+            fileName: picture.Paths.NormalLocal,
+            sourceStream: picture.Stream,
+            imageDimensions: new ImageDimensions(Width: 640, Height: 360),
+            resizeMode: ResizeMode.Max).ComputeAsync();
 
-        await updateImage.ComputeAsync(
-                 picture.Paths.SmallLocal,
-                 preparer: new ResizedImagePreparer(
-                     picture.Stream,
-                     imageDimensions: new ImageDimensions(Width: 64, Height: 64),
-                     resizeMode: ResizeMode.Max));
+        await new ResizePersistPicture(
+            fileName: picture.Paths.SmallLocal,
+            sourceStream: picture.Stream,
+            imageDimensions: new ImageDimensions(Width: 64, Height: 64),
+            resizeMode: ResizeMode.Max).ComputeAsync();
 
         brodiebles.Avatar = new AccountAvatar
         {
@@ -91,16 +90,15 @@ public class AttachPictures(UpdateImage updateImage, IDeletePicture deleteImage)
     {
         if (picture is null) return;
 
-        await updateImage.ComputeAsync(
-            picture.Paths.NormalLocal,
-            preparer: new ImagePreparer(picture.Stream));
+        await persistPicture.ComputeAsync(
+            fileName: picture.Paths.NormalLocal,
+            sourceStream: picture.Stream);
 
-        await updateImage.ComputeAsync(
+        await new ResizePersistPicture(
             picture.Paths.SmallLocal,
-            preparer: new ResizedImagePreparer(
-                picture.Stream,
-                imageDimensions: new ImageDimensions(Width: 384, Height: 288),
-                resizeMode: ResizeMode.Pad));
+            sourceStream: picture.Stream,
+            imageDimensions: new ImageDimensions(Width: 384, Height: 288),
+            resizeMode: ResizeMode.Pad).ComputeAsync();
 
         place.AddPicture(new PlaceProfilePicture
         {
@@ -120,17 +118,15 @@ public class AttachPictures(UpdateImage updateImage, IDeletePicture deleteImage)
 
         foreach (var picture in pictures)
         {
-            await updateImage.ComputeAsync(
-                picture.Paths.NormalLocal,
-                preparer: new ImagePreparer(picture.Stream));
+            await persistPicture.ComputeAsync(
+                fileName: picture.Paths.NormalLocal,
+                sourceStream: picture.Stream);
 
-            await updateImage.ComputeAsync(
+            await new ResizePersistPicture(
                 picture.Paths.SmallLocal,
-                preparer: new ResizedImagePreparer(
-                    picture.Stream,
-                    imageDimensions: new ImageDimensions(Width: 800, Height: 740),
-                    resizeMode: ResizeMode.Crop));
-
+                sourceStream: picture.Stream,
+                imageDimensions: new ImageDimensions(Width: 800, Height: 740),
+                resizeMode: ResizeMode.Crop).ComputeAsync();
 
             placeExtraPictures.Add(new PlaceExtraPicture
             {

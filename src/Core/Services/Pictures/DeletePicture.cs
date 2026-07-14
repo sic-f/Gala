@@ -1,6 +1,6 @@
 ﻿using Core.Interfaces;
 
-namespace Infrastructure.Services.Images;
+namespace Core.Services.Pictures;
 
 public class DeletePicture() : IDeletePicture
 {

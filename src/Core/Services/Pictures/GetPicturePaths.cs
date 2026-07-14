@@ -1,14 +1,14 @@
 ﻿using Core.Interfaces;
 using Core.Values;
 
-namespace Core.Services;
+namespace Core.Services.Pictures;
 
-public class GetImagePaths : IGetImagePaths
+public class GetPicturePaths : IGetPicturePaths
 {
     private string _fileName = default!;
     private string _smallFileName = default!;
 
-    public GetImagePaths()
+    public GetPicturePaths()
     {
         GenerateRandomFileNames();
     }
@@ -24,7 +24,7 @@ public class GetImagePaths : IGetImagePaths
         return paths;
     }
 
-    public PicturePaths GetPicturePaths<T>(PicturePaths paths) where T : IImageTypeSegmentable
+    public PicturePaths GetImagePaths<T>(PicturePaths paths) where T : IImageTypeSegmentable
     {
         paths.NormalLocal = FileNamePath<T>(_fileName);
         paths.SmallLocal = FileNamePath<T>(_smallFileName);

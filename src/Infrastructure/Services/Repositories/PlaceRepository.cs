@@ -50,7 +50,7 @@ public class PlaceRepository(ApplicationDbContext context) : IPlaceRepository
 
     public async Task ModifyPlaceAsync(Place place)
     {
-        if (place.Picture is not null)
+        if (place.Picture is not null && place.Picture.Id != Guid.Empty)
         {
             context.PlacePicture.Remove(place.Picture);
         }

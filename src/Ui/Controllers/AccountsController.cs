@@ -1,9 +1,9 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
+using Core.Services.Pictures;
 using Core.Values;
 using Infrastructure.Data;
 using Infrastructure.Identity;
-using Infrastructure.Services.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

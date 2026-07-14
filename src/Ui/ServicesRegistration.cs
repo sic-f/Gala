@@ -1,4 +1,6 @@
 ﻿using Context;
+using Core.Interfaces;
+using Core.Services.Pictures;
 using Ui.Services.Jwt;
 using Ui.Services.Pictures;
 
@@ -18,5 +20,9 @@ public static class ServicesRegistration
         services.AddScoped<Contribution>();
         services.AddScoped<PlacePicture>();
         services.AddScoped<Saved>();
+
+        services.AddScoped<IDeletePicture, DeletePicture>();
+        services.AddScoped<IGetPicturePaths, GetPicturePaths>();
+        services.AddScoped<PersistPicture>();
     }
 }

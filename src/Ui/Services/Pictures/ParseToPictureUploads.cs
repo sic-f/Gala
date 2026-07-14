@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Ui.Services.Pictures;
 
-public class ParseToPictureUploads(IGetImagePaths getImagePaths, ValidateImageType validateImageType)
+public class ParseToPictureUploads(IGetPicturePaths getPicturePaths, ValidateImageType validateImageType)
 {
     private UrlSegments UrlSegments { get; set; } = default!;
     private ModelStateDictionary? ModelState { get; set; }
@@ -40,9 +40,9 @@ public class ParseToPictureUploads(IGetImagePaths getImagePaths, ValidateImageTy
 
         PicturePaths picturePaths = new();
 
-        getImagePaths.GetURIs<T>(UrlSegments, picturePaths);
-        getImagePaths.GetPicturePaths<T>(picturePaths);
-        getImagePaths.ReInitializeFileName();
+        getPicturePaths.GetURIs<T>(UrlSegments, picturePaths);
+        getPicturePaths.GetImagePaths<T>(picturePaths);
+        getPicturePaths.ReInitializeFileName();
 
         MemoryStream stream = new();
         await picture.CopyToAsync(stream);
@@ -76,9 +76,9 @@ public class ParseToPictureUploads(IGetImagePaths getImagePaths, ValidateImageTy
 
                 PicturePaths picturePaths = new();
 
-                getImagePaths.GetURIs<T>(UrlSegments, picturePaths);
-                getImagePaths.GetPicturePaths<T>(picturePaths);
-                getImagePaths.ReInitializeFileName();
+                getPicturePaths.GetURIs<T>(UrlSegments, picturePaths);
+                getPicturePaths.GetImagePaths<T>(picturePaths);
+                getPicturePaths.ReInitializeFileName();
 
                 MemoryStream stream = new();
                 await picture.CopyToAsync(stream);
