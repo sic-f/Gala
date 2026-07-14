@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Infrastructure.Services.Jwt;
+namespace Ui.Services.Jwt;
 
 public class GenerateToken(IOptions<Configuration.Jwt> jwtOptions)
 {

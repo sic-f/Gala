@@ -1,10 +1,10 @@
 ﻿using Core.Entities;
 using Infrastructure.Data;
 using Infrastructure.Identity;
-using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Ui.Services.Jwt;
 using Ui.ViewModels;
 
 namespace Ui.Controllers;

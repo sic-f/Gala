@@ -1,6 +1,6 @@
 ﻿using Infrastructure.Data;
 
-namespace Infrastructure.Services.Jwt;
+namespace Ui.Services.Jwt;
 
 public class RevokeAllActiveRefreshTokens(ApplicationDbContext context)
 {

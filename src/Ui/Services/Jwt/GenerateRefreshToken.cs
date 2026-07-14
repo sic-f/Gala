@@ -3,7 +3,7 @@ using Infrastructure.Data;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 
-namespace Infrastructure.Services.Jwt;
+namespace Ui.Services.Jwt;
 
 public class GenerateRefreshToken(ApplicationDbContext context, IOptions<Configuration.Jwt> options)
 {

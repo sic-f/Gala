@@ -4,7 +4,6 @@ using Core.Values;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Infrastructure.Services.Images;
-using Infrastructure.Services.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Ui.Services;
+using Ui.Services.Jwt;
 using Ui.ViewModels;
 
 namespace Ui.Controllers;
