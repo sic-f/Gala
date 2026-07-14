@@ -84,7 +84,7 @@ public abstract class ApplicationFactory<TProgram> : WebApplicationFactory<TProg
 
     private async Task LoginThenSetBearerTokenInClientForRequests()
     {
-        Bro = await BroFactory.CreateBroAsync("test@example.net", "Hey@123", Services);
+        Bro = await BroFactory.CreateAsync("test@example.net", "Hey@123", Services);
         var credentials = new LoginCredentials("test@example.net", "Hey@123");
         Response = await Client.PostAsJsonAsync("api/Sessions", credentials);
 

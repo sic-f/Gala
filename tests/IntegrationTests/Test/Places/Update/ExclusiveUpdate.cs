@@ -26,7 +26,7 @@ public class ExclusiveUpdate(PlaceScope app) : BaseTest(app), IClassFixture<Plac
 
     private async Task<(PlaceAttributes attributes, Place place)> GivenPlaceOwnedByAnotherBroAsync()
     {
-        Bro placeOwner = await BroFactory.CreateBroAsync("test@example.org", "Hey@123", app.Services);
+        Bro placeOwner = await BroFactory.CreateAsync("test@example.org", "Hey@123", app.Services);
         PlaceAttributes attributes = new()
         {
             Name = "Test Name",

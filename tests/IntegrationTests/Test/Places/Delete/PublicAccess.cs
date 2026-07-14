@@ -24,7 +24,7 @@ public class PublicAccess(PlaceScope app) : BaseTest(app, isAuthenticated: false
 
     private async Task<Place> GivenPlaceAsync()
     {
-        Bro bro = await BroFactory.CreateBroAsync("test@example.net", "Hey@123", app.Services);
+        Bro bro = await BroFactory.CreateAsync("test@example.net", "Hey@123", app.Services);
         PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Adress", BroId = bro.Id };
 
         return await PlaceFactory.CreatePlaceAsync(attributes, app.Services);

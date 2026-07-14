@@ -23,7 +23,7 @@ public class ExclusiveDelete(PlaceScope app) : BaseTest(app), IClassFixture<Plac
 
     private async Task<Place> GivenPlaceAndBroNotThePlaceOwnerAsync()
     {
-        Bro placeOwner = await BroFactory.CreateBroAsync("test@example.org", "Hey@123", app.Services);
+        Bro placeOwner = await BroFactory.CreateAsync("test@example.org", "Hey@123", app.Services);
         PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Address", BroId = placeOwner.Id };
 
         return await PlaceFactory.CreatePlaceAsync(attributes, app.Services);

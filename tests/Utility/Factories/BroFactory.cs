@@ -19,7 +19,7 @@ public class BroFactory
         var email = "test@example.me";
         Bro bro = new() { UserName = email, Email = email };
 
-        await CreateBroAsync(bro, password: "Hey@123", services);
+        await CreateAsync(bro, password: "Hey@123", services);
 
         return await RepositoryHelper.GetUserBy(email, services);
     }
@@ -31,11 +31,11 @@ public class BroFactory
     /// <param name="password">Password for the Bro account to be created.</param>
     /// <param name="services">The service provider (IServiceProvider) to create a scope for the database context.</param>
     /// <returns>The created Bro.</returns>
-    public static async Task<Bro> CreateBroAsync(string email, string password, IServiceProvider services)
+    public static async Task<Bro> CreateAsync(string email, string password, IServiceProvider services)
     {
         Bro bro = new() { UserName = email, Email = email };
 
-        await CreateBroAsync(bro, password, services);
+        await CreateAsync(bro, password, services);
 
         return await RepositoryHelper.GetUserBy(email, services);
     }
@@ -46,11 +46,11 @@ public class BroFactory
     /// <param name="broDetails">BroWithFullName dto to supply details for creating Bro.</param>
     /// <param name="services">The service provider (IServiceProvider) to create a scope for the database context.</param>
     /// <returns>The created Bro.</returns>
-    public static async Task<Bro> CreateBroAsync(BroWithFullName broDetails, IServiceProvider services)
+    public static async Task<Bro> CreateAsync(BroWithFullName broDetails, IServiceProvider services)
     {
         Bro bro = new() { UserName = broDetails.Email, Email = broDetails.Email, FirstName = broDetails.FirstName, LastName = broDetails.LastName };
 
-        await CreateBroAsync(bro, broDetails.Password, services);
+        await CreateAsync(bro, broDetails.Password, services);
 
         return await RepositoryHelper.GetUserBy(broDetails.Email, services);
     }
@@ -61,11 +61,11 @@ public class BroFactory
     /// <param name="broDetails">BroWithFullName dto to supply details for creating Bro.</param>
     /// <param name="context">The database context (ApplicationDbContext) to use for persisting to the database.</param>
     /// <returns>The created Bro.</returns>
-    public static async Task<Bro> CreateBroAsync(BroWithFullName broDetails, ApplicationDbContext context)
+    public static async Task<Bro> CreateAsync(BroWithFullName broDetails, ApplicationDbContext context)
     {
         Bro bro = new() { UserName = broDetails.Email, Email = broDetails.Email, FirstName = broDetails.FirstName, LastName = broDetails.LastName };
 
-        await CreateBroAsync(bro, context);
+        await CreateAsync(bro, context);
 
         return await RepositoryHelper.GetUserBy(broDetails.Email, context);
     }
@@ -78,7 +78,7 @@ public class BroFactory
     /// <param name="services">The service provider (IServiceProvider) to create a scope for the database context.</param>
     /// <returns>void</returns>
     /// <exception cref="Exception"></exception>
-    private static async Task CreateBroAsync(Bro bro, string password, IServiceProvider services)
+    private static async Task CreateAsync(Bro bro, string password, IServiceProvider services)
     {
         using var scope = services.CreateScope();
         var scopedServices = scope.ServiceProvider;
@@ -92,7 +92,7 @@ public class BroFactory
         }
     }
 
-    private static async Task CreateBroAsync(Bro bro, ApplicationDbContext context)
+    private static async Task CreateAsync(Bro bro, ApplicationDbContext context)
     {
         await context.Users.AddAsync(bro);
         await context.SaveChangesAsync();

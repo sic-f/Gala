@@ -18,7 +18,7 @@ public class RefreshTokenTests(SessionScope app) : BaseTest(app, isAuthenticated
     [Fact]
     public async Task RefreshTokenTestAsync()
     {
-        Bro bro = await BroFactory.CreateBroAsync("token@example.net", "Hey@123", app.Services);
+        Bro bro = await BroFactory.CreateAsync("token@example.net", "Hey@123", app.Services);
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         RefreshToken refreshToken = new()
         {
@@ -45,7 +45,7 @@ public class RefreshTokenTests(SessionScope app) : BaseTest(app, isAuthenticated
     [Fact]
     public async Task RevokeExistingRefreshTokensWhenCurrentIsStolenTestAsync()
     {
-        Bro bro = await BroFactory.CreateBroAsync("token@example.net", "Hey@123", app.Services);
+        Bro bro = await BroFactory.CreateAsync("token@example.net", "Hey@123", app.Services);
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         RefreshToken refreshToken = new()
         {
