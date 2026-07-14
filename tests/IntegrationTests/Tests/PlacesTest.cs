@@ -2,6 +2,7 @@
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using IntegrationTests.Errors;
+using IntegrationTests.Helpers;
 using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -374,7 +375,6 @@ public class PlacesTest
                     Address = "Test Address",
                     BroId = app.Bro.Id,
                 };
-
                 newPlace.AddPicture(picture);
 
                 Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);

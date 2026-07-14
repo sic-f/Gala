@@ -1,7 +1,7 @@
 ﻿using Core.PlaceAggregate;
-using Ui.Dto;
-using IntegrationTests.Services;
+using IntegrationTests.Helpers;
 using System.Net.Http.Json;
+using Ui.Dto;
 
 namespace IntegrationTests.Scopes;
 

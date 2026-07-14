@@ -1,8 +1,8 @@
-﻿using Ui.Dto;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System.Reflection;
+using Ui.Dto;
 
-namespace IntegrationTests.Services;
+namespace IntegrationTests.Helpers;
 
 public class BuildPayload
 {

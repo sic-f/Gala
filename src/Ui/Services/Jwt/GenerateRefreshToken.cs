@@ -2,10 +2,9 @@
 using Infrastructure.Data;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
-
 namespace Ui.Services.Jwt;
 
-public class GenerateRefreshToken(ApplicationDbContext context, IOptions<Configuration.Jwt> options)
+public class GenerateRefreshToken(ApplicationDbContext context, IOptions<Infrastructure.Configuration.Jwt> options)
 {
     public string Compute(Guid broId)
     {

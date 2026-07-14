@@ -2,7 +2,6 @@
 using Core.Services;
 using Infrastructure.Configuration.Storage.Options;
 using Infrastructure.Services.Images;
-using Infrastructure.Services.Jwt;
 using Infrastructure.Services.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

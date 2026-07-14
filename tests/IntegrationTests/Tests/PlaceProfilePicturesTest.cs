@@ -1,6 +1,6 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
-using IntegrationTests.Dto;
+using IntegrationTests.Helpers;
 using IntegrationTests.Scopes;
 using Utility.Factories;
 using Utility.Helpers;

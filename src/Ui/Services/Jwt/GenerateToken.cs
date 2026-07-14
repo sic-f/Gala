@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Ui.Services.Jwt;
 
-public class GenerateToken(IOptions<Configuration.Jwt> jwtOptions)
+public class GenerateToken(IOptions<Infrastructure.Configuration.Jwt> jwtOptions)
 {
     private const string Issuer = "Gala";
     private const string Audience = "Lakwatsa";

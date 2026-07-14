@@ -88,7 +88,7 @@ public class PlaceFactory
         var normalFilePath = Path.Combine(testDirectory, $"{normalFileName}");
         var smallFilePath = Path.Combine(testDirectory, $"{smallFileName}");
 
-        using var sourceStream = File.OpenRead(ImageHelper.TestImageAPath);
+        using var sourceStream = File.OpenRead(TestImages.TestImageAPath);
         using var destinationStream = File.Create(normalFilePath);
         using var destinationStreamSmall = File.Create(smallFilePath);
         sourceStream.CopyTo(destinationStream);
@@ -108,7 +108,7 @@ public class PlaceFactory
             var normalFilePath = Path.Combine(testDirectory, $"{fileName}.jpg");
             var smallFilePath = Path.Combine(testDirectory, $"{fileName}-small.jpg");
 
-            using var sourceStream = File.OpenRead(ImageHelper.TestImageAPath);
+            using var sourceStream = File.OpenRead(TestImages.TestImageAPath);
             using var destinationStream = File.Create(normalFilePath);
             using var destinationStreamSmall = File.Create(smallFilePath);
 
