@@ -64,7 +64,7 @@ public class Contribution(IPicturesAttacher attachPictures,
 
         await attachPictures.ComputeAsync(Place, pictureUploads);
 
-        SetDetails(details);
+        Place.SetDetails(details);
 
         await repository.ModifyPlaceAsync(Place);
 
@@ -124,21 +124,6 @@ public class Contribution(IPicturesAttacher attachPictures,
             Instagram = details.Instagram,
             BroId = broId,
         };
-    }
-
-    public void SetDetails(PlaceDetails details)
-    {
-        Place.Name = details.Name;
-        Place.Description = details.Description;
-        Place.Information = details.Information;
-        Place.Address = details.Address;
-        Place.Mobile = details.Mobile;
-        Place.Landline = details.Landline;
-        Place.Email = details.Email;
-        Place.Website = details.Website;
-        Place.Facebook = details.Facebook;
-        Place.Instagram = details.Instagram;
-        Place.LastModified = DateTimeOffset.UtcNow;
     }
 
     private PlacePictureLean? GetPicture()

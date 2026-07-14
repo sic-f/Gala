@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using Core.Dto;
+using Core.Interfaces;
 
 namespace Core.PlaceAggregate;
 
@@ -21,6 +22,20 @@ public class Place
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset LastModified { get; set; }
     public PlaceProfilePicture? Picture => ProfilePictures.FirstOrDefault();
+
+    public void SetDetails(PlaceDetails details)
+    {
+        Name = details.Name;
+        Description = details.Description;
+        Information = details.Information;
+        Address = details.Address;
+        Mobile = details.Mobile;
+        Landline = details.Landline;
+        Email = details.Email;
+        Website = details.Website;
+        Facebook = details.Facebook;
+        Instagram = details.Instagram;
+    }
 
     public void AddPicture(PlaceProfilePicture profilePicture)
     {
