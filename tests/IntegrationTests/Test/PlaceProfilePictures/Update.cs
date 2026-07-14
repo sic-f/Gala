@@ -26,7 +26,7 @@ public class Update(PlacePictureScope app) : BaseTest(app), IClassFixture<PlaceP
             BroId = app.Bro.Id,
             Picture = profilePicture,
         };
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+        Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
         await app.UpdatePictureCaptionAsync(place.Picture!.Id, caption: "New caption");
 

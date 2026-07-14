@@ -27,7 +27,7 @@ public class Details(PlacePictureScope app) : BaseTest(app), IClassFixture<Place
                 Small = ImageHelper.TestImageCPath,
             }
         };
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+        Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
         PlacePictureDto placePicture = await app.GetPlaceProfilePictureAsync(place.Picture!.Id);
 

@@ -19,7 +19,7 @@ public class SavedPlacesTest()
         public async Task SavePlaceTestAsync()
         {
             PlaceAttributes attributes = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
-            Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+            Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
             await app.SavePlaceAsync(place.Id);
 

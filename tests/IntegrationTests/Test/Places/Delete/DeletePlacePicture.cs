@@ -29,7 +29,7 @@ public class DeletePlacePicture(PlacePictureScope app) : BaseTest(app), IClassFi
             Picture = profilePicture,
             BroId = app.Bro.Id,
         };
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+        Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
         await app.DeletePictureAsync(place.Picture!.Id);
 

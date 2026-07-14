@@ -174,7 +174,7 @@ public class FetchPlaces()
         public async Task FetchPlaceTestAsync()
         {
             PlaceAttributes attributes = new() { Name = "Name Test", Address = "Address Test", BroId = app.Bro.Id };
-            Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+            Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
             Core.Dto.PlaceDetails details = await app.GetPlaceAsync(place.Id);
 

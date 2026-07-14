@@ -33,7 +33,7 @@ public class ExclusiveUpdate(PlaceScope app) : BaseTest(app), IClassFixture<Plac
             Address = "Test Address",
             BroId = placeOwner.Id
         };
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+        Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
         return (attributes, place);
     }

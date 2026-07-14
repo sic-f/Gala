@@ -24,7 +24,7 @@ public class Delete(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
     {
         PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Address", BroId = app.Bro.Id };
 
-        return await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+        return await PlaceFactory.CreateAsync(attributes, app.Services);
     }
 
     private async Task WhenBroDeletesPlace(Guid placeId)

@@ -27,7 +27,7 @@ public class PublicAccess(PlaceScope app) : BaseTest(app, isAuthenticated: false
         Bro bro = await BroFactory.CreateAsync("test@example.net", "Hey@123", app.Services);
         PlaceAttributes attributes = new() { Name = "Test Name", Address = "Test Adress", BroId = bro.Id };
 
-        return await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+        return await PlaceFactory.CreateAsync(attributes, app.Services);
     }
 
     private async Task WhenBroDeletesPlaceUnauthenticatedOrUnregisteredAsync(Guid placeId)

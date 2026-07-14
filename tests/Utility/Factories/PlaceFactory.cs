@@ -8,7 +8,7 @@ namespace Utility.Factories;
 
 public class PlaceFactory
 {
-    public static async Task<Place> CreatePlaceAsync(PlaceAttributes attributes, IServiceProvider services)
+    public static async Task<Place> CreateAsync(PlaceAttributes attributes, IServiceProvider services)
     {
         Place place = new()
         {
@@ -50,7 +50,7 @@ public class PlaceFactory
         return place;
     }
 
-    public static async Task<Place> CreatePlaceCompleteDetails(Guid broId, IServiceProvider services)
+    public static async Task<Place> CreateCompleteDetails(Guid broId, IServiceProvider services)
     {
         Place place = new()
         {

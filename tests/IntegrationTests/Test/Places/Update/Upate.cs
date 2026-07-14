@@ -30,7 +30,7 @@ public class Upate(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
             },
         };
 
-        Place place = await PlaceFactory.CreatePlaceAsync(attributes, app.Services);
+        Place place = await PlaceFactory.CreateAsync(attributes, app.Services);
 
         PlaceDetails details = new()
         {
