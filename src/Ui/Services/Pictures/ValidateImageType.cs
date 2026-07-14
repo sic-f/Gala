@@ -1,7 +1,6 @@
 ﻿using Core.Exceptions;
-using Microsoft.AspNetCore.Http;
 
-namespace Infrastructure.Services.Images;
+namespace Ui.Services.Pictures;
 
 public class ValidateImageType
 {
@@ -10,22 +9,6 @@ public class ValidateImageType
     public void Validate(IFormFile image)
     {
         Compute(image);
-    }
-
-    public void Validate(Values.Images images)
-    {
-        if (images.Picture is not null)
-        {
-            Compute(images.Picture);
-        }
-
-        if (images.Pictures is not null)
-        {
-            foreach (IFormFile picture in images.Pictures)
-            {
-                Compute(picture);
-            }
-        }
     }
 
     private void Compute(IFormFile formFile)

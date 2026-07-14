@@ -2,10 +2,9 @@
 using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace Infrastructure.Services.Images;
+namespace Ui.Services.Pictures;
 
 public class ParseToPictureUploads(IGetImagePaths getImagePaths, ValidateImageType validateImageType)
 {

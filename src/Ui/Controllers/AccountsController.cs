@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Ui.Services;
 using Ui.Services.Jwt;
+using Ui.Services.Pictures;
 using Ui.ViewModels;
 
 namespace Ui.Controllers;

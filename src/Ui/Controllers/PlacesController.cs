@@ -4,11 +4,11 @@ using Core.Exceptions;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Data;
-using Infrastructure.Services.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ui.Services;
+using Ui.Services.Pictures;
 
 namespace Ui.Controllers;
 
