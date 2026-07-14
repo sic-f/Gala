@@ -1,4 +1,5 @@
-﻿using Core.PlaceAggregate;
+﻿using Core.Dto;
+using Core.PlaceAggregate;
 using Core.SavedAggregate;
 using Infrastructure.Identity;
 using IntegrationTests.Scopes;
@@ -38,7 +39,7 @@ public class SavedPlacesTest()
         [Collection("Application Factory Collection")]
         public class FetchSavedPlacesTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
         {
-            private IEnumerable<Dto.SavedPlaceResponse> _response = default!;
+            private IEnumerable<SavedPlaceResponse> _response = default!;
             private Bro _bro = default!;
 
             public override async Task InitializeAsync()

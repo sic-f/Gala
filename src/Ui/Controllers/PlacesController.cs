@@ -1,6 +1,6 @@
-using Context;
 using Core.Dto;
 using Core.Exceptions;
+using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.Values;
 using Infrastructure.Data;
@@ -14,7 +14,7 @@ namespace Ui.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PlacesController(ApplicationDbContext context, Contribution contribution) : ControllerBase
+public class PlacesController(ApplicationDbContext context, Context.Contribution contribution) : ControllerBase
 {
     private Place Place { get; set; } = default!;
 
@@ -25,7 +25,7 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<PlaceDetails>> GetPlace(Guid id, Guid broId)
+    public async Task<ActionResult<PlaceDto>> GetPlace(Guid id, Guid broId)
     {
         return await contribution.DisplayPlaceAsync(id, broId);
     }
@@ -33,12 +33,14 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPlace(Guid id,
-                                              Dto.PlaceDetails details,
+                                              [FromForm] PlaceDetails details,
+                                              IFormFile? picture,
+                                              IFormFileCollection pictures,
                                               ParseToPictureUploads parseToPictureUploads)
     {
         try
         {
-            await ModifyPlaceAsync(details, parseToPictureUploads, id, this.BroId(User));
+            await ModifyPlaceAsync(details, picture, pictures, parseToPictureUploads, id, this.BroId(User));
         }
         catch (ImageTypeException)
         {
@@ -73,11 +75,14 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> PostPlace(Dto.PlaceDetails details, ParseToPictureUploads parseToPictureUploads)
+    public async Task<IActionResult> PostPlace([FromForm] PlaceDetails details,
+                                               IFormFile? picture,
+                                               IFormFileCollection pictures,
+                                               ParseToPictureUploads parseToPictureUploads)
     {
         try
         {
-            Place = await SubmitPlaceAsync(details, parseToPictureUploads);
+            Place = await SubmitPlaceAsync(details, picture, pictures, parseToPictureUploads);
         }
         catch (ImageTypeException)
         {
@@ -143,30 +148,36 @@ public class PlacesController(ApplicationDbContext context, Contribution contrib
         return context.Place.Any(e => e.Id == id);
     }
 
-    private async Task<Place> SubmitPlaceAsync(Dto.PlaceDetails details,
+    private async Task<Place> SubmitPlaceAsync(PlaceDetails details,
+                                               IFormFile? picture,
+                                               IFormFileCollection pictures,
                                                ParseToPictureUploads pictureUploadsParser)
     {
-        var placePictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
+        var placePictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, picture, pictures);
 
         return await contribution.SubmitAsync(details, placePictureUploads, this.BroId(User));
     }
 
-    private async Task ModifyPlaceAsync(Dto.PlaceDetails details,
+    private async Task ModifyPlaceAsync(PlaceDetails details,
+                                        IFormFile? picture,
+                                        IFormFileCollection pictures,
                                         ParseToPictureUploads pictureUploadsParser,
                                         Guid placeId,
                                         Guid broId)
     {
-        var pictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, details);
+        var pictureUploads = await PlacePictureUploadsAsync(pictureUploadsParser, picture, pictures);
 
         await contribution.ModifyAsync(details, pictureUploads, placeId, broId);
     }
 
-    private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads parseToPictureUploads, Dto.PlaceDetails details)
+    private async Task<PictureUploads> PlacePictureUploadsAsync(ParseToPictureUploads parseToPictureUploads,
+                                                                IFormFile? picture,
+                                                                IFormFileCollection pictures)
     {
-        return await parseToPictureUploads.FromFormFilesAsync<Core.PlaceAggregate.PlacePicture>(
+        return await parseToPictureUploads.FromFormFilesAsync<PlacePicture>(
             new UrlSegments(Request.Scheme, Request.Host.ToString()),
-            details.Picture,
-            details.Pictures,
+            picture,
+            pictures,
             ModelState);
     }
 }

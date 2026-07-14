@@ -1,4 +1,3 @@
-using Core.Dto;
 using Core.SavedAggregate;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -53,7 +52,7 @@ namespace Ui.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Saved>> PostSaved(SavedDto saved)
+        public async Task<ActionResult<Core.SavedAggregate.Saved>> PostSaved(Core.Dto.Saved saved)
         {
             _savedPlace = await bookmark.SavePlaceAsync(saved.PlaceId, this.BroId(User));
 

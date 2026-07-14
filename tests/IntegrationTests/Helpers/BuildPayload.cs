@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Core.Dto;
+using Microsoft.AspNetCore.Http;
 using System.Reflection;
-using Ui.Dto;
 
 namespace IntegrationTests.Helpers;
 
 public class BuildPayload
 {
-    public static void Compute(PlaceDetails details, MultipartFormDataContent content)
+    public static void Compute(PlaceDetails details, MultipartFormDataContent content, IFormFile? picture = null)
     {
         foreach (PropertyInfo detail in details.GetType().GetProperties())
         {
@@ -16,11 +16,11 @@ public class BuildPayload
             content.Add(new StringContent(value), detail.Name);
         }
 
-        if (details.Picture is not null)
+        if (picture is not null)
         {
-            var pictureField = new StreamContent(details.Picture.OpenReadStream());
-            pictureField.Headers.Add("Content-Type", details.Picture.ContentType);
-            content.Add(pictureField, "picture", details.Picture.FileName);
+            var pictureField = new StreamContent(picture.OpenReadStream());
+            pictureField.Headers.Add("Content-Type", picture.ContentType);
+            content.Add(pictureField, "picture", picture.FileName);
         }
     }
 }

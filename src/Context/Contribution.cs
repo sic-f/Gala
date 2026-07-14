@@ -44,7 +44,7 @@ public class Contribution(IPicturesAttacher attachPictures,
         return result;
     }
 
-    public async Task<Place> SubmitAsync(IPlaceSetter details, PictureUploads pictureUploads, Guid broId)
+    public async Task<Place> SubmitAsync(PlaceDetails details, PictureUploads pictureUploads, Guid broId)
     {
         BuildPlace(details, broId);
 
@@ -53,7 +53,7 @@ public class Contribution(IPicturesAttacher attachPictures,
         return await repository.CreatePlaceAsync(Place);
     }
 
-    public async Task<Place> ModifyAsync(IPlaceSetter details, PictureUploads pictureUploads, Guid id, Guid broId)
+    public async Task<Place> ModifyAsync(PlaceDetails details, PictureUploads pictureUploads, Guid id, Guid broId)
     {
         Place = await repository.FetchPlaceWithPictureAsync(id);
 
@@ -72,25 +72,25 @@ public class Contribution(IPicturesAttacher attachPictures,
         return Place;
     }
 
-    public async Task<PlaceDetails> DisplayPlaceAsync(Guid id, Guid broId)
+    public async Task<PlaceDto> DisplayPlaceAsync(Guid id, Guid broId)
     {
         Place = repository.FetchPlaceComplete(id);
 
-        return new PlaceDetails(Id: Place.Id,
-                                Name: Place.Name,
-                                Description: Place.Description,
-                                Information: Place.Information,
-                                Address: Place.Address,
-                                Mobile: Place.Mobile,
-                                Landline: Place.Landline,
-                                Email: Place.Email,
-                                Website: Place.Website,
-                                Facebook: Place.Facebook,
-                                Instagram: Place.Instagram,
-                                BroId: Place.BroId,
-                                BookmarkId: await GetIsSavedIdAsync(id, broId),
-                                Picture: GetPicture(),
-                                Pictures: GetPictures());
+        return new PlaceDto(Id: Place.Id,
+                            Name: Place.Name,
+                            Description: Place.Description,
+                            Information: Place.Information,
+                            Address: Place.Address,
+                            Mobile: Place.Mobile,
+                            Landline: Place.Landline,
+                            Email: Place.Email,
+                            Website: Place.Website,
+                            Facebook: Place.Facebook,
+                            Instagram: Place.Instagram,
+                            BroId: Place.BroId,
+                            BookmarkId: await GetIsSavedIdAsync(id, broId),
+                            Picture: GetPicture(),
+                            Pictures: GetPictures());
     }
 
     public async Task DeleteAsync(Guid id, Guid broId)
@@ -109,7 +109,7 @@ public class Contribution(IPicturesAttacher attachPictures,
         await repository.DeletePlaceAsync(Place);
     }
 
-    private void BuildPlace(IPlaceSetter details, Guid broId)
+    private void BuildPlace(PlaceDetails details, Guid broId)
     {
         Place = new()
         {
@@ -127,7 +127,7 @@ public class Contribution(IPicturesAttacher attachPictures,
         };
     }
 
-    public void SetDetails(IPlaceSetter details)
+    public void SetDetails(PlaceDetails details)
     {
         Place.Name = details.Name;
         Place.Description = details.Description;

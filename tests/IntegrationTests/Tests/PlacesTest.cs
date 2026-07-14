@@ -1,4 +1,5 @@
-﻿using Core.PlaceAggregate;
+﻿using Core.Dto;
+using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using IntegrationTests.Errors;
@@ -8,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Ui.Dto;
 using Utility.Factories;
 using Utility.Helpers;
 
@@ -285,7 +285,7 @@ public class PlacesTest
                 Place newPlace = new() { Name = "Name Test", Address = "Address Test", BroId = app.Bro.Id };
                 Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
-                Core.Dto.PlaceDetails details = await app.GetPlaceAsync(place.Id);
+                PlaceDto details = await app.GetPlaceAsync(place.Id);
 
                 Assert.Equal("Name Test", details.Name);
                 Assert.Equal("Address Test", details.Address);
@@ -329,7 +329,6 @@ public class PlacesTest
                 {
                     Name = "Test Name Update",
                     Address = "Test Address Update",
-                    Picture = ImageHelper.MockImageFormFile()
                 };
 
                 await app.UpdatePlaceAsync(placeId, updateAttributes);
@@ -383,10 +382,9 @@ public class PlacesTest
                 {
                     Name = "Name",
                     Address = "Address",
-                    Picture = ImageHelper.MockImageFormFile(),
                 };
 
-                await app.UpdatePlaceAsync(place.Id, details);
+                await app.UpdatePlaceAsync(place.Id, details, ImageHelper.MockImageFormFile());
 
                 Assert.True(app.Response.IsSuccessStatusCode);
 

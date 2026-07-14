@@ -1,5 +1,4 @@
 ﻿using Core.Dto;
-using IntegrationTests.Dto;
 using System.Net.Http.Json;
 
 namespace IntegrationTests.Scopes;
@@ -18,8 +17,8 @@ public class SavedScope : ApplicationFactory<Program>
         Response = await Client.PostAsJsonAsync(DefaultStartUrl, new { placeId });
     }
 
-    internal async Task<SavedResponse> SavePlaceSuccessResponseAsync()
+    internal async Task<Core.Dto.SavedPlaceResponse> SavePlaceSuccessResponseAsync()
     {
-        return (await Response.Content.ReadFromJsonAsync<SavedResponse>())!;
+        return (await Response.Content.ReadFromJsonAsync<SavedPlaceResponse>())!;
     }
 }
