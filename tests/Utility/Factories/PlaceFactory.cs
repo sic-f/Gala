@@ -67,6 +67,17 @@ public class PlaceFactory
         return place;
     }
 
+    public static async Task<IEnumerable<Place>> CreateAsync(IEnumerable<Place> places, IServiceProvider services)
+    {
+        var scope = services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        context.Place.AddRange(places);
+        await context.SaveChangesAsync();
+
+        return places;
+    }
+
     private static string CreateTestDirectory()
     {
         var baseDirectory = Directory.GetCurrentDirectory();

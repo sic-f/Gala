@@ -12,7 +12,7 @@ public class BroFactory
     /// <summary>
     /// Creates Bro quickly with pre-defined field values, just supply a service provider.
     /// </summary>
-    /// <param name="services">The service provider (IServiceProvider) to create a scope for the database context.</param>
+    /// <param name="services">The service provider (IServiceProvider) to create a scope when resolving services, like in this case the database context.</param>
     /// <returns>The created Bro.</returns>
     public static async Task<Bro> CreateAsync(IServiceProvider services)
     {
@@ -29,7 +29,7 @@ public class BroFactory
     /// </summary>
     /// <param name="email">Email of Bro to be created.</param>
     /// <param name="password">Password for the Bro account to be created.</param>
-    /// <param name="services">The service provider (IServiceProvider) to create a scope for the database context.</param>
+    /// <param name="services">The service provider (IServiceProvider) to create a scope when resolving services, like in this case the database context.</param>
     /// <returns>The created Bro.</returns>
     public static async Task<Bro> CreateAsync(string email, string password, IServiceProvider services)
     {
@@ -44,7 +44,7 @@ public class BroFactory
     /// Creates Bro with BroWithFullName dto as argument, and a service provider.
     /// </summary>
     /// <param name="broDetails">BroWithFullName dto to supply details for creating Bro.</param>
-    /// <param name="services">The service provider (IServiceProvider) to create a scope for the database context.</param>
+    /// <param name="services">The service provider (IServiceProvider) to create a scope when resolving services, like in this case the database context.</param>
     /// <returns>The created Bro.</returns>
     public static async Task<Bro> CreateAsync(BroWithFullName broDetails, IServiceProvider services)
     {
@@ -59,7 +59,7 @@ public class BroFactory
     /// Creates Bro with BroWithFullName dto as argument, and a database context.
     /// </summary>
     /// <param name="broDetails">BroWithFullName dto to supply details for creating Bro.</param>
-    /// <param name="context">The database context (ApplicationDbContext) to use for persisting to the database.</param>
+    /// <param name="context">The database context (ApplicationDbContext) to use for persisting Bro to the database.</param>
     /// <returns>The created Bro.</returns>
     public static async Task<Bro> CreateAsync(BroWithFullName broDetails, ApplicationDbContext context)
     {
@@ -75,7 +75,7 @@ public class BroFactory
     /// </summary>
     /// <param name="bro">A newed-up Bro.</param>
     /// <param name="password">Password for the Bro account to be created.</param>
-    /// <param name="services">The service provider (IServiceProvider) to create a scope for the database context.</param>
+    /// <param name="services">The service provider (IServiceProvider) to create a scope when resolving services, like in this case the database context.</param>
     /// <returns>void</returns>
     /// <exception cref="Exception"></exception>
     private static async Task CreateAsync(Bro bro, string password, IServiceProvider services)
