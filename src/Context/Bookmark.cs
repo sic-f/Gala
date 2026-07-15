@@ -3,7 +3,7 @@ using Core.SavedAggregate;
 
 namespace Context;
 
-public class Saved(ISavedPlaceRepository repository)
+public class Bookmark(ISavedPlaceRepository repository)
 {
     public async Task<SavedPlace> SavePlaceAsync(Guid placeId, Guid broId)
     {

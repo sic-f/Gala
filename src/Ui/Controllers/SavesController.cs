@@ -9,7 +9,7 @@ namespace Ui.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SavesController(ApplicationDbContext context, Context.Saved bookmark) : ControllerBase
+    public class SavesController(ApplicationDbContext context, Context.Bookmark bookmark) : ControllerBase
     {
         private SavedPlace _savedPlace = default!;
 
@@ -52,7 +52,7 @@ namespace Ui.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Core.SavedAggregate.Saved>> PostSaved(Core.Dto.Saved saved)
+        public async Task<ActionResult<Saved>> PostSaved(Core.Dto.Saved saved)
         {
             _savedPlace = await bookmark.SavePlaceAsync(saved.PlaceId, this.BroId(User));
 
