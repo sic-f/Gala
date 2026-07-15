@@ -47,9 +47,9 @@ public class PlaceScope : ApplicationFactory<Program>
         Response = await Client.PutAsync($"{DefaultStartUrl}/{placeId}", content);
     }
 
-    public async Task<IEnumerable<Place>?> GetPlacesAsync(string? lastModifiedDate, int fetchLimit)
+    public async Task<IEnumerable<Place>?> GetPlacesAsync(string? offset, int limit)
     {
-        return await Client.GetFromJsonAsync<IEnumerable<Place>>($"{DefaultStartUrl}/?offset={lastModifiedDate}&limit={fetchLimit}");
+        return await Client.GetFromJsonAsync<IEnumerable<Place>>($"{DefaultStartUrl}/?offset={offset}&limit={limit}");
     }
 
     public async Task<PlaceDto> GetPlaceAsync(Guid id)
