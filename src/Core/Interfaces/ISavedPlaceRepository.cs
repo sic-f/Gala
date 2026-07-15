@@ -1,11 +1,12 @@
-﻿using Core.SavedAggregate;
+﻿using Core.Dto;
+using Core.PlaceAggregate;
+using Core.SavedAggregate;
 
 namespace Core.Interfaces;
 
 public interface ISavedPlaceRepository
 {
-    IEnumerable<SavedPlace> FetchSavedPlaces(Guid saverId);
+    IEnumerable<Place> FetchSavedPlaces(Guid saverId);
     Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace);
-    void DeleteSavedPlace(Guid id);
     Task<Guid?> GetSavedPlaceId(Guid placeId, Guid broId);
 }

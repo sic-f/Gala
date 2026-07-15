@@ -60,3 +60,4 @@ public record PlaceDto(Guid Id,
                        Guid? BookmarkId,
                        PlacePictureLean? Picture,
                        IEnumerable<PlacePictureLean> Pictures);
+public record PlaceBookmark(Guid PlaceId, string Name, string? Description, string? Picture);

@@ -1,8 +1,8 @@
+using Core.Dto;
 using Core.SavedAggregate;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Ui.Services;
 
 namespace Ui.Controllers
@@ -15,44 +15,14 @@ namespace Ui.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Saved>>> GetSaved()
+        public ActionResult<IEnumerable<PlaceBookmark>> GetSaved(Guid broId)
         {
-            return await context.Saved.ToListAsync();
-        }
-
-        [Authorize]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSaved(Guid id, Saved saved)
-        {
-            if (id != saved.Id)
-            {
-                return BadRequest();
-            }
-
-            context.Entry(saved).State = EntityState.Modified;
-
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SavedExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return bookmark.FetchBookmarks(broId).ToList();
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Saved>> PostSaved(Core.Dto.Saved saved)
+        public async Task<ActionResult<SavedPlace>> PostSaved(Core.Dto.Saved saved)
         {
             _savedPlace = await bookmark.SavePlaceAsync(saved.PlaceId, this.BroId(User));
 

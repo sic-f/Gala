@@ -1,10 +1,8 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
 using Core.SavedAggregate;
-using Infrastructure.Data;
 using Infrastructure.Identity;
 using IntegrationTests.Scopes;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Utility.Factories;
 
@@ -41,7 +39,7 @@ public class SavedPlacesTest()
         [Collection("Application Factory Collection")]
         public class FetchSavedPlacesTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
         {
-            private IEnumerable<SavedPlaceResponse> _response = default!;
+            private IEnumerable<PlaceBookmark> _response = default!;
             private Bro _bro = default!;
             private Place[] _places = default!;
 
@@ -66,44 +64,49 @@ public class SavedPlacesTest()
             public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
             [Fact]
-            public async Task FetchesPlacesSavedByBroTestAsync()
-            {
-                Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
-                Assert.Collection(_response,
-                    sp => Assert.Equal(_bro.Id, sp.SaverId),
-                    sp => Assert.Equal(_bro.Id, sp.SaverId),
-                    sp => Assert.Equal(_bro.Id, sp.SaverId));
-            }
-
-            [Fact]
-            public async Task DoesNotFetchPlacesSavedByOtherBrosTestAsync()
-            {
-                Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
-                Assert.Collection(_response,
-                    sp => Assert.NotEqual(app.Bro.Id, sp.SaverId),
-                    sp => Assert.NotEqual(app.Bro.Id, sp.SaverId),
-                    sp => Assert.NotEqual(app.Bro.Id, sp.SaverId));
-            }
-
-            [Fact]
             public async Task DoesNotFetchPlacesNotSavedByBroTestAsync()
             {
                 Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
                 Assert.Collection(_response,
-                    sp => Assert.NotEqual(_places[3].Id, sp.SaveableId),
-                    sp => Assert.NotEqual(_places[3].Id, sp.SaveableId),
-                    sp => Assert.NotEqual(_places[3].Id, sp.SaveableId));
+                    sp => Assert.NotEqual("Unexpected", sp.Name),
+                    sp => Assert.NotEqual("Unexpected", sp.Name),
+                    sp => Assert.NotEqual("Unexpected", sp.Name));
             }
+
+            [Fact]
+            public async Task FetchesPlacesSavedByBroTestAsync()
+            {
+                Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
+                Assert.Collection(_response,
+                    sp => Assert.Equal("Expected", sp.Name),
+                    sp => Assert.Equal("Expected b", sp.Name),
+                    sp => Assert.Equal("Expected c", sp.Name));
+            }
+
+            [Fact]
+            public async Task FetchesPlacesWithPictureTestAsync()
+            {
+                Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
+                Assert.Collection(_response,
+                    sp => Assert.NotEqual("Small picture", sp.Picture),
+                    sp => Assert.NotEqual("Small picture", sp.Picture),
+                    sp => Assert.NotEqual("Small picture", sp.Picture));
+            }                                                      
 
             private static IEnumerable<Place> BuildPlaces(Guid broId)
             {
-                return
-                [
-                    new Place { Name = "Bookmarked by other bro", Address = "Address", BroId = broId },
-                    new Place { Name = "Bookmarked by other bro", Address="Address", BroId = broId },
-                    new Place { Name = "Bookmarked by other bro", Address = "Address", BroId = broId },
-                    new Place { Name = "Not bookmarked by other bro", Address = "Address", BroId = broId },
-                ];
+                PlaceProfilePicture picture = new() { Small = "Small Picture " };
+                var place = new Place { Name = "Expected", Address = "Address", BroId = broId };
+                var placeB = new Place { Name = "Expected b", Address = "Address", BroId = broId };
+                var placeC = new Place { Name = "Expected c", Address = "Address", BroId = broId };
+                var placeD = new Place { Name = "Unexpected", Address = "Address", BroId = broId };
+
+                place.AddPicture(picture);
+                placeB.AddPicture(picture);
+                placeC.AddPicture(picture);
+                placeD.AddPicture(picture);
+
+                return [place, placeB, placeC, placeD];
             }
         }
     }

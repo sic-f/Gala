@@ -1,4 +1,6 @@
-﻿using Core.Interfaces;
+﻿using Core.Dto;
+using Core.Interfaces;
+using Core.PlaceAggregate;
 using Core.SavedAggregate;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +11,11 @@ public class SavedPlaceRepository(ApplicationDbContext context) : ISavedPlaceRep
 {
     private SavedPlace _savedPlace = default!;
 
-    public IEnumerable<SavedPlace> FetchSavedPlaces(Guid saverId)
+    public IEnumerable<Place> FetchSavedPlaces(Guid broId)
     {
-        throw new NotImplementedException();
+        IQueryable<Guid> savedPlaceIds = context.SavedPlace.Where(sp => sp.SaverId == broId).Select(sp => sp.SaveableId);
+
+        return context.Place.Include(p => p.ProfilePictures).Where(p => savedPlaceIds.Contains(p.Id));
     }
 
     public async Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace)
@@ -22,14 +26,9 @@ public class SavedPlaceRepository(ApplicationDbContext context) : ISavedPlaceRep
         return _savedPlace;
     }
 
-    public void DeleteSavedPlace(Guid id)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<Guid?> GetSavedPlaceId(Guid placeId, Guid broId)
     {
-        return (await context.SavedPlace.FirstOrDefaultAsync<SavedPlace>(sp => 
+        return (await context.SavedPlace.FirstOrDefaultAsync<SavedPlace>(sp =>
             sp.SaveableId == placeId && sp.SaverId == broId))?.Id;
     }
 }
