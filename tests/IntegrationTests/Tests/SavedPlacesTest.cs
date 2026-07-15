@@ -1,8 +1,10 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
 using Core.SavedAggregate;
+using Infrastructure.Data;
 using Infrastructure.Identity;
 using IntegrationTests.Scopes;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Utility.Factories;
 
@@ -10,6 +12,8 @@ namespace IntegrationTests.Tests;
 
 public class SavedPlacesTest()
 {
+    private const int FetchLimit = 5;
+
     public class SaveTest
     {
         [Collection("Application Factory Collection")]
@@ -58,7 +62,8 @@ public class SavedPlacesTest()
 
                 await SavedPlaceFactory.CreateAsync(buildSavedPlaces, app.Services);
 
-                _response = await app.GetAllSavedPlacesAsync(_bro.Id);
+                
+                _response = await app.GetAllSavedPlacesAsync(offset: DateTimeOffset.UtcNow.ToString(), limit: FetchLimit, _bro.Id);
             }
 
             public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
@@ -91,7 +96,7 @@ public class SavedPlacesTest()
                     sp => Assert.NotEqual("Small picture", sp.Picture),
                     sp => Assert.NotEqual("Small picture", sp.Picture),
                     sp => Assert.NotEqual("Small picture", sp.Picture));
-            }                                                      
+            }
 
             private static IEnumerable<Place> BuildPlaces(Guid broId)
             {
@@ -109,5 +114,131 @@ public class SavedPlacesTest()
                 return [place, placeB, placeC, placeD];
             }
         }
+
+        [Collection("Application Factory Collection")]
+        public class PaginatedTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+        {
+            public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+            [Fact]
+            public async Task FetchSavedPlacesPaginatedTestAsync()
+            {
+                SavedPlace[] newSavedPlaces = BuildNewSavedPlaces();
+
+                using var scope = app.Services.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                context.SavedPlace.AddRange(newSavedPlaces);
+                await context.SaveChangesAsync();
+
+                DateTimeOffset createdAt = newSavedPlaces[6].CreatedAt;
+                IEnumerable<PlaceBookmark>? bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit, app.Bro.Id);
+
+                Assert.Collection(bookmarks!,
+                    p => Assert.Equal("1st Batch E", p.Name),
+                    p => Assert.Equal("1st Batch D", p.Name),
+                    p => Assert.Equal("1st Batch C", p.Name),
+                    p => Assert.Equal("1st Batch B", p.Name),
+                    p => Assert.Equal("1st Batch A", p.Name));
+
+                createdAt = newSavedPlaces[11].CreatedAt;
+                bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit, app.Bro.Id);
+
+                Assert.Collection(bookmarks!,
+                    p => Assert.Equal("2nd Batch E", p.Name),
+                    p => Assert.Equal("2nd Batch D", p.Name),
+                    p => Assert.Equal("2nd Batch C", p.Name),
+                    p => Assert.Equal("2nd Batch B", p.Name),
+                    p => Assert.Equal("2nd Batch A", p.Name));
+            }
+
+            private SavedPlace[] BuildNewSavedPlaces()
+            {
+                return 
+                [
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(21),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(23),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(25),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(27),
+                    },
+                    new SavedPlace
+                    {
+                        SaverId = app.Bro.Id,
+                        CreatedAt = DateTimeOffset.UtcNow.AddSeconds(29),
+                    },
+                ];
+            }
+
+            private static string GetFormattedDateTimeOffset(DateTimeOffset dateTime)
+            {
+                return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
+            }
+        }
+
     }
 }

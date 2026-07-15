@@ -8,9 +8,9 @@ public class SavedScope : ApplicationFactory<Program>
 {
     protected override string DefaultStartUrl => $"api/Saves";
 
-    internal async Task<IEnumerable<PlaceBookmark>> GetAllSavedPlacesAsync(Guid broId)
+    internal async Task<IEnumerable<PlaceBookmark>> GetAllSavedPlacesAsync(string offset, int limit, Guid broId)
     {
-        return (await Client.GetFromJsonAsync<IEnumerable<PlaceBookmark>>($"{DefaultStartUrl}?broId={broId}"))!;
+        return (await Client.GetFromJsonAsync<IEnumerable<PlaceBookmark>>($"{DefaultStartUrl}?offset={offset}?limit={limit}?broId={broId}"))!;
     }
 
     internal async Task SavePlaceAsync(Guid placeId)
