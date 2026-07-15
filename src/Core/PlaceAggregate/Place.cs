@@ -1,5 +1,4 @@
 ﻿using Core.Dto;
-using Core.Interfaces;
 
 namespace Core.PlaceAggregate;
 
