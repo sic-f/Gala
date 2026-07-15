@@ -6,7 +6,7 @@ namespace Core.Interfaces;
 
 public interface ISavedPlaceRepository
 {
-    IEnumerable<Place> FetchSavedPlaces(Guid saverId);
+    IEnumerable<Place> FetchSavedPlaces(DateTimeOffset offset, int limit, Guid saverId);
     Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace);
     Task<Guid?> GetSavedPlaceId(Guid placeId, Guid broId);
 }

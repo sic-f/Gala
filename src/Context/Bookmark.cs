@@ -7,9 +7,9 @@ namespace Context;
 
 public class Bookmark(ISavedPlaceRepository repository)
 {
-    public IEnumerable<PlaceBookmark> FetchBookmarks(Guid broId)
+    public IEnumerable<PlaceBookmark> FetchBookmarks(DateTimeOffset offset, int limit, Guid broId)
     {
-        Place[] place = [.. repository.FetchSavedPlaces(broId)];
+        IEnumerable<Place> place = repository.FetchSavedPlaces(offset, limit, broId);
 
         return place.Select(p => new PlaceBookmark(
             PlaceId: p.Id,

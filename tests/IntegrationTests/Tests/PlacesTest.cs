@@ -121,6 +121,8 @@ public class PlacesTest
         [Collection("Application Factory Collection")]
         public class PaginatedTest(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
         {
+            public const int FetchLimit = 5;
+
             public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
             [Fact]
@@ -135,9 +137,8 @@ public class PlacesTest
                 context.Place.AddRange(newPlaces);
                 await context.SaveChangesAsync();
 
-                DateTimeOffset? createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "2nd Batch A")?.CreatedAt;
-                var fetchLimit = 5;
-                IEnumerable<Place>? places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
+                DateTimeOffset? createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "1st Batch E")?.CreatedAt.AddSeconds(1);
+                IEnumerable<Place>? places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(places!,
                     p => Assert.Equal("1st Batch E", p.Name),
@@ -147,7 +148,7 @@ public class PlacesTest
                     p => Assert.Equal("1st Batch A", p.Name));
 
                 createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "3rd Batch A")?.CreatedAt;
-                places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), fetchLimit);
+                places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(places!,
                     p => Assert.Equal("2nd Batch E", p.Name),
