@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using Core.Dto;
+using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.SavedAggregate;
 using Infrastructure.Data;
@@ -10,19 +11,22 @@ public class SavedPlaceRepository(ApplicationDbContext context) : ISavedPlaceRep
 {
     private SavedPlace _savedPlace = default!;
 
-    public IEnumerable<Place> FetchSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
+    public (IEnumerable<Place>, IList<SavedPlace>) FetchSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
     {
-        IList<Guid> savedPlaceIds = [.. context.SavedPlace.AsNoTracking()
+        IList<SavedPlace> savedPlaces = [.. context.SavedPlace.AsNoTracking()
             .Where(p => p.CreatedAt < offset)
             .OrderByDescending(p => p.CreatedAt)
             .Take(limit)
-            .Where(sp => sp.SaverId == broId)
-            .Select(sp => sp.SaveableId)];
+            .Where(sp => sp.SaverId == broId)];
 
-        return context.Place.Include(p => p.ProfilePictures)
+        IList<Guid> savedPlaceIds = [.. savedPlaces.Select(sianca => sianca.SaveableId)];
+
+        IEnumerable<Place> places = context.Place.Include(p => p.ProfilePictures)
             .Where(p => savedPlaceIds.Contains(p.Id))
             .ToList()
             .OrderBy(p => savedPlaceIds.IndexOf(p.Id));
+
+        return (places, savedPlaces);
     }
 
     public async Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace)
