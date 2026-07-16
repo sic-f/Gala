@@ -15,9 +15,9 @@ namespace Ui.Controllers
 
         [Authorize]
         [HttpGet]
-        public ActionResult<IEnumerable<PlaceBookmark>> GetSaved(DateTimeOffset offset, int limit, Guid broId)
+        public ActionResult<IEnumerable<PlaceBookmark>> GetSaved(DateTimeOffset offset, int limit)
         {
-            return bookmark.FetchBookmarks(offset, limit, broId).ToList();
+            return bookmark.FetchBookmarks(offset, limit, this.BroId(User)).ToList();
         }
 
         [Authorize]
