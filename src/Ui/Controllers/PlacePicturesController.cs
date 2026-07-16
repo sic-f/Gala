@@ -58,6 +58,7 @@ namespace Ui.Controllers
                                                     Message: "Updated successfuly."));
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePlacePicture(Guid id)
         {
