@@ -4,7 +4,7 @@ public class BaseTest(ApplicationFactory<Program> app, bool isAuthenticated = tr
 {
     public virtual Task DisposeAsync() => Task.CompletedTask;
 
-    public async Task InitializeAsync()
+    public virtual async Task InitializeAsync()
     {
         await app.ResetDatabase();
         await InitializeClientAsync();

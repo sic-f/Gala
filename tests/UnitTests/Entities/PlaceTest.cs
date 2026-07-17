@@ -1,27 +1,20 @@
-﻿using Core.PlaceAggregate;
-using Utility.Dto;
+﻿using Core.Dto;
+using Core.PlaceAggregate;
 
 namespace UnitTests.Entities;
 
 public class PlaceTest
 {
     [Fact]
-    public void UpdateDetailsTest()
+    public void SetDetailsTest()
     {
-        Place place = new()
-        {
-            Name = "Test",
-            Address = "Test Address",
-            Description = "Test Description",
-        };
+        Place place = new() { Name = "Name", Address = "Address" };
+        PlaceDetails details = new() { Name = "New Name", Address = "New Address" };
 
-        PlaceDetails details = new() { Name = "Updated", Address = "Updated" };
+        place.SetDetails(details);
 
-        place.UpdateDetails(details);
-
-        Assert.Equal("Updated", place.Name);
-        Assert.Equal("Updated", place.Address);
-        Assert.NotEqual("Updated", place.Description);
+        Assert.Equal("New Name", place.Name);
+        Assert.Equal("New Address", place.Address);
     }
 
     [Fact]

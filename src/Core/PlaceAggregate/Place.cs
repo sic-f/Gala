@@ -1,4 +1,4 @@
-﻿using Core.Interfaces;
+﻿using Core.Dto;
 
 namespace Core.PlaceAggregate;
 
@@ -18,11 +18,11 @@ public class Place
     public ICollection<PlaceProfilePicture> ProfilePictures { get; } = Enumerable.Empty<PlaceProfilePicture>().ToList();
     public List<PlaceExtraPicture> Pictures { get; } = new List<PlaceExtraPicture>();
     public Guid BroId { get; set; }
-    public DateTimeOffset CreatedAt { get; }
+    public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset LastModified { get; set; }
     public PlaceProfilePicture? Picture => ProfilePictures.FirstOrDefault();
 
-    public void UpdateDetails(IPlaceUpdater details)
+    public void SetDetails(PlaceDetails details)
     {
         Name = details.Name;
         Description = details.Description;
@@ -34,7 +34,6 @@ public class Place
         Website = details.Website;
         Facebook = details.Facebook;
         Instagram = details.Instagram;
-        LastModified = DateTimeOffset.UtcNow;
     }
 
     public void AddPicture(PlaceProfilePicture profilePicture)
