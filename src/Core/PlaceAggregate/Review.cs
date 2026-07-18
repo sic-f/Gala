@@ -1,4 +1,6 @@
-﻿namespace Core.PlaceAggregate;
+﻿using Core.Dto;
+
+namespace Core.PlaceAggregate;
 
 public class Review
 {
@@ -9,4 +11,11 @@ public class Review
     public Guid ReviewerId { get; set; }
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset LastModified { get; set; }
+
+    public void SetDetails(ReviewDetails details, Guid broId)
+    {
+        Content = details.Content;
+        PlaceId = details.PlaceId;
+        ReviewerId = broId;
+    }
 }
