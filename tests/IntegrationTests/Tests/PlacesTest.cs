@@ -147,7 +147,7 @@ public class PlacesTest
                     p => Assert.Equal("1st Batch B", p.Name),
                     p => Assert.Equal("1st Batch A", p.Name));
 
-                createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "3rd Batch A")?.CreatedAt;
+                createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "2nd Batch E")?.CreatedAt.AddSeconds(1);
                 places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(places!,
