@@ -15,9 +15,10 @@ public class Place
     public string? Website { get; set; }
     public string? Facebook { get; set; }
     public string? Instagram { get; set; }
-    public ICollection<PlaceProfilePicture> ProfilePictures { get; } = Enumerable.Empty<PlaceProfilePicture>().ToList();
-    public List<PlaceExtraPicture> Pictures { get; } = new List<PlaceExtraPicture>();
     public Guid BroId { get; set; }
+    public ICollection<PlaceProfilePicture> ProfilePictures { get; } = [];
+    public List<PlaceExtraPicture> Pictures { get; } = [];
+    public ICollection<Review> Reviews { get; } = [];
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset LastModified { get; set; }
     public PlaceProfilePicture? Picture => ProfilePictures.FirstOrDefault();
