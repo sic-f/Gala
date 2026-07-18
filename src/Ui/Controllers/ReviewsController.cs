@@ -10,8 +10,9 @@ namespace Ui.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReviewsController(ApplicationDbContext context) : ControllerBase
+    public class ReviewsController(ApplicationDbContext context, Context.Review review) : ControllerBase
     {
+        private Review _review = default!;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Review>>> GetReview()
@@ -65,13 +66,9 @@ namespace Ui.Controllers
         [HttpPost]
         public async Task<ActionResult<Review>> PostReview(ReviewDetails details)
         {
-            var review = new Review();
-            review.SetDetails(details, this.BroId(User));
+            _review = await review.WriteReviewAsync(details, this.BroId(User));
 
-            context.Review.Add(review);
-            await context.SaveChangesAsync();
-
-            return CreatedAtAction("GetReview", new { id = review.Id }, review);
+            return CreatedAtAction(nameof(GetReview), new { _review.Id }, _review);
         }
 
         [HttpDelete("{id}")]

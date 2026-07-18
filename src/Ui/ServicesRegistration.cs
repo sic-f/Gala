@@ -20,6 +20,7 @@ public static class ServicesRegistration
         services.AddScoped<Contribution>();
         services.AddScoped<PlacePicture>();
         services.AddScoped<Bookmark>();
+        services.AddScoped<Review>();
 
         services.AddScoped<IDeletePicture, DeletePicture>();
         services.AddScoped<IGetPicturePaths, GetPicturePaths>();

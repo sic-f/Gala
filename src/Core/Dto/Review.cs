@@ -8,3 +8,4 @@ public record ReviewDetails
     public string Content { get; set; } = string.Empty;
     public Guid PlaceId { get; set; }
 };
+public record ReviewDto(Guid Id, string? Headline, string Content);
