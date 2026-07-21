@@ -59,5 +59,6 @@ public record PlaceDto(Guid Id,
                        Guid BroId,
                        Guid? BookmarkId,
                        PlacePictureLean? Picture,
-                       IEnumerable<PlacePictureLean> Pictures);
+                       IEnumerable<PlacePictureLean> Pictures,
+                       IEnumerable<ReviewDto> Reviews);
 public record PlaceBookmark(Guid PlaceId, string Name, string? Description, string? Picture, DateTimeOffset CreatedAt);

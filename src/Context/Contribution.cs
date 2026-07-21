@@ -89,7 +89,8 @@ public class Contribution(IPicturesAttacher attachPictures,
                             BroId: Place.BroId,
                             BookmarkId: await GetIsSavedIdAsync(id, broId),
                             Picture: GetPicture(),
-                            Pictures: GetPictures());
+                            Pictures: GetPictures(),
+                            Reviews: GetReviews());
     }
 
     public async Task DeleteAsync(Guid id, Guid broId)
@@ -142,13 +143,25 @@ public class Contribution(IPicturesAttacher attachPictures,
 
     private IEnumerable<PlacePictureLean> GetPictures()
     {
-        if (Place.Pictures.Count != 0)
-        {
+        //if (Place.Pictures.Count != 0)
+        //{
             return Place.Pictures.Select(p =>
                 new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId));
-        }
+        //}
 
-        return [];
+        //return [];
+    }
+
+    private IEnumerable<ReviewDto> GetReviews()
+    {
+        return Place.Reviews.Select(static r => new ReviewDto(
+            Id: r.Id,
+            Headline: r.Headline,
+            Content: r.Content,
+            PlaceId: r.PlaceId,
+            ReviewerId: r.ReviewerId,
+            CreatedAt: r.CreatedAt))
+        .OrderByDescending(r => r.CreatedAt);
     }
 
     private async Task<Guid?> GetIsSavedIdAsync(Guid placeId, Guid broId)

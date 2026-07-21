@@ -1,4 +1,5 @@
 using Core.Dto;
+using Core.Exceptions;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -34,18 +35,19 @@ namespace Ui.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReview(Guid id, Review review)
+        public async Task<IActionResult> PutReview(Guid id, ReviewDetails details)
         {
-            if (id != review.Id)
-            {
-                return BadRequest();
-            }
-
-            context.Entry(review).State = EntityState.Modified;
 
             try
             {
-                await context.SaveChangesAsync();
+            await review.ModifyAsync(id, details, this.BroId(User));
+            }
+            catch (UnauthorizedReviewModificationException ex)
+            {
+                return Problem(ex.Message,
+                               $"PUT /reviews/{id}",
+                               403,
+                               "You do not have permission to modify this review.");
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -66,7 +68,7 @@ namespace Ui.Controllers
         [HttpPost]
         public async Task<ActionResult<Review>> PostReview(ReviewDetails details)
         {
-            _review = await review.WriteReviewAsync(details, this.BroId(User));
+            _review = await review.WriteAsync(details, this.BroId(User));
 
             return CreatedAtAction(nameof(GetReview), new { _review.Id }, _review);
         }
