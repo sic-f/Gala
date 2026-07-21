@@ -1,6 +1,7 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
 using Infrastructure.Identity;
+using Utility.Factories;
 
 namespace UnitTests.Entities;
 
@@ -21,5 +22,19 @@ public class ReviewTest
         Assert.Equal("Content", review.Content);
         Assert.Equal(place.Id, review.PlaceId);
         Assert.Equal(bro.Id, review.ReviewerId);
+    }
+
+    [Fact]
+    public void UpdateDetailsTest()
+    {
+        DateTimeOffset initialLastModified = DateTimeOffset.UtcNow;
+        var review = new Review { Headline = "Headline", Content = "Content", LastModified = initialLastModified };
+        var details = new ReviewDetails { Headline = "New Headline", Content = "New Content" };
+
+        review.UpdateDetails(details);
+
+        Assert.Equal("New Headline", review.Headline);
+        Assert.Equal("New Content", review.Content);
+        Assert.NotEqual(initialLastModified, review.LastModified);
     }
 }

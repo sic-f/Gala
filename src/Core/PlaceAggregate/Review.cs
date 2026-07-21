@@ -12,10 +12,19 @@ public class Review
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset LastModified { get; set; }
 
-    public void SetDetails(ReviewDetails details, Guid broId)
+    public void SetDetails(ReviewDetails details, Guid? broId = null)
     {
+        Headline = details.Headline;
         Content = details.Content;
         PlaceId = details.PlaceId;
-        ReviewerId = broId;
+        ReviewerId = broId ?? ReviewerId;
+        LastModified = DateTimeOffset.UtcNow;
+    }
+
+    public void UpdateDetails(ReviewDetails details)
+    {
+        Headline = details.Headline;
+        Content = details.Content;
+        LastModified = DateTimeOffset.UtcNow;
     }
 }
