@@ -1,5 +1,6 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
+using Infrastructure.Identity;
 using IntegrationTests.Errors;
 using IntegrationTests.Scopes;
 using System.Net;
@@ -47,6 +48,7 @@ public class ReviewsTest
         }
     }
 
+    [Collection("Application Factory Collection")]
     public class UpdateTest(ReviewScope app) : BaseTest(app), IClassFixture<ReviewScope>
     {
         private readonly ReviewErrors _errors = new(app);
@@ -84,6 +86,24 @@ public class ReviewsTest
 
             Assert.Equal("New Headline", updatedReview.Headline);
             Assert.Equal("New Content", updatedReview.Content);
+        }
+    }
+
+    public class DeleteTest(ReviewScope app) : BaseTest(app), IClassFixture<ReviewScope>
+    {
+        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+        [Fact]
+        public async Task DeleteReviewTestAsync()
+        {
+            Bro bro = await BroFactory.CreateAsync(app.Services);
+            Place place = await PlaceFactory.CreateAsync(bro.Id, app.Services);
+            Review newReview = new() { ReviewerId = bro.Id, PlaceId = place.Id };
+            Review review = await ReviewFactory.CreateAsync(newReview, app.Services);
+
+            await app.DeleteReviewAsync(review.Id);
+
+            Assert.Equal(HttpStatusCode.NoContent, app.ResponseStatusCode);
         }
     }
 }

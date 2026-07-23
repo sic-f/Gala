@@ -34,13 +34,13 @@ namespace Ui.Controllers
             return review;
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReview(Guid id, ReviewDetails details)
         {
-
             try
             {
-            await review.ModifyAsync(id, details, this.BroId(User));
+                await review.ModifyAsync(id, details, this.BroId(User));
             }
             catch (UnauthorizedReviewModificationException ex)
             {
@@ -73,17 +73,11 @@ namespace Ui.Controllers
             return CreatedAtAction(nameof(GetReview), new { _review.Id }, _review);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(Guid id)
         {
-            var review = await context.Review.FindAsync(id);
-            if (review == null)
-            {
-                return NotFound();
-            }
-
-            context.Review.Remove(review);
-            await context.SaveChangesAsync();
+            await review.DeleteAsync(id);
 
             return NoContent();
         }

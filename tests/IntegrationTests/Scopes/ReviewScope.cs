@@ -8,6 +8,11 @@ public class ReviewScope : ApplicationFactory<Program>
 {
     protected override string DefaultStartUrl => "api/Reviews";
 
+    internal async Task DeleteReviewAsync(Guid id)
+    {
+        Response = await Client.DeleteAsync($"{DefaultStartUrl}/{id}");
+    }
+
     internal async Task SubmitReviewAsync(Review review)
     {
         Response = await Client.PostAsJsonAsync<Review>(DefaultStartUrl, review);

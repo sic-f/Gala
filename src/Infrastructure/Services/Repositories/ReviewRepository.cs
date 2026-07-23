@@ -18,8 +18,19 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
         return await context.Review.FirstAsync(r => r.Id == id);
     }
 
+    public async Task<Review> NoTrackingFetchAsync(Guid id)
+    {
+        return await context.Review.AsNoTracking().FirstAsync(r => r.Id == id);
+    }
+
     public async Task ModifyAsync()
     {
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Review review)
+    {
+        context.Review.Remove(review);
         await context.SaveChangesAsync();
     }
 }

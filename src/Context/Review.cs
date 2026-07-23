@@ -31,4 +31,11 @@ public class Review(IReviewRepository repository)
 
         await repository.ModifyAsync();
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        Core.PlaceAggregate.Review review = await repository.NoTrackingFetchAsync(id);
+
+        await repository.DeleteAsync(review);
+    }
 }
