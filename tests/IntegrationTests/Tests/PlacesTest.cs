@@ -119,20 +119,19 @@ public class PlacesTest
     public class FetchTest
     {
         [Collection("Application Factory Collection")]
-        public class PaginatedTest(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
+        public class PaginationTest(PlaceScope app) : BaseTest(app), IClassFixture<PlaceScope>
         {
             public const int FetchLimit = 5;
 
             public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
             [Fact]
-            public async Task FetchPlacesTestAsync()
+            public async Task FetchPaginatedPlacesTestAsync()
             {
                 IEnumerable<Place> newPlaces = BuildNewPlaces();
 
                 using var scope = app.Services.CreateScope();
-                var scopedServices = scope.ServiceProvider;
-                var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
                 context.Place.AddRange(newPlaces);
                 await context.SaveChangesAsync();
