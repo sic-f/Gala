@@ -89,6 +89,7 @@ public class ReviewsTest
         }
     }
 
+    [Collection("Application Factory Collection")]
     public class DeleteTest(ReviewScope app) : BaseTest(app), IClassFixture<ReviewScope>
     {
         public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
@@ -104,6 +105,43 @@ public class ReviewsTest
             await app.DeleteReviewAsync(review.Id);
 
             Assert.Equal(HttpStatusCode.NoContent, app.ResponseStatusCode);
+        }
+    }
+
+    public class FetchTest(ReviewScope app) : BaseTest(app), IClassFixture<ReviewScope>
+    {
+        const int Offset = 5;
+        const int NumberOfReviewsToFetch = 5;
+        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+        [Fact]
+        public async Task PaginatedFetchTestAsync()
+        {
+            Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
+            IEnumerable<Review> newReviews = await BuildReviews(place.Id);
+            IEnumerable<Review> reviews = await ReviewFactory.CreateAsync(newReviews, app.Services);
+
+            await app.FetchPaginatedReviewsAsync(offset: Offset, limit: NumberOfReviewsToFetch);
+
+            IEnumerable<ReviewDto> content = await app.FetchPaginatedReviewsSuccessResponseAsync();
+
+            Assert.Collection<ReviewDto>(content,
+                r => Assert.Equal("2nd Review", r.Content),
+                r => Assert.Equal("1st Review", r.Content));
+        }
+
+        private async Task<IEnumerable<Review>> BuildReviews(Guid placeId)
+        {
+            return
+            [
+                new() { Content = "1st Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1) },
+                new() { Content = "2nd Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3) },
+                new() { Content = "3rd Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5) },
+                new() { Content = "4th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7) },
+                new() { Content = "5th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9) },
+                new() { Content = "6th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11) },
+                new() { Content = "7th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13) },
+            ];
         }
     }
 }

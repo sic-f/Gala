@@ -16,4 +16,15 @@ public class ReviewFactory
 
         return entity;
     }
+
+    public static async Task<IEnumerable<Review>> CreateAsync(IEnumerable<Review> reviews, IServiceProvider services)
+    {
+        var scope = services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        context.Review.AddRange(reviews);
+        await context.SaveChangesAsync();
+
+        return reviews;
+    }
 }

@@ -7,6 +7,14 @@ namespace Infrastructure.Services.Repositories;
 
 public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
 {
+    public IQueryable<Review> FetchPaginated(int offset, int limit)
+    {
+        return context.Review.AsNoTracking()
+                             .OrderByDescending(r => r.CreatedAt)
+                             .Skip(offset)
+                             .Take(limit);
+    }
+
     public async Task CreateReviewAsync(Review review)
     {
         context.Review.Add(review);

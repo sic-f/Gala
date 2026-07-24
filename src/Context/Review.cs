@@ -6,6 +6,19 @@ namespace Context;
 
 public class Review(IReviewRepository repository)
 {
+    public IQueryable<ReviewDto> FetchPaginatedReviews(int offset, int limit)
+    {
+        IQueryable<Core.PlaceAggregate.Review> reviews = repository.FetchPaginated(offset, limit);
+
+        return reviews.Select(r => new ReviewDto(
+            Id: r.Id,
+            Headline: r.Headline,
+            Content: r.Content,
+            PlaceId: r.PlaceId,
+            ReviewerId: r.ReviewerId,
+            CreatedAt: r.CreatedAt));
+    }
+
     public async Task<Core.PlaceAggregate.Review> WriteAsync(ReviewDetails details, Guid broId)
     {
         var review = new Core.PlaceAggregate.Review();
@@ -21,7 +34,7 @@ public class Review(IReviewRepository repository)
     {
         Core.PlaceAggregate.Review review = await repository.FetchAsync(id);
 
-        if (review.PlaceId != details.PlaceId &&  review.ReviewerId != broId)
+        if (review.PlaceId != details.PlaceId && review.ReviewerId != broId)
         {
             throw new UnauthorizedReviewModificationException(
                 "❌👦🏣 You did not write this review, you are not allowed to modify it.");
