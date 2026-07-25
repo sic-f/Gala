@@ -8,6 +8,7 @@ namespace Context;
 public class Contribution(IPicturesAttacher attachPictures,
                           IPlaceRepository repository,
                           ISavedPlaceRepository savedPlaceRepository,
+                          IReviewRepository reviewRepository,
                           IDeletePicture deleteImage)
 {
     private Place Place { get; set; } = default!;
@@ -88,6 +89,7 @@ public class Contribution(IPicturesAttacher attachPictures,
                             Instagram: Place.Instagram,
                             BroId: Place.BroId,
                             BookmarkId: await GetIsSavedIdAsync(id, broId),
+                            ReviewsCount: await reviewRepository.GetReviewsCountAsync(Place.Id),
                             Picture: GetPicture(),
                             Pictures: GetPictures(),
                             Reviews: GetReviews());
@@ -161,7 +163,8 @@ public class Contribution(IPicturesAttacher attachPictures,
             PlaceId: r.PlaceId,
             ReviewerId: r.ReviewerId,
             CreatedAt: r.CreatedAt))
-        .OrderByDescending(r => r.CreatedAt);
+        .OrderByDescending(r => r.CreatedAt)
+        .Take(5);
     }
 
     private async Task<Guid?> GetIsSavedIdAsync(Guid placeId, Guid broId)

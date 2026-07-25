@@ -16,9 +16,9 @@ namespace Ui.Controllers
         private Review _review = default!;
 
         [HttpGet]
-        public IQueryable<ReviewDto> GetReview(int offset, int limit)
+        public IQueryable<ReviewDto> GetReview(int offset, int limit, Guid placeId)
         {
-            return review.FetchPaginatedReviews(offset, limit);
+            return review.FetchPaginatedReviews(offset, limit, placeId);
         }
 
         [HttpGet("{id}")]

@@ -6,9 +6,9 @@ namespace Context;
 
 public class Review(IReviewRepository repository)
 {
-    public IQueryable<ReviewDto> FetchPaginatedReviews(int offset, int limit)
+    public IQueryable<ReviewDto> FetchPaginatedReviews(int offset, int limit, Guid placeId)
     {
-        IQueryable<Core.PlaceAggregate.Review> reviews = repository.FetchPaginated(offset, limit);
+        IQueryable<Core.PlaceAggregate.Review> reviews = repository.FetchPaginated(offset, limit, placeId);
 
         return reviews.Select(r => new ReviewDto(
             Id: r.Id,

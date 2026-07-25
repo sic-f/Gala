@@ -13,9 +13,9 @@ public class ReviewScope : ApplicationFactory<Program>
         Response = await Client.DeleteAsync($"{DefaultStartUrl}/{id}");
     }
 
-    internal async Task FetchPaginatedReviewsAsync(int offset, int limit)
+    internal async Task FetchPaginatedReviewsAsync(int offset, int limit, Guid placeId)
     {
-        Response = await Client.GetAsync($"{DefaultStartUrl}?offset={offset}&limit={limit}");
+        Response = await Client.GetAsync($"{DefaultStartUrl}?offset={offset}&limit={limit}&placeId={placeId}");
     }
 
     internal async Task<IEnumerable<ReviewDto>> FetchPaginatedReviewsSuccessResponseAsync()

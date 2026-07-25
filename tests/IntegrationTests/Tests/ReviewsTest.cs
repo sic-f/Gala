@@ -118,29 +118,34 @@ public class ReviewsTest
         public async Task PaginatedFetchTestAsync()
         {
             Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
-            IEnumerable<Review> newReviews = await BuildReviews(place.Id);
+            Place otherPlace = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
+            IEnumerable<Review> newReviews = await BuildReviews(place.Id, otherPlace.Id);
             IEnumerable<Review> reviews = await ReviewFactory.CreateAsync(newReviews, app.Services);
 
-            await app.FetchPaginatedReviewsAsync(offset: Offset, limit: NumberOfReviewsToFetch);
+            await app.FetchPaginatedReviewsAsync(offset: Offset, limit: NumberOfReviewsToFetch, place.Id);
 
             IEnumerable<ReviewDto> content = await app.FetchPaginatedReviewsSuccessResponseAsync();
 
             Assert.Collection<ReviewDto>(content,
+                r => Assert.Equal("4th Review", r.Content),
                 r => Assert.Equal("2nd Review", r.Content),
                 r => Assert.Equal("1st Review", r.Content));
         }
 
-        private async Task<IEnumerable<Review>> BuildReviews(Guid placeId)
+        private async Task<IEnumerable<Review>> BuildReviews(Guid placeId, Guid otherPlaceId)
         {
             return
             [
                 new() { Content = "1st Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1) },
                 new() { Content = "2nd Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3) },
-                new() { Content = "3rd Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5) },
+                new() { Content = "3rd Review", PlaceId = otherPlaceId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5) },
                 new() { Content = "4th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7) },
-                new() { Content = "5th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9) },
+                new() { Content = "5th Review", PlaceId = otherPlaceId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9) },
                 new() { Content = "6th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11) },
                 new() { Content = "7th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13) },
+                new() { Content = "8th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15) },
+                new() { Content = "9th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17) },
+                new() { Content = "10th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19) },
             ];
         }
     }

@@ -7,9 +7,10 @@ namespace Infrastructure.Services.Repositories;
 
 public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
 {
-    public IQueryable<Review> FetchPaginated(int offset, int limit)
+    public IQueryable<Review> FetchPaginated(int offset, int limit, Guid placeId)
     {
         return context.Review.AsNoTracking()
+                             .Where(r => r.PlaceId == placeId)
                              .OrderByDescending(r => r.CreatedAt)
                              .Skip(offset)
                              .Take(limit);
@@ -40,5 +41,10 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
     {
         context.Review.Remove(review);
         await context.SaveChangesAsync();
+    }
+
+    public async Task<int> GetReviewsCountAsync(Guid placeId)
+    {
+        return await context.Review.Where(r => r.PlaceId == placeId).CountAsync();
     }
 }
