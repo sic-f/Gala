@@ -22,6 +22,7 @@ public class ApplicationDbContext : IdentityDbContext<Bro, IdentityRole<Guid>, G
     public DbSet<PlaceExtraPicture> PlaceExtraPicture => Set<PlaceExtraPicture>();
     public DbSet<Saved> Saved => Set<Saved>();
     public DbSet<SavedPlace> SavedPlace => Set<SavedPlace>();
+    public DbSet<SavedReview> SavedReview => Set<SavedReview>();
     public DbSet<Review> Review => Set<Review>();
 
     protected override void OnModelCreating(ModelBuilder builder)
