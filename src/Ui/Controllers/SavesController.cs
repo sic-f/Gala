@@ -24,7 +24,7 @@ namespace Ui.Controllers
         [HttpPost]
         public async Task<ActionResult<SavedPlace>> PostSaved(Core.Dto.Saved saved)
         {
-            _savedPlace = await bookmark.SavePlaceAsync(saved.PlaceId, this.BroId(User));
+            _savedPlace = await bookmark.SavePlaceAsync(saved.SaveableId, this.BroId(User));
 
             return CreatedAtAction("GetSaved", new { id = _savedPlace.Id }, _savedPlace);
         }
