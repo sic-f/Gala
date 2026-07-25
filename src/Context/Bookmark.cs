@@ -5,7 +5,7 @@ using Core.SavedAggregate;
 
 namespace Context;
 
-public class Bookmark(ISavedPlaceRepository repository)
+public class Bookmark(ISavedRepository repository)
 {
     public IEnumerable<PlaceBookmark> FetchBookmarks(DateTimeOffset offset, int limit, Guid broId)
     {
@@ -23,6 +23,17 @@ public class Bookmark(ISavedPlaceRepository repository)
         };
 
         return await repository.CreateSavedPlaceAsync(savedPlace);
+    }
+
+    public async Task<SavedReview> SaveReviewAsync(Guid reviewId, Guid broId)
+    {
+        SavedReview savedReview = new()
+        {
+            SaveableId = reviewId,
+            SaverId = broId,
+        };
+
+        return await repository.CreateSavedReviewAsync(savedReview);
     }
 
     private static IEnumerable<PlaceBookmark> BuildPlaceBookmarks(IEnumerable<Place> places, IList<SavedPlace> savedPlaces)

@@ -26,25 +26,25 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         return (places, savedPlaces);
     }
 
-    public async Task<Saved> CreateSavedAsync(Saved newSaved)
+    public async Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace)
     {
-        Saved saved = context.Add(newSaved).Entity;
+        SavedPlace saved = context.SavedPlace.Add(savedPlace).Entity;
         await context.SaveChangesAsync();
 
         return saved;
     }
 
-    public async Task<Guid?> GetSavedPlaceId(Guid placeId, Guid broId)
+    public async Task<Guid?> GetSavedId(Guid saveableId, Guid broId)
     {
-        return (await context.SavedPlace.AsNoTracking().FirstOrDefaultAsync<SavedPlace>(sp =>
-            sp.SaveableId == placeId && sp.SaverId == broId))?.Id;
+        return (await context.Saved.AsNoTracking().FirstOrDefaultAsync<Saved>(sp =>
+            sp.SaveableId == saveableId && sp.SaverId == broId))?.Id;
     }
 
     public async Task<SavedReview> CreateSavedReviewAsync(SavedReview savedReview)
     {
-        SavedReview createdSavedReview = context.SavedReview.Add(savedReview).Entity;
+        SavedReview saved = context.SavedReview.Add(savedReview).Entity;
         await context.SaveChangesAsync();
 
-        return createdSavedReview;
+        return saved;
     }
 }

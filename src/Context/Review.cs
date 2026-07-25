@@ -4,19 +4,28 @@ using Core.Interfaces;
 
 namespace Context;
 
-public class Review(IReviewRepository repository)
+public class Review(IReviewRepository repository, ISavedRepository savedRepository)
 {
-    public IQueryable<ReviewDto> FetchPaginatedReviews(int offset, int limit, Guid placeId)
+    public async Task<IEnumerable<ReviewDto>> FetchPaginatedReviews(int offset, int limit, Guid placeId, Guid broId)
     {
         IQueryable<Core.PlaceAggregate.Review> reviews = repository.FetchPaginated(offset, limit, placeId);
 
-        return reviews.Select(r => new ReviewDto(
-            Id: r.Id,
-            Headline: r.Headline,
-            Content: r.Content,
-            PlaceId: r.PlaceId,
-            ReviewerId: r.ReviewerId,
-            CreatedAt: r.CreatedAt));
+        IEnumerable<ReviewDto> reviewDtos = [.. reviews.Select(r => new ReviewDto
+        {
+            Id = r.Id,
+            Headline = r.Headline,
+            Content = r.Content,
+            PlaceId = r.PlaceId,
+            ReviewerId = r.ReviewerId,
+            CreatedAt = r.CreatedAt,
+        })];
+
+        foreach (ReviewDto dto in reviewDtos)
+        {
+            dto.BookmarkId = await GetIsSavedIdAsync(dto.Id, broId);
+        }
+
+        return reviewDtos;
     }
 
     public async Task<Core.PlaceAggregate.Review> WriteAsync(ReviewDetails details, Guid broId)
@@ -50,5 +59,10 @@ public class Review(IReviewRepository repository)
         Core.PlaceAggregate.Review review = await repository.NoTrackingFetchAsync(id);
 
         await repository.DeleteAsync(review);
+    }
+
+    private async Task<Guid?> GetIsSavedIdAsync(Guid saveableId, Guid broId)
+    {
+        return await savedRepository.GetSavedId(saveableId, broId);
     }
 }

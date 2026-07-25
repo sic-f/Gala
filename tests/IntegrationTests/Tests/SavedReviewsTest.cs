@@ -9,6 +9,7 @@ namespace IntegrationTests.Tests;
 
 public class SavedReviewsTest
 {
+    [Collection("Application Factory Collection")]
     public class SaveReviewsTest(SavedReviewScope app) : BaseTest(app), IClassFixture<SavedReviewScope>
     {
         public override Task DisposeAsync() => Task.Run(() => app.ClearToken());

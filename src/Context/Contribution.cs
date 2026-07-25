@@ -7,7 +7,7 @@ namespace Context;
 
 public class Contribution(IPicturesAttacher attachPictures,
                           IPlaceRepository repository,
-                          ISavedRepository savedPlaceRepository,
+                          ISavedRepository savedRepository,
                           IReviewRepository reviewRepository,
                           IDeletePicture deleteImage)
 {
@@ -38,7 +38,7 @@ public class Contribution(IPicturesAttacher attachPictures,
 
         foreach (PlaceDetailsHomePage details in result)
         {
-            details.BookmarkId = await GetIsSavedIdAsync(details.Id, broId);
+            details.BookmarkId = await GetIsSavedIdAsync(saveableId: details.Id, broId);
         }
 
         return result;
@@ -92,7 +92,7 @@ public class Contribution(IPicturesAttacher attachPictures,
                             ReviewsCount: await reviewRepository.GetReviewsCountAsync(Place.Id),
                             Picture: GetPicture(),
                             Pictures: GetPictures(),
-                            Reviews: GetReviews());
+                            Reviews: await GetReviews(broId));
     }
 
     public async Task DeleteAsync(Guid id, Guid broId)
@@ -145,30 +145,33 @@ public class Contribution(IPicturesAttacher attachPictures,
 
     private IEnumerable<PlacePictureLean> GetPictures()
     {
-        //if (Place.Pictures.Count != 0)
-        //{
-            return Place.Pictures.Select(p =>
-                new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId));
-        //}
-
-        //return [];
+        return Place.Pictures.Select(p =>
+            new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId));
     }
 
-    private IEnumerable<ReviewDto> GetReviews()
+    private async Task<IEnumerable<ReviewDto>> GetReviews(Guid broId)
     {
-        return Place.Reviews.Select(static r => new ReviewDto(
-            Id: r.Id,
-            Headline: r.Headline,
-            Content: r.Content,
-            PlaceId: r.PlaceId,
-            ReviewerId: r.ReviewerId,
-            CreatedAt: r.CreatedAt))
-        .OrderByDescending(r => r.CreatedAt)
-        .Take(5);
+        IEnumerable<ReviewDto> reviewDtos = [.. Place.Reviews.Select(r => new ReviewDto
+        {
+            Id = r.Id,
+            Headline = r.Headline,
+            Content = r.Content,
+            PlaceId = r.PlaceId,
+            ReviewerId = r.ReviewerId,
+            CreatedAt = r.CreatedAt,
+        }).OrderByDescending(r => r.CreatedAt).Take(5)];
+
+
+        foreach (ReviewDto dto in reviewDtos)
+        {
+            dto.BookmarkId = await GetIsSavedIdAsync(saveableId: dto.Id, broId);
+        }
+
+        return reviewDtos;
     }
 
-    private async Task<Guid?> GetIsSavedIdAsync(Guid placeId, Guid broId)
+    private async Task<Guid?> GetIsSavedIdAsync(Guid saveableId, Guid broId)
     {
-        return await savedPlaceRepository.GetSavedPlaceId(placeId, broId);
+        return await savedRepository.GetSavedId(saveableId, broId);
     }
 }

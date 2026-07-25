@@ -16,9 +16,9 @@ namespace Ui.Controllers
         private Review _review = default!;
 
         [HttpGet]
-        public IQueryable<ReviewDto> GetReview(int offset, int limit, Guid placeId)
+        public async Task<IEnumerable<ReviewDto>> GetReview(int offset, int limit, Guid placeId)
         {
-            return review.FetchPaginatedReviews(offset, limit, placeId);
+            return await review.FetchPaginatedReviews(offset, limit, placeId, this.BroId(User));
         }
 
         [HttpGet("{id}")]
