@@ -7,7 +7,7 @@ namespace Context;
 
 public class Contribution(IPicturesAttacher attachPictures,
                           IPlaceRepository repository,
-                          ISavedPlaceRepository savedPlaceRepository,
+                          ISavedRepository savedPlaceRepository,
                           IReviewRepository reviewRepository,
                           IDeletePicture deleteImage)
 {
