@@ -14,27 +14,34 @@ public class SavedPlacesTest()
 {
     private const int FetchLimit = 5;
 
-    public class SaveTest
+    [Collection("Application Factory Collection")]
+    public class SaveTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
     {
-        [Collection("Application Factory Collection")]
-        public class SavePlaceTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+        [Fact]
+        public async Task SavePlaceTestAsync()
         {
-            public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+            Place newPlace = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
+            Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
-            [Fact]
-            public async Task SavePlaceTestAsync()
-            {
-                Place newPlace = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
-                Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
+            await app.SavePlaceAsync(place.Id);
 
-                await app.SavePlaceAsync(place.Id);
+            var responseBody = await app.SavePlaceSuccessResponseAsync();
 
-                var responseBody = await app.SavePlaceSuccessResponseAsync();
+            Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
+            Assert.Equal(place.Id, responseBody.SaveableId);
+            Assert.Equal(app.Bro.Id, responseBody.SaverId);
+        }
 
-                Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
-                Assert.Equal(place.Id, responseBody.SaveableId);
-                Assert.Equal(app.Bro.Id, responseBody.SaverId);
-            }
+        [Fact]
+        public async Task UnprocessableContentWhenBroSavesOwnPlaceTestAsync()
+        {
+            Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
+
+            await app.SavePlaceAsync(place.Id);
+
+            Assert.Equal(HttpStatusCode.UnprocessableContent, app.ResponseStatusCode);
         }
     }
 
@@ -61,7 +68,7 @@ public class SavedPlacesTest()
                 ];
 
                 await SavedPlaceFactory.CreateAsync(buildSavedPlaces, app.Services);
-                
+
                 _response = await app.GetAllSavedPlacesAsync(
                     offset: GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
                     limit: FetchLimit);
@@ -189,7 +196,7 @@ public class SavedPlacesTest()
 
             private SavedPlace[] BuildNewSavedPlaces(Place[] places)
             {
-                return 
+                return
                 [
                     new SavedPlace
                     {
