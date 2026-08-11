@@ -104,6 +104,29 @@ public class PlaceFactory
         return places;
     }
 
+    public static async Task<Place> CreateAsync(Guid broId, ApplicationDbContext context)
+    {
+        Place place = new()
+        {
+            Name = "Test Name",
+            Description = "Test Description",
+            Information = "Test Information",
+            Address = "Test Address",
+            Mobile = "Test Mobile",
+            Landline = "Test Landline",
+            Email = "Test Email",
+            Website = "https://www.example.net",
+            Facebook = "https://www.facebook.com/test",
+            Instagram = "@test",
+            BroId = broId,
+        };
+
+        place = context.Place.Add(place).Entity;
+        await context.SaveChangesAsync();
+
+        return place;
+    }
+
     private static string CreateTestDirectory()
     {
         var baseDirectory = Directory.GetCurrentDirectory();
