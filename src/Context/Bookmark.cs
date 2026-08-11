@@ -1,11 +1,12 @@
 ﻿using Core.Dto;
+using Core.Exceptions;
 using Core.Interfaces;
 using Core.PlaceAggregate;
 using Core.SavedAggregate;
 
 namespace Context;
 
-public class Bookmark(ISavedRepository repository)
+public class Bookmark(ISavedRepository repository, IPlaceRepository placeRepository)
 {
     public IEnumerable<PlaceBookmark> FetchBookmarks(DateTimeOffset offset, int limit, Guid broId)
     {
@@ -16,6 +17,13 @@ public class Bookmark(ISavedRepository repository)
 
     public async Task<SavedPlace> SavePlaceAsync(Guid placeId, Guid broId)
     {
+        Place place = await placeRepository.FetchPlaceAsync(placeId);
+
+        if (place.BroId == broId)
+        {
+            throw new SaveOwnPlaceException("You can not save your own contributed place.");
+        }
+
         SavedPlace savedPlace = new()
         {
             SaveableId = placeId,
