@@ -22,7 +22,8 @@ public class SavedPlacesTest()
         [Fact]
         public async Task SavePlaceTestAsync()
         {
-            Place newPlace = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
+            Bro bro = await BroFactory.CreateAsync(app.Services);
+            Place newPlace = new() { Name = "Name", Address = "Address", BroId = bro.Id };
             Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
             await app.SavePlaceAsync(place.Id);
