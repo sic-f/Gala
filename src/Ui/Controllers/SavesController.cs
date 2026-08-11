@@ -1,4 +1,5 @@
 using Core.Dto;
+using Core.Exceptions;
 using Core.SavedAggregate;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -24,8 +25,21 @@ namespace Ui.Controllers
         [HttpPost]
         public async Task<ActionResult<SavedPlace>> PostSaved(Core.Dto.Saved saved)
         {
-            _savedPlace = await bookmark.SavePlaceAsync(saved.SaveableId, this.BroId(User));
+            try
+            {
 
+                _savedPlace = await bookmark.SavePlaceAsync(saved.SaveableId, this.BroId(User));
+            }
+            catch (SaveOwnPlaceException ex)
+            {
+                ModelState.AddModelError(nameof(SavedPlace), ex.Message);
+
+                return Problem(
+                    ex.Message,
+                    "/POST /saves/{id}",
+                    422,
+                    "Operation not allowed on resource.");
+            }
             return CreatedAtAction("GetSaved", new { id = _savedPlace.Id }, _savedPlace);
         }
 
