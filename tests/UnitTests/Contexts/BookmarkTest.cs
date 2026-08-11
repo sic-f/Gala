@@ -8,10 +8,10 @@ using Moq;
 
 namespace UnitTests.Contexts;
 
-public class SavedTest()
+public class BookmarkTest()
 {
     [Fact]
-    public async Task InvalidWhenSavingOwnPlaceTest()
+    public async Task InvalidWhenSavingOwnPlaceTestAsync()
     {
         Bro bro = new() { Id = Guid.NewGuid() };
         Place place = new() { BroId = bro.Id };
