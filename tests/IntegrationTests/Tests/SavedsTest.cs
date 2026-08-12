@@ -20,7 +20,7 @@ public class SavedsTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScop
         Review newReview = new()
         {
             Headline = string.Empty,
-            Content = string.Empty,
+            Content = "Fantastic experience!",
             PlaceId = place.Id,
             ReviewerId = bro.Id
         };
@@ -36,8 +36,8 @@ public class SavedsTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScop
 
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
         Assert.Collection(savedDtos!,
-            s => Assert.Equal(s.SaveableId, savedReview.Id),
-            s => Assert.Equal(s.SaveableId, savedPlace.Id));
+            s => Assert.Equal(s.SaveableId, newReview.Id),
+            s => Assert.Equal(s.SaveableId, place.Id));
     }
     // TODO: Extract to one place.
     private static string GetFormattedDateTimeOffset(DateTimeOffset dateTime)

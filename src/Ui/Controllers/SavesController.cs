@@ -16,9 +16,9 @@ namespace Ui.Controllers
 
         [Authorize]
         [HttpGet]
-        public ActionResult<IEnumerable<PlaceBookmark>> GetSaved(DateTimeOffset offset, int limit)
+        public async Task<IEnumerable<SavedDto>> GetSavedAsync(DateTimeOffset offset, int limit)
         {
-            return bookmark.FetchBookmarks(offset, limit, this.BroId(User)).ToList();
+            return await bookmark.FetchBookmarksAsync(offset, limit, this.BroId(User));
         }
 
         [Authorize]
