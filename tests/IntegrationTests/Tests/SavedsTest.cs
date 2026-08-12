@@ -4,6 +4,7 @@ using Infrastructure.Identity;
 using IntegrationTests.Scopes;
 using System.Net;
 using Utility.Factories;
+using Utility.Helpers;
 
 namespace IntegrationTests.Tests;
 
@@ -31,17 +32,12 @@ public class SavedsTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScop
         SavedReview savedReview = await SavedReviewFactory.CreateAsync(newSavedReview, app.Services);
 
         var savedDtos = await app.FetchSavedsAsync(
-            GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
+            DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
             FetchLimit);
 
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
         Assert.Collection(savedDtos!,
             s => Assert.Equal(s.SaveableId, newReview.Id),
             s => Assert.Equal(s.SaveableId, place.Id));
-    }
-    // TODO: Extract to one place.
-    private static string GetFormattedDateTimeOffset(DateTimeOffset dateTime)
-    {
-        return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
     }
 }

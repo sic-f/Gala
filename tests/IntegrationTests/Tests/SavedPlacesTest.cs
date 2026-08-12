@@ -7,6 +7,7 @@ using IntegrationTests.Scopes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Utility.Factories;
+using Utility.Helpers;
 
 namespace IntegrationTests.Tests;
 
@@ -71,7 +72,7 @@ public class SavedPlacesTest()
                 await SavedPlaceFactory.CreateAsync(buildSavedPlaces, app.Services);
 
                 _response = await app.GetAllSavedPlacesAsync(
-                    offset: GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
+                    offset: DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
                     limit: FetchLimit);
             }
 
@@ -151,7 +152,7 @@ public class SavedPlacesTest()
             public async Task FetchSavedPlacesPaginatedTestAsync()
             {
                 DateTimeOffset createdAt = DateTimeOffset.UtcNow.AddSeconds(30);
-                IEnumerable<SavedDto> bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
+                IEnumerable<SavedDto> bookmarks = await app.GetAllSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
                     p => Assert.Equal(_places[12].Id, p.SaveableId),
@@ -161,7 +162,7 @@ public class SavedPlacesTest()
                     p => Assert.Equal(_places[10].Id, p.SaveableId));
 
                 createdAt = _newSavedPlaces[4].CreatedAt.AddSeconds(1);
-                bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
+                bookmarks = await app.GetAllSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
                     p => Assert.Equal(_places[4].Id, p.SaveableId),
@@ -171,7 +172,7 @@ public class SavedPlacesTest()
                     p => Assert.Equal(_places[0].Id, p.SaveableId));
 
                 createdAt = _newSavedPlaces[9].CreatedAt.AddSeconds(1);
-                bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
+                bookmarks = await app.GetAllSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
                     p => Assert.Equal(_places[9].Id, p.SaveableId),
@@ -185,7 +186,7 @@ public class SavedPlacesTest()
             public async Task ReturnsCorrectCreatedAtValuesTestAsync()
             {
                 DateTimeOffset createdAt = DateTimeOffset.UtcNow.AddSeconds(30);
-                IEnumerable<SavedDto> bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
+                IEnumerable<SavedDto> bookmarks = await app.GetAllSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
                     p => Assert.Equal(_newSavedPlaces[14].CreatedAt, p.CreatedAt),
@@ -403,11 +404,6 @@ public class SavedPlacesTest()
                     },
                 ];
             }
-        }
-        // TODO: Extract to one place.
-        private static string GetFormattedDateTimeOffset(DateTimeOffset dateTime)
-        {
-            return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
         }
     }
 }
