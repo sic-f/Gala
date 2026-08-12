@@ -268,7 +268,7 @@ public class PlacesTest
                     },
                 ];
             }
-
+            // TODO: Extract to one place.
             private static string? GetFormattedDateTimeOffset(DateTimeOffset? dateTime)
             {
                 return dateTime?.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");

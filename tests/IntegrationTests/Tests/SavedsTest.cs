@@ -1,10 +1,8 @@
-﻿using Core.Dto;
-using Core.PlaceAggregate;
+﻿using Core.PlaceAggregate;
 using Core.SavedAggregate;
 using Infrastructure.Identity;
 using IntegrationTests.Scopes;
 using System.Net;
-using System.Net.Http.Json;
 using Utility.Factories;
 
 namespace IntegrationTests.Tests;
@@ -26,22 +24,22 @@ public class SavedsTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScop
             PlaceId = place.Id,
             ReviewerId = bro.Id
         };
-        SavedPlace savedPlace = new() { SaveableId = place.Id, SaverId = app.Bro.Id };
-        SavedReview savedReview = new() { SaveableId = newReview.Id, SaverId = app.Bro.Id };
         await ReviewFactory.CreateAsync(newReview, app.Services);
-        await SavedPlaceFactory.CreateAsync(savedPlace, app.Services);
-        await SavedReviewFactory.CreateAsync(savedReview, app.Services);
+        SavedPlace newSavedPlace = new() { SaveableId = place.Id, SaverId = app.Bro.Id };
+        SavedReview newSavedReview = new() { SaveableId = newReview.Id, SaverId = app.Bro.Id };
+        SavedPlace savedPlace = await SavedPlaceFactory.CreateAsync(newSavedPlace, app.Services);
+        SavedReview savedReview = await SavedReviewFactory.CreateAsync(newSavedReview, app.Services);
 
-        await app.GetAllSavedPlacesAsync(
+        var savedDtos = await app.FetchSavedsAsync(
             GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
             FetchLimit);
 
-        var response = (await app.Response.Content.ReadFromJsonAsync<IEnumerable<PlaceBookmark>>());
-
-
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
+        Assert.Collection(savedDtos!,
+            s => Assert.Equal(s.SaveableId, savedReview.Id),
+            s => Assert.Equal(s.SaveableId, savedPlace.Id));
     }
-
+    // TODO: Extract to one place.
     private static string GetFormattedDateTimeOffset(DateTimeOffset dateTime)
     {
         return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
