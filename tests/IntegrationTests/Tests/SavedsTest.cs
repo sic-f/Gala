@@ -1,4 +1,5 @@
-﻿using Core.PlaceAggregate;
+﻿using Core.Dto;
+using Core.PlaceAggregate;
 using Core.SavedAggregate;
 using Infrastructure.Identity;
 using IntegrationTests.Scopes;
@@ -9,35 +10,71 @@ using Utility.Helpers;
 namespace IntegrationTests.Tests;
 
 [Collection("Application Factory Collection")]
-public class SavedsTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+public class FetchSavedsTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
 {
     private const int FetchLimit = 5;
+    private Bro _bro = default!;
+    private Place _place = default!;
+    private Review _review = default!;
+    private SavedPlace _savedPlace = default!;
+    private SavedReview _savedReview = default!;
+    private IEnumerable<SavedDto> _savedDtos = [];
 
-    [Fact]
-    public async Task FetchSavedPlacesAndReviewsTestAsync()
+    public override async Task InitializeAsync()
     {
-        Bro bro = await BroFactory.CreateAsync(app.Services);
-        Place place = await PlaceFactory.CreateAsync(bro.Id, app.Services);
-        Review newReview = new()
-        {
-            Headline = string.Empty,
-            Content = "Fantastic experience!",
-            PlaceId = place.Id,
-            ReviewerId = bro.Id
-        };
-        await ReviewFactory.CreateAsync(newReview, app.Services);
-        SavedPlace newSavedPlace = new() { SaveableId = place.Id, SaverId = app.Bro.Id };
-        SavedReview newSavedReview = new() { SaveableId = newReview.Id, SaverId = app.Bro.Id };
-        SavedPlace savedPlace = await SavedPlaceFactory.CreateAsync(newSavedPlace, app.Services);
-        SavedReview savedReview = await SavedReviewFactory.CreateAsync(newSavedReview, app.Services);
+        await base.InitializeAsync();
 
-        var savedDtos = await app.FetchSavedsAsync(
+        _bro = await BroFactory.CreateAsync(app.Services);
+        _place = await PlaceFactory.CreateAsync(_bro.Id, app.Services);
+        _review = new()
+        {
+            Content = "Fantastic experience!",
+            PlaceId = _place.Id,
+            ReviewerId = _bro.Id
+        };
+        await ReviewFactory.CreateAsync(_review, app.Services);
+        _savedPlace = new() { SaveableId = _place.Id, SaverId = app.Bro.Id };
+        _savedReview = new() { SaveableId = _review.Id, SaverId = app.Bro.Id };
+        await SavedPlaceFactory.CreateAsync(_savedPlace, app.Services);
+        await SavedReviewFactory.CreateAsync(_savedReview, app.Services);
+
+        _savedDtos = await app.FetchSavedsAsync(
             DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
             FetchLimit);
+    }
 
+    public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+    [Fact]
+    public async Task IdsTestAsync()
+    {
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
-        Assert.Collection(savedDtos!,
-            s => Assert.Equal(s.SaveableId, newReview.Id),
-            s => Assert.Equal(s.SaveableId, place.Id));
+        Assert.Collection(_savedDtos,
+            s => Assert.Equal(s.SaveableId, _review.Id),
+            s => Assert.Equal(s.SaveableId, _place.Id));
+    }
+
+    [Fact]
+    public async Task HeadlineTestAsync()
+    {
+        Assert.Collection(_savedDtos,
+            savedDto => Assert.Equal(savedDto.Headline, _review.Content),
+            savedDto => Assert.Equal(savedDto.Headline, _place.Name));
+    }
+
+    [Fact]
+    public async Task PictureTestAsync()
+    {
+        Assert.Collection(_savedDtos,
+            savedDto => Assert.Null(savedDto.Picture),
+            savedDto => Assert.Null(savedDto.Picture));
+    }
+
+    [Fact]
+    public async Task CreatedAtTestAsync()
+    {
+        Assert.Collection(_savedDtos,
+            savedDto => Assert.Equal(savedDto.CreatedAt, _savedReview.CreatedAt),
+            savedDto => Assert.Equal(savedDto.CreatedAt, _savedPlace.CreatedAt));
     }
 }
