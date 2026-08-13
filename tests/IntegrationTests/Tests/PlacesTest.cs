@@ -136,8 +136,8 @@ public class PlacesTest
                 context.Place.AddRange(newPlaces);
                 await context.SaveChangesAsync();
 
-                DateTimeOffset? createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "1st Batch E")?.CreatedAt.AddSeconds(1);
-                IEnumerable<Place>? places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
+                DateTimeOffset createdAt = context.Place.First<Place>(p => p.Name == "1st Batch E").CreatedAt.AddSeconds(1);
+                IEnumerable<Place>? places = await app.GetPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(places!,
                     p => Assert.Equal("1st Batch E", p.Name),
@@ -146,8 +146,8 @@ public class PlacesTest
                     p => Assert.Equal("1st Batch B", p.Name),
                     p => Assert.Equal("1st Batch A", p.Name));
 
-                createdAt = context.Place.FirstOrDefault<Place>(p => p.Name == "2nd Batch E")?.CreatedAt.AddSeconds(1);
-                places = await app.GetPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit);
+                createdAt = context.Place.First<Place>(p => p.Name == "2nd Batch E").CreatedAt.AddSeconds(1);
+                places = await app.GetPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(places!,
                     p => Assert.Equal("2nd Batch E", p.Name),
@@ -267,11 +267,6 @@ public class PlacesTest
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(29),
                     },
                 ];
-            }
-            // TODO: Extract to one place.
-            private static string? GetFormattedDateTimeOffset(DateTimeOffset? dateTime)
-            {
-                return dateTime?.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
             }
         }
 
