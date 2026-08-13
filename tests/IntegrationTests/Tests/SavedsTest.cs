@@ -34,12 +34,17 @@ public class FetchSavedsTest(SavedScope app) : BaseTest(app), IClassFixture<Save
         };
         await ReviewFactory.CreateAsync(_review, app.Services);
         _savedPlace = new() { SaveableId = _place.Id, SaverId = app.Bro.Id };
-        _savedReview = new() { SaveableId = _review.Id, SaverId = app.Bro.Id };
+        _savedReview = new()
+        {
+            SaveableId = _review.Id,
+            SaverId = app.Bro.Id,
+            CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1)
+        };
         await SavedPlaceFactory.CreateAsync(_savedPlace, app.Services);
         await SavedReviewFactory.CreateAsync(_savedReview, app.Services);
 
         _savedDtos = await app.FetchSavedsAsync(
-            DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
+            DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(2)),
             FetchLimit);
     }
 
@@ -50,8 +55,8 @@ public class FetchSavedsTest(SavedScope app) : BaseTest(app), IClassFixture<Save
     {
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
         Assert.Collection(_savedDtos,
-            s => Assert.Equal(s.SaveableId, _review.Id),
-            s => Assert.Equal(s.SaveableId, _place.Id));
+            s => Assert.Equal(_review.Id, s.SaveableId),
+            s => Assert.Equal(_place.Id, s.SaveableId));
     }
 
     [Fact]
