@@ -108,6 +108,7 @@ public class ReviewsTest
         }
     }
 
+    [Collection("Application Factory Collection")]
     public class FetchTest(ReviewScope app) : BaseTest(app), IClassFixture<ReviewScope>
     {
         const int Offset = 5;
