@@ -17,8 +17,8 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         IList<Saved> saveds = [.. context.Saved.AsNoTracking()
             .Where(saved => saved.CreatedAt < offset)
             .OrderByDescending(saved => saved.CreatedAt)
-            .Take(limit)
-            .Where(saved => saved.SaverId == broId)];
+            .Where(saved => saved.SaverId == broId)
+            .Take(limit)];
 
         IEnumerable<Saved> savedPlaces = saveds.Where(savedPlace => savedPlace.Discriminator == "SavedPlace");
         IEnumerable<Saved> savedReviews = saveds.Where(savedReview => savedReview.Discriminator == "SavedReview");

@@ -32,7 +32,14 @@ public class FetchSavedsTest(SavedScope app) : BaseTest(app), IClassFixture<Save
             PlaceId = _place.Id,
             ReviewerId = _bro.Id
         };
+        var excludedReview = new Review
+        {
+            Content = "Excluded review",
+            PlaceId = _place.Id,
+            ReviewerId = app.Bro.Id
+        };
         await ReviewFactory.CreateAsync(_review, app.Services);
+        await ReviewFactory.CreateAsync(excludedReview, app.Services);
         _savedPlace = new() { SaveableId = _place.Id, SaverId = app.Bro.Id };
         _savedReview = new()
         {
@@ -40,8 +47,15 @@ public class FetchSavedsTest(SavedScope app) : BaseTest(app), IClassFixture<Save
             SaverId = app.Bro.Id,
             CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1)
         };
+        var excludedSavedReview = new SavedReview
+        {
+            SaveableId = excludedReview.Id,
+            SaverId = _bro.Id,
+            CreatedAt = DateTimeOffset.UtcNow.AddSeconds(2)
+        };
         await SavedPlaceFactory.CreateAsync(_savedPlace, app.Services);
         await SavedReviewFactory.CreateAsync(_savedReview, app.Services);
+        await SavedReviewFactory.CreateAsync(excludedSavedReview, app.Services);
 
         _savedDtos = await app.FetchSavedsAsync(
             DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(2)),
