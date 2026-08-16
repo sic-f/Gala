@@ -11,9 +11,9 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
 {
     public async Task<IEnumerable<SavedDto>> FetchBookmarksAsync(DateTimeOffset offset, int limit, Guid broId)
     {
-        var (places, savedPlaces, reviews, savedReviews) = repository.FetchSavedPlaces(offset, limit, broId);
+        var (places, savedPlaces, reviews, savedReviews) = repository.FetchSaveds(offset, limit, broId);
 
-        return await BuildPlaceBookmarksAsync(places, savedPlaces, reviews, savedReviews);
+        return await BuildBookmarksAsync(places, savedPlaces, reviews, savedReviews);
     }
 
     public async Task<SavedPlace> SavePlaceAsync(Guid placeId, Guid broId)
@@ -45,7 +45,7 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
         return await repository.CreateSavedReviewAsync(savedReview);
     }
 
-    private async Task<IEnumerable<SavedDto>> BuildPlaceBookmarksAsync(
+    private async Task<IEnumerable<SavedDto>> BuildBookmarksAsync(
         IEnumerable<Place> places,
         IEnumerable<Core.SavedAggregate.Saved> savedPlaces,
         IEnumerable<Core.PlaceAggregate.Review> reviews,

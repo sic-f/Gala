@@ -9,7 +9,7 @@ public interface ISavedRepository
     (IEnumerable<Place>,
      IEnumerable<Saved>,
      IEnumerable<Review>,
-     IEnumerable<Saved>) FetchSavedPlaces(DateTimeOffset offset, int limit, Guid broId);
+     IEnumerable<Saved>) FetchSaveds(DateTimeOffset offset, int limit, Guid broId);
     Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace);
     Task<Guid?> GetSavedId(Guid placeId, Guid broId);
     Task<SavedReview> CreateSavedReviewAsync(SavedReview savedReview);

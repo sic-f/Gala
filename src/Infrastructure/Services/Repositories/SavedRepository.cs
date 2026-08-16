@@ -12,7 +12,7 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
     public (IEnumerable<Place>,
         IEnumerable<Saved>,
         IEnumerable<Review>,
-        IEnumerable<Saved>) FetchSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
+        IEnumerable<Saved>) FetchSaveds(DateTimeOffset offset, int limit, Guid broId)
     {
         IList<Saved> saveds = [.. context.Saved.AsNoTracking()
             .Where(saved => saved.CreatedAt < offset)
