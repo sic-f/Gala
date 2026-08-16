@@ -46,14 +46,19 @@ namespace Ui.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSaved(Guid id)
         {
-            var saved = await context.Saved.FindAsync(id);
-            if (saved == null)
+            try
             {
-                return NotFound();
+                await bookmark.DeleteSavedAsync(savedId: id);
             }
-
-            context.Saved.Remove(saved);
-            await context.SaveChangesAsync();
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Instance = "DELETE /Saveds/{id}",
+                    Title = "Saved not found."
+                });
+            }
 
             return NoContent();
         }

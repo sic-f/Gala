@@ -42,6 +42,11 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         return (places, savedPlaces, reviews, savedReviews);
     }
 
+    public async Task<Saved> FetchSavedAsync(Guid savedId)
+    {
+        return await context.Saved.FirstAsync<Saved>(saved => saved.Id == savedId);
+    }
+
     public async Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace)
     {
         SavedPlace saved = context.SavedPlace.Add(savedPlace).Entity;
@@ -70,5 +75,11 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
             .FirstAsync<Review>(review => review.Id == reviewId);
 
         return await context.AccountAvatar.FirstOrDefaultAsync(avatar => avatar.BroId == review.ReviewerId);
+    }
+
+    public async Task DeleteSavedAsync(Saved saved)
+    {
+        context.Saved.Remove(saved);
+        await context.SaveChangesAsync();
     }
 }

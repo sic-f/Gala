@@ -45,6 +45,13 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
         return await repository.CreateSavedReviewAsync(savedReview);
     }
 
+    public async Task DeleteSavedAsync(Guid savedId)
+    {
+        Core.SavedAggregate.Saved saved = await repository.FetchSavedAsync(savedId);
+
+        await repository.DeleteSavedAsync(saved);
+    }
+
     private async Task<IEnumerable<SavedDto>> BuildBookmarksAsync(
         IEnumerable<Place> places,
         IEnumerable<Core.SavedAggregate.Saved> savedPlaces,
