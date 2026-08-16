@@ -6,7 +6,7 @@ namespace Context;
 
 public class Review(IReviewRepository repository, ISavedRepository savedRepository)
 {
-    public async Task<IEnumerable<ReviewDto>> FetchPaginatedReviews(int offset, int limit, Guid placeId, Guid broId)
+    public async Task<IEnumerable<ReviewDto>> FetchPaginatedReviews(int offset, int limit, Guid placeId, string? broId)
     {
         IQueryable<Core.PlaceAggregate.Review> reviews = repository.FetchPaginated(offset, limit, placeId);
 
@@ -20,9 +20,12 @@ public class Review(IReviewRepository repository, ISavedRepository savedReposito
             CreatedAt = r.CreatedAt,
         })];
 
-        foreach (ReviewDto dto in reviewDtos)
+        if (broId is not null)
         {
-            dto.BookmarkId = await GetIsSavedIdAsync(dto.Id, broId);
+            foreach (ReviewDto dto in reviewDtos)
+            {
+                dto.BookmarkId = await GetIsSavedIdAsync(dto.Id, Guid.Parse(broId));
+            }
         }
 
         return reviewDtos;

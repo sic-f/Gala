@@ -5,6 +5,7 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Ui.Services;
 
 namespace Ui.Controllers
@@ -18,7 +19,8 @@ namespace Ui.Controllers
         [HttpGet]
         public async Task<IEnumerable<ReviewDto>> GetReview(int offset, int limit, Guid placeId)
         {
-            return await review.FetchPaginatedReviews(offset, limit, placeId, this.BroId(User));
+            string? broId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return await review.FetchPaginatedReviews(offset, limit, placeId, broId);
         }
 
         [HttpGet("{id}")]
