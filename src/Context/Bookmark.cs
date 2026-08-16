@@ -59,7 +59,8 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
             {
                 SaveableId = place.Id,
                 Headline = place.Name,
-                Picture = place.Picture?.Small,
+                Picture = place.Picture?.Normal,
+                Kind = savedPlace.Discriminator,
                 CreatedAt = savedPlace.CreatedAt
             })];
 
@@ -71,6 +72,7 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
             {
                 SaveableId = review.Id,
                 Headline = review.Content,
+                Kind = savedReview.Discriminator,
                 CreatedAt = savedReview.CreatedAt
             })];
 
