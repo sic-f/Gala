@@ -88,6 +88,6 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
     {
         AccountAvatar? avatar = await repository.GetReviewerAvatarAsync(reviewId);
 
-        return avatar?.Small;
+        return avatar?.Normal;
     }
 }
