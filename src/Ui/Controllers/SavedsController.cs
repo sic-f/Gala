@@ -32,8 +32,6 @@ namespace Ui.Controllers
             }
             catch (SaveOwnPlaceException ex)
             {
-                ModelState.AddModelError(nameof(SavedPlace), ex.Message);
-
                 return Problem(
                     ex.Message,
                     "/POST /saves/{id}",
