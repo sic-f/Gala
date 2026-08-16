@@ -10,13 +10,13 @@ namespace Ui.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SavesController(ApplicationDbContext context, Context.Bookmark bookmark) : ControllerBase
+    public class SavedsController(ApplicationDbContext context, Context.Bookmark bookmark) : ControllerBase
     {
         private SavedPlace _savedPlace = default!;
 
         [Authorize]
         [HttpGet]
-        public async Task<IEnumerable<SavedDto>> GetSavedAsync(DateTimeOffset offset, int limit)
+        public async Task<IEnumerable<SavedDto>> GetSavedsAsync(DateTimeOffset offset, int limit)
         {
             return await bookmark.FetchBookmarksAsync(offset, limit, this.BroId(User));
         }
@@ -40,7 +40,8 @@ namespace Ui.Controllers
                     422,
                     "Operation not allowed on resource.");
             }
-            return CreatedAtAction("GetSaved", new { id = _savedPlace.Id }, _savedPlace);
+
+            return CreatedAtAction(null, _savedPlace);
         }
 
         [Authorize]
@@ -57,11 +58,6 @@ namespace Ui.Controllers
             await context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool SavedExists(Guid id)
-        {
-            return context.Saved.Any(e => e.Id == id);
         }
     }
 }

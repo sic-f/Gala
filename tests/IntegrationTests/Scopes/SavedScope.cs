@@ -6,7 +6,7 @@ namespace IntegrationTests.Scopes;
 
 public class SavedScope : ApplicationFactory<Program>
 {
-    protected override string DefaultStartUrl => $"api/Saves";
+    protected override string DefaultStartUrl => $"api/Saveds";
 
     internal async Task<IEnumerable<SavedDto>> FetchSavedsAsync(string offset, int limit)
     {
