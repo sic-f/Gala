@@ -27,7 +27,6 @@ namespace Ui.Controllers
         {
             try
             {
-
                 _savedPlace = await bookmark.SavePlaceAsync(saved.SaveableId, this.BroId(User));
             }
             catch (SaveOwnPlaceException ex)
