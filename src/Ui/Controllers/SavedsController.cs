@@ -1,7 +1,6 @@
 using Core.Dto;
 using Core.Exceptions;
 using Core.SavedAggregate;
-using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ui.Services;
@@ -10,7 +9,7 @@ namespace Ui.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SavedsController(ApplicationDbContext context, Context.Bookmark bookmark) : ControllerBase
+    public class SavedsController(Context.Bookmark bookmark) : ControllerBase
     {
         private SavedPlace _savedPlace = default!;
 
