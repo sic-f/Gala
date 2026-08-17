@@ -6,7 +6,7 @@ using System.Net;
 using Utility.Factories;
 using Utility.Helpers;
 
-namespace IntegrationTests.Tests;
+namespace IntegrationTests.Test;
 
 public class SavedReviewsTest
 {

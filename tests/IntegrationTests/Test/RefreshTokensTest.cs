@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using Utility.Factories;
 using static Core.Dto.Session;
 
-namespace IntegrationTests.Tests;
+namespace IntegrationTests.Test;
 
 [Collection("Application Factory Collection")]
 public class RefreshTokensTest(SessionScope app) : BaseTest(app, isAuthenticated: false), IClassFixture<SessionScope>

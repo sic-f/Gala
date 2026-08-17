@@ -12,7 +12,7 @@ using System.Text.Json;
 using Utility.Factories;
 using Utility.Helpers;
 
-namespace IntegrationTests.Tests;
+namespace IntegrationTests.Test;
 
 public class PlacesTest
 {
