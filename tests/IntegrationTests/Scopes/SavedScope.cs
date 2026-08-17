@@ -27,4 +27,9 @@ public class SavedScope : ApplicationFactory<Program>
     {
         return (await Response.Content.ReadFromJsonAsync<SavedPlace>())!;
     }
+
+    internal async Task DeleteSavedAsync(Guid savedId)
+    {
+        Response = await Client.DeleteAsync($"{DefaultStartUrl}/{savedId}");
+    }
 }
