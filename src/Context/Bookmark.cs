@@ -18,7 +18,7 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
 
     public IEnumerable<SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
     {
-        var (places, savedPlaces) = repository.GetSavedPlacesAsync(offset, limit, broId);
+        var (places, savedPlaces) = repository.GetSavedPlaces(offset, limit, broId);
 
         return places.Join(
             savedPlaces,
@@ -31,6 +31,29 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
                 Picture = place.Picture?.Normal,
                 CreatedAt = savedPlace.CreatedAt,
             });
+    }
+
+    public async Task<IEnumerable<SavedDto>> GetSavedReviewsAsync(DateTimeOffset offset, int limit, Guid broId)
+    {
+        var (reviews, savedReviews) = repository.GetSavedReviews(offset, limit, broId);
+
+        IEnumerable<SavedDto> savedReviewDtos = reviews.Join(
+            savedReviews,
+            review => review.Id,
+            savedReview => savedReview.SaveableId,
+            (review, savedReview) => new SavedDto
+            {
+                SaveableId = review.Id,
+                Headline = review.Content,
+                CreatedAt = savedReview.CreatedAt,
+            });
+
+        foreach (SavedDto savedReviewDto in savedReviewDtos)
+        {
+            savedReviewDto.Picture = await GetReviewerAvatarAsync(savedReviewDto.SaveableId);
+        }
+
+        return savedReviewDtos;
     }
 
     public async Task<SavedPlace> SavePlaceAsync(Guid placeId, Guid broId)

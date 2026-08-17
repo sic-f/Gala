@@ -43,14 +43,26 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
     }
 
     public (IOrderedEnumerable<Place>,
-        IQueryable<SavedPlace>) GetSavedPlacesAsync(DateTimeOffset offset, int limit, Guid broId)
+        IQueryable<SavedPlace>) GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
     {
         Guid[] savedPlaceIds = [.. SavedPlaces(offset, limit, broId).Select(savedPlace => savedPlace.SaveableId)];
         IOrderedEnumerable<Place> places = context.Place.Where(place => savedPlaceIds.Contains(place.Id))
             .AsEnumerable()
-            .OrderBy(p => savedPlaceIds.IndexOf(p.Id));
+            .OrderBy(place => savedPlaceIds.IndexOf(place.Id));
 
         return (places, SavedPlaces(offset, limit, broId));
+    }
+
+    public (IOrderedEnumerable<Review>,
+        IQueryable<SavedReview>) GetSavedReviews(DateTimeOffset offset, int limit, Guid broId)
+    {
+        Guid[] savedReviewIds = [.. SavedReviews(offset, limit, broId).Select(savedReview => savedReview.SaveableId)];
+
+        IOrderedEnumerable<Review> reviews = context.Review.Where(review => savedReviewIds.Contains(review.Id))
+            .AsEnumerable()
+            .OrderBy(review => savedReviewIds.IndexOf(review.Id));
+
+        return (reviews, SavedReviews(offset, limit, broId));
     }
 
     public async Task<Saved> FetchSavedAsync(Guid savedId)
@@ -100,6 +112,15 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
             .Where(savedPlace => savedPlace.SaverId == broId)
             .Where(savedPlace => savedPlace.CreatedAt < offset)
             .OrderByDescending(savedPlace => savedPlace.CreatedAt)
+            .Take(limit);
+    }
+
+    private IQueryable<SavedReview> SavedReviews(DateTimeOffset offset, int limit, Guid broId)
+    {
+        return context.SavedReview.AsNoTracking()
+            .Where(savedReview => savedReview.SaverId == broId)
+            .Where(savedReview => savedReview.CreatedAt < offset)
+            .OrderByDescending(savedReview => savedReview.CreatedAt)
             .Take(limit);
     }
 }
