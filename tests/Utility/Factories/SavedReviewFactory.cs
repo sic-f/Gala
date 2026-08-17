@@ -15,4 +15,14 @@ public class SavedReviewFactory
 
         return entity;
     }
+
+    public static async Task<IEnumerable<SavedReview>> CreateAsync(IEnumerable<SavedReview> savedReviews, IServiceProvider services)
+    {
+        var context = services.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        await context.SavedReview.AddRangeAsync(savedReviews);
+        await context.SaveChangesAsync();
+
+        return savedReviews;
+    }
 }
