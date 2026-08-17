@@ -16,6 +16,23 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
         return await BuildBookmarksAsync(places, savedPlaces, reviews, savedReviews);
     }
 
+    public IEnumerable<SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
+    {
+        var (places, savedPlaces) = repository.GetSavedPlacesAsync(offset, limit, broId);
+
+        return places.Join(
+            savedPlaces,
+            place => place.Id,
+            savedPlace => savedPlace.SaveableId,
+            (place, savedPlace) => new SavedDto
+            {
+                SaveableId = place.Id,
+                Headline = place.Name,
+                Picture = place.Picture?.Normal,
+                CreatedAt = savedPlace.CreatedAt,
+            });
+    }
+
     public async Task<SavedPlace> SavePlaceAsync(Guid placeId, Guid broId)
     {
         Place place = await placeRepository.FetchPlaceAsync(placeId);

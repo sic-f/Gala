@@ -13,11 +13,6 @@ public class SavedScope : ApplicationFactory<Program>
         return (await Client.GetFromJsonAsync<IEnumerable<SavedDto>>($"{DefaultStartUrl}/?offset={offset}&limit={limit}"))!;
     }
 
-    internal async Task<IEnumerable<SavedDto>> GetAllSavedPlacesAsync(string offset, int limit)
-    {
-        return (await Client.GetFromJsonAsync<IEnumerable<SavedDto>>($"{DefaultStartUrl}?offset={offset}&limit={limit}"))!;
-    }
-
     internal async Task SavePlaceAsync(Guid saveableId)
     {
         Response = await Client.PostAsJsonAsync(DefaultStartUrl, new { saveableId });

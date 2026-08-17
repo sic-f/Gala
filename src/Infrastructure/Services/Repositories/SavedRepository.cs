@@ -42,6 +42,17 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         return (places, savedPlaces, reviews, savedReviews);
     }
 
+    public (IOrderedEnumerable<Place>,
+        IQueryable<SavedPlace>) GetSavedPlacesAsync(DateTimeOffset offset, int limit, Guid broId)
+    {
+        Guid[] savedPlaceIds = [.. SavedPlaces(offset, limit, broId).Select(savedPlace => savedPlace.SaveableId)];
+        IOrderedEnumerable<Place> places = context.Place.Where(place => savedPlaceIds.Contains(place.Id))
+            .AsEnumerable()
+            .OrderBy(p => savedPlaceIds.IndexOf(p.Id));
+
+        return (places, SavedPlaces(offset, limit, broId));
+    }
+
     public async Task<Saved> FetchSavedAsync(Guid savedId)
     {
         return await context.Saved.FirstAsync<Saved>(saved => saved.Id == savedId);
@@ -81,5 +92,14 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
     {
         context.Saved.Remove(saved);
         await context.SaveChangesAsync();
+    }
+
+    private IQueryable<SavedPlace> SavedPlaces(DateTimeOffset offset, int limit, Guid broId)
+    {
+        return context.SavedPlace.AsNoTracking()
+            .Where(savedPlace => savedPlace.SaverId == broId)
+            .Where(savedPlace => savedPlace.CreatedAt < offset)
+            .OrderByDescending(savedPlace => savedPlace.CreatedAt)
+            .Take(limit);
     }
 }
