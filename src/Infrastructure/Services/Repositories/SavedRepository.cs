@@ -9,37 +9,53 @@ namespace Infrastructure.Services.Repositories;
 
 public class SavedRepository(ApplicationDbContext context) : ISavedRepository
 {
-    public (IEnumerable<Place>,
-        IEnumerable<Saved>,
-        IEnumerable<Review>,
-        IEnumerable<Saved>) FetchSaveds(DateTimeOffset offset, int limit, Guid broId)
+    public IOrderedEnumerable<Core.Dto.SavedDto> FetchSaveds(DateTimeOffset offset, int limit, Guid broId)
     {
-        IList<Saved> saveds = [.. context.Saved.AsNoTracking()
+        IQueryable<Saved> saveds = context.Saved.AsNoTracking()
             .Where(saved => saved.CreatedAt < offset)
             .OrderByDescending(saved => saved.CreatedAt)
             .Where(saved => saved.SaverId == broId)
-            .Take(limit)];
+            .Take(limit);
 
-        IEnumerable<Saved> savedPlaces = saveds.Where(savedPlace => savedPlace.Discriminator == "SavedPlace");
-        IEnumerable<Saved> savedReviews = saveds.Where(savedReview => savedReview.Discriminator == "SavedReview");
+        List<Core.Dto.SavedDto> savedDtos = [];
 
-        IList<Guid> savedPlaceIds = [.. saveds.Where(saved => saved.Discriminator == "SavedPlace")
-            .Select(sianca => sianca.SaveableId)];
+        savedDtos.AddRange(saveds.AsEnumerable().Join(
+            context.Place,
+            saved => saved.SaveableId,
+            place => place.Id,
+            (saved, place) => new Core.Dto.SavedDto
+            {
+                SaveableId = place.Id,
+                Headline = place.Name,
+                Picture = place.Picture?.Normal,
+                Kind = saved.Discriminator,
+                CreatedAt = saved.CreatedAt
+            }));
 
-        IList<Guid> savedReviewIds = [.. saveds.Where(saved => saved.Discriminator == "SavedReview")
-            .Select(sianca => sianca.SaveableId)];
+        savedDtos.AddRange(
+            saveds.AsEnumerable().Join(
+                context.Review.AsEnumerable().LeftJoin(
+                    context.AccountAvatar,
+                    review => review.ReviewerId,
+                    avatar => avatar.BroId,
+                    (review, avatar) => new
+                    {
+                        review.Id,
+                        Headline = review.Content,
+                        Picture = avatar?.Normal,
+                    }),
+                saved => saved.SaveableId,
+                review => review.Id,
+                (saved, review) => new Core.Dto.SavedDto
+                {
+                    SaveableId = review.Id,
+                    Headline = review.Headline,
+                    Picture = review.Picture,
+                    Kind = saved.Discriminator,
+                    CreatedAt = saved.CreatedAt
+                }));
 
-        IEnumerable<Place> places = context.Place.Include(p => p.ProfilePictures)
-            .Where(p => savedPlaceIds.Contains(p.Id))
-            .ToList()
-            .OrderBy(p => savedPlaceIds.IndexOf(p.Id));
-
-        IEnumerable<Review> reviews = context.Review
-            .Where(p => savedReviewIds.Contains(p.Id))
-            .ToList()
-            .OrderBy(p => savedReviewIds.IndexOf(p.Id));
-
-        return (places, savedPlaces, reviews, savedReviews);
+        return savedDtos.OrderByDescending(savedDto => savedDto.CreatedAt);
     }
 
     public IEnumerable<Core.Dto.SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)

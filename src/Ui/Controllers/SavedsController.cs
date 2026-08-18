@@ -15,9 +15,9 @@ namespace Ui.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IEnumerable<SavedDto>> GetSavedsAsync(DateTimeOffset offset, int limit)
+        public IOrderedEnumerable<SavedDto> GetSavedsAsync(DateTimeOffset offset, int limit)
         {
-            return await bookmark.FetchBookmarksAsync(offset, limit, this.BroId(User));
+            return bookmark.FetchBookmarks(offset, limit, this.BroId(User));
         }
 
         [Authorize]

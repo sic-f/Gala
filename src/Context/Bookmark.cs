@@ -9,11 +9,11 @@ namespace Context;
 
 public class Bookmark(ISavedRepository repository, IPlaceRepository placeRepository)
 {
-    public async Task<IEnumerable<SavedDto>> FetchBookmarksAsync(DateTimeOffset offset, int limit, Guid broId)
+    public IOrderedEnumerable<SavedDto> FetchBookmarks(DateTimeOffset offset, int limit, Guid broId)
     {
-        var (places, savedPlaces, reviews, savedReviews) = repository.FetchSaveds(offset, limit, broId);
+        return repository.FetchSaveds(offset, limit, broId);
 
-        return await BuildBookmarksAsync(places, savedPlaces, reviews, savedReviews);
+        //return await BuildBookmarksAsync(places, savedPlaces, reviews, savedReviews);
     }
 
     public IEnumerable<SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
