@@ -11,7 +11,7 @@ public interface ISavedRepository
      IEnumerable<Review>,
      IEnumerable<Saved>) FetchSaveds(DateTimeOffset offset, int limit, Guid broId);
     Task<Saved> FetchSavedAsync(Guid savedId);
-    (IOrderedEnumerable<Place>, IQueryable<SavedPlace>) GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId);
+    IEnumerable<Core.Dto.SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId);
     (IOrderedEnumerable<Review>, IQueryable<SavedReview>) GetSavedReviews(DateTimeOffset offset, int limit, Guid broId);
     Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace);
     Task<Guid?> GetSavedId(Guid placeId, Guid broId);

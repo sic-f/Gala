@@ -42,15 +42,20 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         return (places, savedPlaces, reviews, savedReviews);
     }
 
-    public (IOrderedEnumerable<Place>,
-        IQueryable<SavedPlace>) GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
+    public IEnumerable<Core.Dto.SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
     {
-        Guid[] savedPlaceIds = [.. SavedPlaces(offset, limit, broId).Select(savedPlace => savedPlace.SaveableId)];
-        IOrderedEnumerable<Place> places = context.Place.Where(place => savedPlaceIds.Contains(place.Id))
-            .AsEnumerable()
-            .OrderBy(place => savedPlaceIds.IndexOf(place.Id));
-
-        return (places, SavedPlaces(offset, limit, broId));
+        return SavedPlaces(offset, limit, broId).AsEnumerable().Join(
+            context.Place.Include(place => place.ProfilePictures),
+            savedPlace => savedPlace.SaveableId,
+            place => place.Id,
+            (savedPlace, place) => new Core.Dto.SavedDto
+            {
+                SaveableId = place.Id,
+                Headline = place.Name,
+                Picture = place.Picture?.Normal,
+                Kind = savedPlace.Discriminator,
+                CreatedAt = savedPlace.CreatedAt
+            });
     }
 
     public (IOrderedEnumerable<Review>,
