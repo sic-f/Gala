@@ -58,16 +58,29 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
             });
     }
 
-    public (IOrderedEnumerable<Review>,
-        IQueryable<SavedReview>) GetSavedReviews(DateTimeOffset offset, int limit, Guid broId)
+    public IEnumerable<Core.Dto.SavedDto> GetSavedReviews(DateTimeOffset offset, int limit, Guid broId)
     {
-        Guid[] savedReviewIds = [.. SavedReviews(offset, limit, broId).Select(savedReview => savedReview.SaveableId)];
-
-        IOrderedEnumerable<Review> reviews = context.Review.Where(review => savedReviewIds.Contains(review.Id))
-            .AsEnumerable()
-            .OrderBy(review => savedReviewIds.IndexOf(review.Id));
-
-        return (reviews, SavedReviews(offset, limit, broId));
+        return SavedReviews(offset, limit, broId).AsEnumerable().Join(
+            context.Review.AsEnumerable().LeftJoin(
+                context.AccountAvatar,
+                review => review.ReviewerId,
+                avatar => avatar.BroId,
+                (review, avatar) => new
+                {
+                    review.Id,
+                    Headline = review.Content,
+                    Picture = avatar?.Normal,
+                }),
+            savedReview => savedReview.SaveableId,
+            review => review.Id,
+            (savedReview, review) => new Core.Dto.SavedDto
+            {
+                SaveableId = review.Id,
+                Headline = review.Headline,
+                Picture = review.Picture,
+                Kind = savedReview.Discriminator,
+                CreatedAt = savedReview.CreatedAt,
+            });
     }
 
     public async Task<Saved> FetchSavedAsync(Guid savedId)

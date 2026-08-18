@@ -11,9 +11,9 @@ namespace Ui.Controllers
     public class SavedReviewsController(Bookmark bookmark) : ControllerBase
     {
         [HttpGet]
-        public async Task<IEnumerable<SavedDto>> GetSavedReviews(DateTimeOffset offset, int limit)
+        public IEnumerable<SavedDto> GetSavedReviews(DateTimeOffset offset, int limit)
         {
-            return await bookmark.GetSavedReviewsAsync(offset, limit, this.BroId(User));
+            return bookmark.GetSavedReviews(offset, limit, this.BroId(User));
         }
 
         //[HttpGet("{id}")]

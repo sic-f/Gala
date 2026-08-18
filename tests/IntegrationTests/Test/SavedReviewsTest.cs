@@ -18,8 +18,8 @@ public class SavedReviewsTest
         [Fact]
         public async Task SaveReviewTestAsync()
         {
-            Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
-            Review newReview = new() { Content = "Content", PlaceId = place.Id, ReviewerId = app.Bro.Id };
+            Place place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
+            Review newReview = new() { Content = "Content", PlaceId = place.Id, ReviewerId = app.BroId };
             Review review = await ReviewFactory.CreateAsync(newReview, app.Services);
 
             await app.SavedReviewAsync(review.Id);
@@ -27,7 +27,7 @@ public class SavedReviewsTest
             SavedReview savedReview = RepositoryHelper.GetFirstRecord<SavedReview>(app.Services);
 
             Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
-            Assert.Equal(app.Bro.Id, savedReview.SaverId);
+            Assert.Equal(app.BroId, savedReview.SaverId);
             Assert.Equal(review.Id, savedReview.SaveableId);
         }
     }
@@ -45,11 +45,11 @@ public class SavedReviewsTest
         {
             await base.InitializeAsync();
 
-            Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
+            Place place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
             _reviews = [.. await ReviewFactory.CreateAsync(
-                BuildReviews(placeId: place.Id, reviewerId: app.Bro.Id),
+                BuildReviews(placeId: place.Id, reviewerId: app.BroId),
                 app.Services)];
-            IEnumerable<SavedReview> buildSavedReviews = BuildSavedReviews(saveableId: place.Id, saverId: app.Bro.Id);
+            IEnumerable<SavedReview> buildSavedReviews = BuildSavedReviews(saveableId: place.Id, saverId: app.BroId);
             _savedReviews = [.. await SavedReviewFactory.CreateAsync(buildSavedReviews, app.Services)];
 
             _savedDtos = (await app.GetSavedReviewsAsync(DateHelper.GetFormattedDateTimeOffset(
@@ -123,31 +123,31 @@ public class SavedReviewsTest
                 {
                     PlaceId = placeId,
                     ReviewerId = reviewerId,
-                    Content = "Review A",
+                    Content = "Review B",
                 },
                 new Review
                 {
                     PlaceId = placeId,
                     ReviewerId = reviewerId,
-                    Content = "Review A",
+                    Content = "Review C",
                 },
                 new Review
                 {
                     PlaceId = placeId,
                     ReviewerId = reviewerId,
-                    Content = "Review A",
+                    Content = "Review D",
                 },
                 new Review
                 {
                     PlaceId = placeId,
                     ReviewerId = reviewerId,
-                    Content = "Review A",
+                    Content = "Review E",
                 },
                 new Review
                 {
                     PlaceId = placeId,
                     ReviewerId = reviewerId,
-                    Content = "Review A",
+                    Content = "Review F",
                 },
             ];
         }
