@@ -44,7 +44,7 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
 
     public IEnumerable<Core.Dto.SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
     {
-        return SavedPlaces(offset, limit, broId).AsEnumerable().Join(
+        return Saveds<SavedPlace>(offset, limit, broId).AsEnumerable().Join(
             context.Place.Include(place => place.ProfilePictures),
             savedPlace => savedPlace.SaveableId,
             place => place.Id,
@@ -60,7 +60,7 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
 
     public IEnumerable<Core.Dto.SavedDto> GetSavedReviews(DateTimeOffset offset, int limit, Guid broId)
     {
-        return SavedReviews(offset, limit, broId).AsEnumerable().Join(
+        return Saveds<SavedReview>(offset, limit, broId).AsEnumerable().Join(
             context.Review.AsEnumerable().LeftJoin(
                 context.AccountAvatar,
                 review => review.ReviewerId,
@@ -124,21 +124,12 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         await context.SaveChangesAsync();
     }
 
-    private IQueryable<SavedPlace> SavedPlaces(DateTimeOffset offset, int limit, Guid broId)
+    private IQueryable<T> Saveds<T>(DateTimeOffset offset, int limit, Guid broId) where T : Saved
     {
-        return context.SavedPlace.AsNoTracking()
-            .Where(savedPlace => savedPlace.SaverId == broId)
-            .Where(savedPlace => savedPlace.CreatedAt < offset)
-            .OrderByDescending(savedPlace => savedPlace.CreatedAt)
-            .Take(limit);
-    }
-
-    private IQueryable<SavedReview> SavedReviews(DateTimeOffset offset, int limit, Guid broId)
-    {
-        return context.SavedReview.AsNoTracking()
-            .Where(savedReview => savedReview.SaverId == broId)
-            .Where(savedReview => savedReview.CreatedAt < offset)
-            .OrderByDescending(savedReview => savedReview.CreatedAt)
+        return context.Set<T>().AsNoTracking()
+            .Where(saved => saved.SaverId == broId)
+            .Where(saved => saved.CreatedAt < offset)
+            .OrderByDescending(saved => saved.CreatedAt)
             .Take(limit);
     }
 }
