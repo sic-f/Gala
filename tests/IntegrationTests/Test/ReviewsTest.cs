@@ -23,7 +23,7 @@ public class ReviewsTest
         {
             await base.InitializeAsync();
 
-            _place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
+            _place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
         }
 
         [Fact]
@@ -58,8 +58,8 @@ public class ReviewsTest
         {
             await base.InitializeAsync();
 
-            Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
-            Review newReview = new() { Headline = "Headline", Content = "Content", PlaceId = place.Id, ReviewerId = app.Bro.Id };
+            Place place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
+            Review newReview = new() { Headline = "Headline", Content = "Content", PlaceId = place.Id, ReviewerId = app.BroId };
             _review = await ReviewFactory.CreateAsync(newReview, app.Services);
         }
 
@@ -118,8 +118,8 @@ public class ReviewsTest
         [Fact]
         public async Task PaginatedFetchTestAsync()
         {
-            Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
-            Place otherPlace = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
+            Place place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
+            Place otherPlace = await PlaceFactory.CreateAsync(app.BroId, app.Services);
             IEnumerable<Review> newReviews = await BuildReviews(place.Id, otherPlace.Id);
             IEnumerable<Review> reviews = await ReviewFactory.CreateAsync(newReviews, app.Services);
 
@@ -137,16 +137,16 @@ public class ReviewsTest
         {
             return
             [
-                new() { Content = "1st Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1) },
-                new() { Content = "2nd Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3) },
-                new() { Content = "3rd Review", PlaceId = otherPlaceId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5) },
-                new() { Content = "4th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7) },
-                new() { Content = "5th Review", PlaceId = otherPlaceId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9) },
-                new() { Content = "6th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11) },
-                new() { Content = "7th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13) },
-                new() { Content = "8th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15) },
-                new() { Content = "9th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17) },
-                new() { Content = "10th Review", PlaceId = placeId, ReviewerId = app.Bro.Id, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19) },
+                new() { Content = "1st Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1) },
+                new() { Content = "2nd Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3) },
+                new() { Content = "3rd Review", PlaceId = otherPlaceId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5) },
+                new() { Content = "4th Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7) },
+                new() { Content = "5th Review", PlaceId = otherPlaceId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9) },
+                new() { Content = "6th Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11) },
+                new() { Content = "7th Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13) },
+                new() { Content = "8th Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15) },
+                new() { Content = "9th Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17) },
+                new() { Content = "10th Review", PlaceId = placeId, ReviewerId = app.BroId, CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19) },
             ];
         }
     }

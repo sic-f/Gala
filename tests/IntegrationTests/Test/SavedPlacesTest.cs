@@ -31,13 +31,13 @@ public class SavedPlacesTest
 
             Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
             Assert.Equal(place.Id, responseBody.SaveableId);
-            Assert.Equal(app.Bro.Id, responseBody.SaverId);
+            Assert.Equal(app.BroId, responseBody.SaverId);
         }
 
         [Fact]
         public async Task UnprocessableContentWhenBroSavesOwnPlaceTestAsync()
         {
-            Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
+            Place place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
 
             await app.SavePlaceAsync(place.Id);
 
@@ -59,12 +59,12 @@ public class SavedPlacesTest
             {
                 await base.InitializeAsync();
 
-                _places = [.. await PlaceFactory.CreateAsync(BuildPlaces(app.Bro.Id), app.Services)];
+                _places = [.. await PlaceFactory.CreateAsync(BuildPlaces(app.BroId), app.Services)];
                 IEnumerable<SavedPlace> buildSavedPlaces =
                 [
-                    new SavedPlace() { SaveableId = _places[0].Id, SaverId = app.Bro.Id },
-                    new SavedPlace() { SaveableId = _places[1].Id , SaverId = app.Bro.Id },
-                    new SavedPlace() { SaveableId = _places[2].Id, SaverId = app.Bro.Id },
+                    new SavedPlace() { SaveableId = _places[0].Id, SaverId = app.BroId },
+                    new SavedPlace() { SaveableId = _places[1].Id , SaverId = app.BroId },
+                    new SavedPlace() { SaveableId = _places[2].Id, SaverId = app.BroId },
                 ];
                 await SavedPlaceFactory.CreateAsync(buildSavedPlaces, app.Services);
 
@@ -193,91 +193,91 @@ public class SavedPlacesTest
                     new SavedPlace
                     {
                         SaveableId = places[0].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[1].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[2].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[3].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[4].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[5].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[6].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[7].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[8].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[9].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[10].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(21),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[14].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(23),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[11].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(25),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[13].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(27),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[12].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(29),
                     },
                 ];
@@ -291,105 +291,105 @@ public class SavedPlacesTest
                     {
                         Name = "1st Batch A",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1),
                     },
                     new Place
                     {
                         Name = "1st Batch B",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3),
                     },
                     new Place
                     {
                         Name = "1st Batch C",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5),
                     },
                     new Place
                     {
                         Name = "1st Batch D",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7),
                     },
                     new Place
                     {
                         Name = "1st Batch E",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9),
                     },
                     new Place
                     {
                         Name = "2nd Batch A",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11),
                     },
                     new Place
                     {
                         Name = "2nd Batch B",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13),
                     },
                     new Place
                     {
                         Name = "2nd Batch C",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15),
                     },
                     new Place
                     {
                         Name = "2nd Batch D",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17),
                     },
                     new Place
                     {
                         Name = "2nd Batch E",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19),
                     },
                     new Place
                     {
                         Name = "3rd Batch A",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(21),
                     },
                     new Place
                     {
                         Name = "3rd Batch B",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(23),
                     },
                     new Place
                     {
                         Name = "3rd Batch C",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(25),
                     },
                     new Place
                     {
                         Name = "3rd Batch D",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(27),
                     },
                     new Place
                     {
                         Name = "3rd Batch E",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(29),
                     },
                 ];

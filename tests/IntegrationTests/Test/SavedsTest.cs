@@ -38,15 +38,15 @@ public class SavedsTest
             {
                 Content = "Excluded review",
                 PlaceId = _place.Id,
-                ReviewerId = app.Bro.Id
+                ReviewerId = app.BroId
             };
             await ReviewFactory.CreateAsync(_review, app.Services);
             await ReviewFactory.CreateAsync(excludedReview, app.Services);
-            _savedPlace = new() { SaveableId = _place.Id, SaverId = app.Bro.Id };
+            _savedPlace = new() { SaveableId = _place.Id, SaverId = app.BroId };
             _savedReview = new()
             {
                 SaveableId = _review.Id,
-                SaverId = app.Bro.Id,
+                SaverId = app.BroId,
                 CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1)
             };
             var excludedSavedReview = new SavedReview
@@ -107,8 +107,8 @@ public class SavedsTest
             [Fact]
             public async Task DeleteSuccessTestAsync()
             {
-                Place place = await PlaceFactory.CreateAsync(app.Bro.Id, app.Services);
-                SavedPlace savedPlace = new() { SaveableId = place.Id, SaverId = app.Bro.Id };
+                Place place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
+                SavedPlace savedPlace = new() { SaveableId = place.Id, SaverId = app.BroId };
                 Core.SavedAggregate.Saved saved = await SavedPlaceFactory.CreateAsync(savedPlace, app.Services);
 
                 await app.DeleteSavedAsync(saved.Id);

@@ -40,7 +40,7 @@ public class PlaceProfilePicturesTest
             {
                 Name = "Test Name",
                 Address = "Test Adress",
-                BroId = app.Bro.Id,
+                BroId = app.BroId,
             };
 
             place.AddPicture(picture);
@@ -66,7 +66,7 @@ public class PlaceProfilePicturesTest
             {
                 Name = "Name",
                 Address = "Address",
-                BroId = app.Bro.Id,
+                BroId = app.BroId,
             };
             newPlace.AddPicture(profilePicture);
             Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
