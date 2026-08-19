@@ -20,7 +20,7 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         List<Core.Dto.SavedDto> savedDtos = [];
 
         savedDtos.AddRange(saveds.AsEnumerable().Join(
-            context.Place,
+            context.Place.Include(place => place.ProfilePictures),
             saved => saved.SaveableId,
             place => place.Id,
             (saved, place) => new Core.Dto.SavedDto

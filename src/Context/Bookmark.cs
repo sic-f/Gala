@@ -12,8 +12,6 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
     public IOrderedEnumerable<SavedDto> FetchBookmarks(DateTimeOffset offset, int limit, Guid broId)
     {
         return repository.FetchSaveds(offset, limit, broId);
-
-        //return await BuildBookmarksAsync(places, savedPlaces, reviews, savedReviews);
     }
 
     public IEnumerable<SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId)
