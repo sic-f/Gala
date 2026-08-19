@@ -1,6 +1,7 @@
 ﻿using Core.Interfaces;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
+using Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Repositories;
@@ -46,5 +47,12 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
     public async Task<int> GetReviewsCountAsync(Guid placeId)
     {
         return await context.Review.Where(r => r.PlaceId == placeId).CountAsync();
+    }
+
+    public async Task<string> GetReviewerNameAsync(Guid reviewerId)
+    {
+        Bro bro = await context.Users.FirstAsync(bro => bro.Id == reviewerId);
+
+        return bro.Name();
     }
 }

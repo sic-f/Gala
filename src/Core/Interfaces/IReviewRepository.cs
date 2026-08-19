@@ -11,4 +11,5 @@ public interface IReviewRepository
     Task ModifyAsync();
     Task DeleteAsync(Review review);
     Task<int> GetReviewsCountAsync(Guid placeId);
+    Task<string> GetReviewerNameAsync(Guid reviewerId);
 }

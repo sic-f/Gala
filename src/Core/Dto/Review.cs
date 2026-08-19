@@ -16,8 +16,10 @@ public record ReviewDto
     public Guid Id { get; set; }
     public string? Headline { get; set; }
     public string Content { get; set; } = string.Empty;
+    public string Reviewer { get; set; } = string.Empty;
     public Guid PlaceId { get; set; }
     public Guid ReviewerId { get; set; }
     public Guid? BookmarkId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset LastModified { get; set; }
 };

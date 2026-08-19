@@ -92,7 +92,7 @@ public class Contribution(IPicturesAttacher attachPictures,
                             ReviewsCount: await reviewRepository.GetReviewsCountAsync(Place.Id),
                             Picture: GetPicture(),
                             Pictures: GetPictures(),
-                            Reviews: await GetReviews(broId));
+                            Reviews: await GetReviewsAsync(broId));
     }
 
     public async Task DeleteAsync(Guid id, Guid broId)
@@ -149,7 +149,7 @@ public class Contribution(IPicturesAttacher attachPictures,
             new PlacePictureLean(Id: p.Id, Small: p.Small, PlaceId: p.PlaceId));
     }
 
-    private async Task<IEnumerable<ReviewDto>> GetReviews(Guid broId)
+    private async Task<IEnumerable<ReviewDto>> GetReviewsAsync(Guid broId)
     {
         IEnumerable<ReviewDto> reviewDtos = [.. Place.Reviews.Select(r => new ReviewDto
         {
@@ -159,12 +159,14 @@ public class Contribution(IPicturesAttacher attachPictures,
             PlaceId = r.PlaceId,
             ReviewerId = r.ReviewerId,
             CreatedAt = r.CreatedAt,
+            LastModified = r.LastModified,
         }).OrderByDescending(r => r.CreatedAt).Take(5)];
 
 
         foreach (ReviewDto dto in reviewDtos)
         {
             dto.BookmarkId = await GetIsSavedIdAsync(saveableId: dto.Id, broId);
+            dto.Reviewer = await GetReviewerNameAsync(reviewerId: dto.ReviewerId);
         }
 
         return reviewDtos;
@@ -172,6 +174,11 @@ public class Contribution(IPicturesAttacher attachPictures,
 
     private async Task<Guid?> GetIsSavedIdAsync(Guid saveableId, Guid broId)
     {
-        return await savedRepository.GetSavedId(saveableId, broId);
+        return await savedRepository.GetSavedIdAsync(saveableId, broId);
+    }
+
+    private async Task<string> GetReviewerNameAsync(Guid reviewerId)
+    {
+        return await reviewRepository.GetReviewerNameAsync(reviewerId);
     }
 }

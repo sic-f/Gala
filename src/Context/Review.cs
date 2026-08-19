@@ -18,7 +18,13 @@ public class Review(IReviewRepository repository, ISavedRepository savedReposito
             PlaceId = r.PlaceId,
             ReviewerId = r.ReviewerId,
             CreatedAt = r.CreatedAt,
+            LastModified = r.LastModified,
         })];
+
+        foreach (ReviewDto dto in reviewDtos)
+        {
+            dto.Reviewer = await GetReviewerNameAsync(dto.ReviewerId);
+        }
 
         if (broId is not null)
         {
@@ -66,6 +72,11 @@ public class Review(IReviewRepository repository, ISavedRepository savedReposito
 
     private async Task<Guid?> GetIsSavedIdAsync(Guid saveableId, Guid broId)
     {
-        return await savedRepository.GetSavedId(saveableId, broId);
+        return await savedRepository.GetSavedIdAsync(saveableId, broId);
+    }
+
+    private async Task<string> GetReviewerNameAsync(Guid reviewerId)
+    {
+        return await repository.GetReviewerNameAsync(reviewerId);
     }
 }

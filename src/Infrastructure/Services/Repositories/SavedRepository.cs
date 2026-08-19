@@ -112,7 +112,7 @@ public class SavedRepository(ApplicationDbContext context) : ISavedRepository
         return saved;
     }
 
-    public async Task<Guid?> GetSavedId(Guid saveableId, Guid broId)
+    public async Task<Guid?> GetSavedIdAsync(Guid saveableId, Guid broId)
     {
         return (await context.Saved.AsNoTracking().FirstOrDefaultAsync<Saved>(sp =>
             sp.SaveableId == saveableId && sp.SaverId == broId))?.Id;

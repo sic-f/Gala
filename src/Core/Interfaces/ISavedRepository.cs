@@ -10,7 +10,7 @@ public interface ISavedRepository
     IEnumerable<Core.Dto.SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId);
     IEnumerable<Core.Dto.SavedDto> GetSavedReviews(DateTimeOffset offset, int limit, Guid broId);
     Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace);
-    Task<Guid?> GetSavedId(Guid placeId, Guid broId);
+    Task<Guid?> GetSavedIdAsync(Guid placeId, Guid broId);
     Task<SavedReview> CreateSavedReviewAsync(SavedReview savedReview);
     Task<AccountAvatar?> GetReviewerAvatarAsync(Guid reviewId);
     Task DeleteSavedAsync(Saved saved);
