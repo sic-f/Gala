@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using Core.Dto;
+using Core.Interfaces;
 using Core.PlaceAggregate;
 using Infrastructure.Data;
 using Infrastructure.Identity;
@@ -31,6 +32,24 @@ public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
     public async Task<Review> NoTrackingFetchAsync(Guid id)
     {
         return await context.Review.AsNoTracking().FirstAsync(r => r.Id == id);
+    }
+
+    public ReviewDto NoTrackingFetchWithReviewer(Guid id)
+    {
+        return context.Review.AsNoTracking().Where(review => review.Id == id).Join(
+            context.Users.AsNoTracking(),
+            review => review.ReviewerId,
+            bro => bro.Id,
+            (review, bro) => new ReviewDto
+            {
+                Headline = review.Headline,
+                Content = review.Content,
+                Reviewer = bro.Name(),
+                ReviewerId = review.ReviewerId,
+                PlaceId = review.PlaceId,
+                CreatedAt = review.CreatedAt,
+                LastModified = review.LastModified,
+            }).ToList().First();
     }
 
     public async Task ModifyAsync()

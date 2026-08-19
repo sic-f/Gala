@@ -26,6 +26,11 @@ public class Review(IReviewRepository repository, ISavedRepository savedReposito
         return reviewDtos;
     }
 
+    public ReviewDto GetReview(Guid id)
+    {
+        return repository.NoTrackingFetchWithReviewer(id);
+    }
+
     public async Task<Core.PlaceAggregate.Review> WriteAsync(ReviewDetails details, Guid broId)
     {
         var review = new Core.PlaceAggregate.Review();

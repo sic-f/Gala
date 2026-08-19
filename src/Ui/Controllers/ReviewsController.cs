@@ -24,16 +24,9 @@ namespace Ui.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Review>> GetReview(Guid id)
+        public ReviewDto GetReview(Guid id)
         {
-            var review = await context.Review.FindAsync(id);
-
-            if (review == null)
-            {
-                return NotFound();
-            }
-
-            return review;
+            return review.GetReview(id);
         }
 
         [Authorize]
