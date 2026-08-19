@@ -8,18 +8,7 @@ public class Review(IReviewRepository repository, ISavedRepository savedReposito
 {
     public async Task<IEnumerable<ReviewDto>> FetchPaginatedReviews(int offset, int limit, Guid placeId, string? broId)
     {
-        IQueryable<Core.PlaceAggregate.Review> reviews = repository.FetchPaginated(offset, limit, placeId);
-
-        IEnumerable<ReviewDto> reviewDtos = [.. reviews.Select(r => new ReviewDto
-        {
-            Id = r.Id,
-            Headline = r.Headline,
-            Content = r.Content,
-            PlaceId = r.PlaceId,
-            ReviewerId = r.ReviewerId,
-            CreatedAt = r.CreatedAt,
-            LastModified = r.LastModified,
-        })];
+        IEnumerable<ReviewDto> reviewDtos = GetSavedDtos(repository.FetchPaginated(offset, limit, placeId));
 
         foreach (ReviewDto dto in reviewDtos)
         {
@@ -30,7 +19,7 @@ public class Review(IReviewRepository repository, ISavedRepository savedReposito
         {
             foreach (ReviewDto dto in reviewDtos)
             {
-                dto.BookmarkId = await GetIsSavedIdAsync(dto.Id, Guid.Parse(broId));
+                dto.BookmarkId = await GetSavedIdAsync(dto.Id, Guid.Parse(broId));
             }
         }
 
@@ -70,7 +59,21 @@ public class Review(IReviewRepository repository, ISavedRepository savedReposito
         await repository.DeleteAsync(review);
     }
 
-    private async Task<Guid?> GetIsSavedIdAsync(Guid saveableId, Guid broId)
+    private static IEnumerable<ReviewDto> GetSavedDtos(IQueryable<Core.PlaceAggregate.Review> reviews)
+    {
+        return [.. reviews.Select(r => new ReviewDto
+        {
+            Id = r.Id,
+            Headline = r.Headline,
+            Content = r.Content,
+            PlaceId = r.PlaceId,
+            ReviewerId = r.ReviewerId,
+            CreatedAt = r.CreatedAt,
+            LastModified = r.LastModified,
+        })];
+    }
+
+    private async Task<Guid?> GetSavedIdAsync(Guid saveableId, Guid broId)
     {
         return await savedRepository.GetSavedIdAsync(saveableId, broId);
     }

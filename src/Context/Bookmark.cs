@@ -1,5 +1,4 @@
 ﻿using Core.Dto;
-using Core.Entities;
 using Core.Exceptions;
 using Core.Interfaces;
 using Core.PlaceAggregate;
@@ -58,53 +57,5 @@ public class Bookmark(ISavedRepository repository, IPlaceRepository placeReposit
         Core.SavedAggregate.Saved saved = await repository.FetchSavedAsync(savedId);
 
         await repository.DeleteSavedAsync(saved);
-    }
-
-    private async Task<IEnumerable<SavedDto>> BuildBookmarksAsync(
-        IEnumerable<Place> places,
-        IEnumerable<Core.SavedAggregate.Saved> savedPlaces,
-        IEnumerable<Core.PlaceAggregate.Review> reviews,
-        IEnumerable<Core.SavedAggregate.Saved> savedReviews)
-    {
-        List<SavedDto> savedPlaceDtos = [.. savedPlaces.Join(
-            places,
-            savedPlace => savedPlace.SaveableId,
-            place => place.Id,
-            (savedPlace, place) => new SavedDto
-            {
-                SaveableId = place.Id,
-                Headline = place.Name,
-                Picture = place.Picture?.Normal,
-                Kind = savedPlace.Discriminator,
-                CreatedAt = savedPlace.CreatedAt
-            })];
-
-        List<SavedDto> savedReviewDtos = [ ..savedReviews.Join(
-            reviews,
-            savedReview => savedReview.SaveableId,
-            review => review.Id,
-            (savedReview, review) => new SavedDto
-            {
-                SaveableId = review.Id,
-                Headline = review.Content,
-                Kind = savedReview.Discriminator,
-                CreatedAt = savedReview.CreatedAt
-            })];
-
-        foreach (SavedDto savedReviewDto in savedReviewDtos)
-        {
-            savedReviewDto.Picture = await GetReviewerAvatarAsync(savedReviewDto.SaveableId);
-        }
-
-        savedPlaceDtos.AddRange(savedReviewDtos);
-
-        return savedPlaceDtos.OrderByDescending(dto => dto.CreatedAt);
-    }
-
-    private async Task<string?> GetReviewerAvatarAsync(Guid reviewId)
-    {
-        AccountAvatar? avatar = await repository.GetReviewerAvatarAsync(reviewId);
-
-        return avatar?.Normal;
     }
 }
