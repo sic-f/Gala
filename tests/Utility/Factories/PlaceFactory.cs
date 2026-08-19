@@ -30,6 +30,32 @@ public class PlaceFactory
         return place;
     }
 
+    public static async Task<Place> CreateAsync(Guid broId, IServiceProvider services)
+    {
+        Place place = new()
+        {
+            Name = "Test Name",
+            Description = "Test Description",
+            Information = "Test Information",
+            Address = "Test Address",
+            Mobile = "Test Mobile",
+            Landline = "Test Landline",
+            Email = "Test Email",
+            Website = "https://www.example.net",
+            Facebook = "https://www.facebook.com/test",
+            Instagram = "@test",
+            BroId = broId,
+        };
+
+        using var scope = services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        place = context.Place.Add(place).Entity;
+        await context.SaveChangesAsync();
+
+        return place;
+    }
+
     public static async Task<Place> CreateCompleteDetails(Guid broId, IServiceProvider services)
     {
         Place place = new()
@@ -76,6 +102,29 @@ public class PlaceFactory
         await context.SaveChangesAsync();
 
         return places;
+    }
+
+    public static async Task<Place> CreateAsync(Guid broId, ApplicationDbContext context)
+    {
+        Place place = new()
+        {
+            Name = "Test Name",
+            Description = "Test Description",
+            Information = "Test Information",
+            Address = "Test Address",
+            Mobile = "Test Mobile",
+            Landline = "Test Landline",
+            Email = "Test Email",
+            Website = "https://www.example.net",
+            Facebook = "https://www.facebook.com/test",
+            Instagram = "@test",
+            BroId = broId,
+        };
+
+        place = context.Place.Add(place).Entity;
+        await context.SaveChangesAsync();
+
+        return place;
     }
 
     private static string CreateTestDirectory()

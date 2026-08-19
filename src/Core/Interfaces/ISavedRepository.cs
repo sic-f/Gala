@@ -1,0 +1,17 @@
+﻿using Core.Entities;
+using Core.SavedAggregate;
+
+namespace Core.Interfaces;
+
+public interface ISavedRepository
+{
+    IOrderedEnumerable<Core.Dto.SavedDto> FetchSaveds(DateTimeOffset offset, int limit, Guid broId);
+    Task<Saved> FetchSavedAsync(Guid savedId);
+    IEnumerable<Core.Dto.SavedDto> GetSavedPlaces(DateTimeOffset offset, int limit, Guid broId);
+    IEnumerable<Core.Dto.SavedDto> GetSavedReviews(DateTimeOffset offset, int limit, Guid broId);
+    Task<SavedPlace> CreateSavedPlaceAsync(SavedPlace savedPlace);
+    Task<Guid?> GetSavedIdAsync(Guid placeId, Guid broId);
+    Task<SavedReview> CreateSavedReviewAsync(SavedReview savedReview);
+    Task<AccountAvatar?> GetReviewerAvatarAsync(Guid reviewId);
+    Task DeleteSavedAsync(Saved saved);
+}

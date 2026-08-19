@@ -1,80 +1,86 @@
 ﻿using Core.Dto;
 using Core.PlaceAggregate;
 using Core.SavedAggregate;
-using Infrastructure.Data;
 using Infrastructure.Identity;
 using IntegrationTests.Scopes;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Utility.Factories;
+using Utility.Helpers;
 
-namespace IntegrationTests.Tests;
+namespace IntegrationTests.Test;
 
-public class SavedPlacesTest()
+public class SavedPlacesTest
 {
     private const int FetchLimit = 5;
 
-    public class SaveTest
+    [Collection("Application Factory Collection")]
+    public class SaveTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
     {
-        [Collection("Application Factory Collection")]
-        public class SavePlaceTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+        public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+
+        [Fact]
+        public async Task SavePlaceTestAsync()
         {
-            public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+            Bro bro = await BroFactory.CreateAsync(app.Services);
+            Place newPlace = new() { Name = "Name", Address = "Address", BroId = bro.Id };
+            Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
 
-            [Fact]
-            public async Task SavePlaceTestAsync()
-            {
-                Place newPlace = new() { Name = "Name", Address = "Address", BroId = app.Bro.Id };
-                Place place = await PlaceFactory.CreateAsync(newPlace, app.Services);
+            await app.SavePlaceAsync(place.Id);
 
-                await app.SavePlaceAsync(place.Id);
+            var responseBody = await app.SavePlaceSuccessResponseAsync();
 
-                var responseBody = await app.SavePlaceSuccessResponseAsync();
+            Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
+            Assert.Equal(place.Id, responseBody.SaveableId);
+            Assert.Equal(app.BroId, responseBody.SaverId);
+        }
 
-                Assert.Equal(HttpStatusCode.Created, app.ResponseStatusCode);
-                Assert.Equal(place.Id, responseBody.SaveableId);
-                Assert.Equal(app.Bro.Id, responseBody.SaverId);
-            }
+        [Fact]
+        public async Task UnprocessableContentWhenBroSavesOwnPlaceTestAsync()
+        {
+            Place place = await PlaceFactory.CreateAsync(app.BroId, app.Services);
+
+            await app.SavePlaceAsync(place.Id);
+
+            Assert.Equal(HttpStatusCode.UnprocessableContent, app.ResponseStatusCode);
         }
     }
 
     public class FetchTest
     {
         [Collection("Application Factory Collection")]
-        public class FetchSavedPlacesTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+        public class FetchSavedPlacesTest(SavedPlaceScope app) : BaseTest(app), IClassFixture<SavedPlaceScope>
         {
-            private IEnumerable<PlaceBookmark> _response = default!;
-            private Bro _bro = default!;
-            private Place[] _places = default!;
+            private IEnumerable<SavedDto> _response = [];
+            private Place[] _places = [];
+
+            public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
 
             public override async Task InitializeAsync()
             {
                 await base.InitializeAsync();
 
-                _bro = await BroFactory.CreateAsync(app.Services);
-                _places = [.. await PlaceFactory.CreateAsync(BuildPlaces(app.Bro.Id), app.Services)];
+                _places = [.. await PlaceFactory.CreateAsync(BuildPlaces(app.BroId), app.Services)];
                 IEnumerable<SavedPlace> buildSavedPlaces =
                 [
-                    new SavedPlace() { SaveableId = _places[0].Id, SaverId = _bro.Id },
-                    new SavedPlace() { SaveableId = _places[1].Id , SaverId = _bro.Id },
-                    new SavedPlace() { SaveableId = _places[2].Id, SaverId = _bro.Id },
+                    new SavedPlace() { SaveableId = _places[0].Id, SaverId = app.BroId },
+                    new SavedPlace() { SaveableId = _places[1].Id , SaverId = app.BroId },
+                    new SavedPlace() { SaveableId = _places[2].Id, SaverId = app.BroId },
                 ];
-
                 await SavedPlaceFactory.CreateAsync(buildSavedPlaces, app.Services);
-                
-                _response = await app.GetAllSavedPlacesAsync(offset: GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)), limit: FetchLimit, _bro.Id);
-            }
 
-            public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
+                _response = await app.FetchSavedPlacesAsync(
+                    offset: DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(1)),
+                    limit: FetchLimit);
+            }
 
             [Fact]
             public async Task DoesNotFetchPlacesNotSavedByBroTestAsync()
             {
                 Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
                 Assert.Collection(_response,
-                    sp => Assert.NotEqual("Unexpected", sp.Name),
-                    sp => Assert.NotEqual("Unexpected", sp.Name),
-                    sp => Assert.NotEqual("Unexpected", sp.Name));
+                    sp => Assert.NotEqual("Unexpected", sp.Headline),
+                    sp => Assert.NotEqual("Unexpected", sp.Headline),
+                    sp => Assert.NotEqual("Unexpected", sp.Headline));
             }
 
             [Fact]
@@ -82,9 +88,9 @@ public class SavedPlacesTest()
             {
                 Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
                 Assert.Collection(_response,
-                    sp => Assert.Equal("Expected", sp.Name),
-                    sp => Assert.Equal("Expected b", sp.Name),
-                    sp => Assert.Equal("Expected c", sp.Name));
+                    sp => Assert.Equal("Expected", sp.Headline),
+                    sp => Assert.Equal("Expected b", sp.Headline),
+                    sp => Assert.Equal("Expected c", sp.Headline));
             }
 
             [Fact]
@@ -115,7 +121,7 @@ public class SavedPlacesTest()
         }
 
         [Collection("Application Factory Collection")]
-        public class PaginationTest(SavedScope app) : BaseTest(app), IClassFixture<SavedScope>
+        public class PaginationTest(SavedPlaceScope app) : BaseTest(app), IClassFixture<SavedPlaceScope>
         {
             private Place[] _places = default!;
             private SavedPlace[] _newSavedPlaces = default!;
@@ -129,53 +135,48 @@ public class SavedPlacesTest()
                 _places = BuildNewPlaces();
                 await PlaceFactory.CreateAsync(_places, app.Services);
                 _newSavedPlaces = BuildNewSavedPlaces(_places);
-
-                using var scope = app.Services.CreateScope();
-                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                context.SavedPlace.AddRange(_newSavedPlaces);
-                await context.SaveChangesAsync();
+                await SavedPlaceFactory.CreateAsync(_newSavedPlaces, app.Services);
             }
 
             [Fact]
             public async Task FetchSavedPlacesPaginatedTestAsync()
             {
                 DateTimeOffset createdAt = DateTimeOffset.UtcNow.AddSeconds(30);
-                IEnumerable<PlaceBookmark> bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit, app.Bro.Id);
+                IEnumerable<SavedDto> bookmarks = await app.FetchSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
-                    p => Assert.Equal(_places[12].Id, p.PlaceId),
-                    p => Assert.Equal(_places[13].Id, p.PlaceId),
-                    p => Assert.Equal(_places[11].Id, p.PlaceId),
-                    p => Assert.Equal(_places[14].Id, p.PlaceId),
-                    p => Assert.Equal(_places[10].Id, p.PlaceId));
+                    p => Assert.Equal(_places[12].Id, p.SaveableId),
+                    p => Assert.Equal(_places[13].Id, p.SaveableId),
+                    p => Assert.Equal(_places[11].Id, p.SaveableId),
+                    p => Assert.Equal(_places[14].Id, p.SaveableId),
+                    p => Assert.Equal(_places[10].Id, p.SaveableId));
 
                 createdAt = _newSavedPlaces[4].CreatedAt.AddSeconds(1);
-                bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit, app.Bro.Id);
+                bookmarks = await app.FetchSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
-                    p => Assert.Equal(_places[4].Id, p.PlaceId),
-                    p => Assert.Equal(_places[3].Id, p.PlaceId),
-                    p => Assert.Equal(_places[2].Id, p.PlaceId),
-                    p => Assert.Equal(_places[1].Id, p.PlaceId),
-                    p => Assert.Equal(_places[0].Id, p.PlaceId));
+                    p => Assert.Equal(_places[4].Id, p.SaveableId),
+                    p => Assert.Equal(_places[3].Id, p.SaveableId),
+                    p => Assert.Equal(_places[2].Id, p.SaveableId),
+                    p => Assert.Equal(_places[1].Id, p.SaveableId),
+                    p => Assert.Equal(_places[0].Id, p.SaveableId));
 
                 createdAt = _newSavedPlaces[9].CreatedAt.AddSeconds(1);
-                bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit, app.Bro.Id);
+                bookmarks = await app.FetchSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
-                    p => Assert.Equal(_places[9].Id, p.PlaceId),
-                    p => Assert.Equal(_places[8].Id, p.PlaceId),
-                    p => Assert.Equal(_places[7].Id, p.PlaceId),
-                    p => Assert.Equal(_places[6].Id, p.PlaceId),
-                    p => Assert.Equal(_places[5].Id, p.PlaceId));
+                    p => Assert.Equal(_places[9].Id, p.SaveableId),
+                    p => Assert.Equal(_places[8].Id, p.SaveableId),
+                    p => Assert.Equal(_places[7].Id, p.SaveableId),
+                    p => Assert.Equal(_places[6].Id, p.SaveableId),
+                    p => Assert.Equal(_places[5].Id, p.SaveableId));
             }
 
             [Fact]
             public async Task ReturnsCorrectCreatedAtValuesTestAsync()
             {
                 DateTimeOffset createdAt = DateTimeOffset.UtcNow.AddSeconds(30);
-                IEnumerable<PlaceBookmark> bookmarks = await app.GetAllSavedPlacesAsync(GetFormattedDateTimeOffset(createdAt), FetchLimit, app.Bro.Id);
+                IEnumerable<SavedDto> bookmarks = await app.FetchSavedPlacesAsync(DateHelper.GetFormattedDateTimeOffset(createdAt), FetchLimit);
 
                 Assert.Collection(bookmarks,
                     p => Assert.Equal(_newSavedPlaces[14].CreatedAt, p.CreatedAt),
@@ -187,96 +188,96 @@ public class SavedPlacesTest()
 
             private SavedPlace[] BuildNewSavedPlaces(Place[] places)
             {
-                return 
+                return
                 [
                     new SavedPlace
                     {
                         SaveableId = places[0].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[1].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[2].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[3].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[4].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[5].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[6].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[7].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[8].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[9].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[10].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(21),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[14].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(23),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[11].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(25),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[13].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(27),
                     },
                     new SavedPlace
                     {
                         SaveableId = places[12].Id,
-                        SaverId = app.Bro.Id,
+                        SaverId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(29),
                     },
                 ];
@@ -290,114 +291,109 @@ public class SavedPlacesTest()
                     {
                         Name = "1st Batch A",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(1),
                     },
                     new Place
                     {
                         Name = "1st Batch B",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(3),
                     },
                     new Place
                     {
                         Name = "1st Batch C",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(5),
                     },
                     new Place
                     {
                         Name = "1st Batch D",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(7),
                     },
                     new Place
                     {
                         Name = "1st Batch E",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(9),
                     },
                     new Place
                     {
                         Name = "2nd Batch A",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(11),
                     },
                     new Place
                     {
                         Name = "2nd Batch B",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(13),
                     },
                     new Place
                     {
                         Name = "2nd Batch C",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(15),
                     },
                     new Place
                     {
                         Name = "2nd Batch D",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(17),
                     },
                     new Place
                     {
                         Name = "2nd Batch E",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(19),
                     },
                     new Place
                     {
                         Name = "3rd Batch A",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(21),
                     },
                     new Place
                     {
                         Name = "3rd Batch B",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(23),
                     },
                     new Place
                     {
                         Name = "3rd Batch C",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(25),
                     },
                     new Place
                     {
                         Name = "3rd Batch D",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(27),
                     },
                     new Place
                     {
                         Name = "3rd Batch E",
                         Address = string.Empty,
-                        BroId = app.Bro.Id,
+                        BroId = app.BroId,
                         CreatedAt = DateTimeOffset.UtcNow.AddSeconds(29),
                     },
                 ];
             }
-        }
-
-        private static string GetFormattedDateTimeOffset(DateTimeOffset dateTime)
-        {
-            return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.sssssssZ");
         }
     }
 }

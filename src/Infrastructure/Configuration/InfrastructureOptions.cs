@@ -19,6 +19,7 @@ public static class InfrastructureOptions
 
         services.AddScoped<IPlaceRepository, PlaceRepository>();
         services.AddScoped<IPlacePictureRepository, PlacePictureRepository>();
-        services.AddScoped<ISavedPlaceRepository, SavedPlaceRepository>();
+        services.AddScoped<ISavedRepository, SavedRepository>();
+        services.AddScoped<IReviewRepository, ReviewRepository>();
     }
 }

@@ -20,11 +20,12 @@ public abstract class ApplicationFactory<TProgram> : WebApplicationFactory<TProg
 {
     private const string ConnectionString =
         "Server=(localdb)\\mssqllocaldb;Database=GalaTest;Trusted_Connection=True;MultipleActiveResultSets=true";
+    private Bro _bro = default!;
     private TokenableResponse? _tokenableResponse;
+    public Guid BroId => _bro.Id;
     public HttpResponseMessage Response { get; protected set; } = null!;
     public HttpStatusCode ResponseStatusCode => Response.StatusCode;
     protected HttpClient Client { get; private set; } = null!;
-    public Bro Bro { get; private set; } = null!;
     protected abstract string DefaultStartUrl { get; }
 
     public override async ValueTask DisposeAsync()
@@ -84,7 +85,7 @@ public abstract class ApplicationFactory<TProgram> : WebApplicationFactory<TProg
 
     private async Task LoginThenSetBearerTokenInClientForRequests()
     {
-        Bro = await BroFactory.CreateAsync("test@example.net", "Hey@123", Services);
+        _bro = await BroFactory.CreateAsync("test@example.net", "Hey@123", Services);
         var credentials = new LoginCredentials("test@example.net", "Hey@123");
         Response = await Client.PostAsJsonAsync("api/Sessions", credentials);
 

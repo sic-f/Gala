@@ -58,6 +58,8 @@ public record PlaceDto(Guid Id,
                        string? Instagram,
                        Guid BroId,
                        Guid? BookmarkId,
+                       int ReviewsCount,
                        PlacePictureLean? Picture,
-                       IEnumerable<PlacePictureLean> Pictures);
+                       IEnumerable<PlacePictureLean> Pictures,
+                       IEnumerable<ReviewDto> Reviews);
 public record PlaceBookmark(Guid PlaceId, string Name, string? Description, string? Picture, DateTimeOffset CreatedAt);

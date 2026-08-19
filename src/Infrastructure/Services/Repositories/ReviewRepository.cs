@@ -1,0 +1,77 @@
+﻿using Core.Dto;
+using Core.Interfaces;
+using Core.PlaceAggregate;
+using Infrastructure.Data;
+using Infrastructure.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Services.Repositories;
+
+public class ReviewRepository(ApplicationDbContext context) : IReviewRepository
+{
+    public IQueryable<Review> FetchPaginated(int offset, int limit, Guid placeId)
+    {
+        return context.Review.AsNoTracking()
+                             .Where(r => r.PlaceId == placeId)
+                             .OrderByDescending(r => r.CreatedAt)
+                             .Skip(offset)
+                             .Take(limit);
+    }
+
+    public async Task CreateReviewAsync(Review review)
+    {
+        context.Review.Add(review);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<Review> FetchAsync(Guid id)
+    {
+        return await context.Review.FirstAsync(r => r.Id == id);
+    }
+
+    public async Task<Review> NoTrackingFetchAsync(Guid id)
+    {
+        return await context.Review.AsNoTracking().FirstAsync(r => r.Id == id);
+    }
+
+    public ReviewDto NoTrackingFetchWithReviewer(Guid id)
+    {
+        return context.Review.AsNoTracking().Where(review => review.Id == id).Join(
+            context.Users.AsNoTracking(),
+            review => review.ReviewerId,
+            bro => bro.Id,
+            (review, bro) => new ReviewDto
+            {
+                Headline = review.Headline,
+                Content = review.Content,
+                Reviewer = bro.Name(),
+                ReviewerId = review.ReviewerId,
+                PlaceId = review.PlaceId,
+                CreatedAt = review.CreatedAt,
+                LastModified = review.LastModified,
+            }).ToList().First();
+    }
+
+    public async Task ModifyAsync()
+    {
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Review review)
+    {
+        context.Review.Remove(review);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<int> GetReviewsCountAsync(Guid placeId)
+    {
+        return await context.Review.Where(r => r.PlaceId == placeId).CountAsync();
+    }
+
+    public async Task<string> GetReviewerNameAsync(Guid reviewerId)
+    {
+        Bro bro = await context.Users.FirstAsync(bro => bro.Id == reviewerId);
+
+        return bro.Name();
+    }
+}

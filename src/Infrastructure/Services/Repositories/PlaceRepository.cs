@@ -35,6 +35,7 @@ public class PlaceRepository(ApplicationDbContext context) : IPlaceRepository
         return context.Place.AsNoTracking()
                             .Include(p => p.ProfilePictures)
                             .Include(p => p.Pictures)
+                            .Include(p => p.Reviews)
                             .First(p => p.Id == id);
     }
 
