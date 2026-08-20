@@ -4,7 +4,7 @@ namespace Core.Dto;
 
 public record CommentDetails
 {
-    [Required]
+    [Required(ErrorMessage = "comment can't be blank.")]
     [MaxLength(8000)]
     public string Body { get; set; } = string.Empty;
 }
