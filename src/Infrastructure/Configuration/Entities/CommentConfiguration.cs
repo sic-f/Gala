@@ -20,13 +20,13 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.HasOne<Bro>()
             .WithMany()
             .HasForeignKey(comment => comment.CommenterId)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
         builder.HasOne<PlacePicture>()
             .WithMany(placePicture => placePicture.Comments)
             .HasForeignKey(comment => comment.CommentableId)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
-
-        builder.HasIndex(comment => comment.CommentableId);
     }
 }
