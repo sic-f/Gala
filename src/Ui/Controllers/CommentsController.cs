@@ -9,7 +9,7 @@ using Ui.Services;
 
 namespace Ui.Controllers
 {
-    [Route("api/Place-Pictures/{placePictureId}/Comments")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CommentsController(ApplicationDbContext context, Comments comments) : ControllerBase
     {
