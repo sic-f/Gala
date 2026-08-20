@@ -95,7 +95,7 @@ public class PlaceFactory
 
     public static async Task<IEnumerable<Place>> CreateAsync(IEnumerable<Place> places, IServiceProvider services)
     {
-        var scope = services.CreateScope();
+        using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         context.Place.AddRange(places);

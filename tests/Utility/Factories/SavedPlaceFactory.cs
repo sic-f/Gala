@@ -23,7 +23,6 @@ public class SavedPlaceFactory
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         context.SavedPlace.AddRange(savedPlaces);
-
         await context.SaveChangesAsync();
 
         return savedPlaces;
