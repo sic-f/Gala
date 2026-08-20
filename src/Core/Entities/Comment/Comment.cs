@@ -1,4 +1,6 @@
-﻿namespace Core.Entities.Comment;
+﻿using Core.Dto;
+
+namespace Core.Entities.Comment;
 
 public class Comment
 {
@@ -8,4 +10,11 @@ public class Comment
     public Guid CommenterId { get; set; }
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset LastModified { get; set; }
+
+    public void SetDetails(CommentDetails details, Guid placePictureId, Guid broId)
+    {
+        Body = details.Body;
+        CommentableId = placePictureId;
+        CommenterId = broId;
+    }
 }
