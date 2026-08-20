@@ -11,7 +11,7 @@ public class CommentRepository(ApplicationDbContext context) : ICommentRepositor
     public IEnumerable<CommentDto> GetPlacePictureComments(Guid placePictureId, DateTimeOffset offset, int limit)
     {
         return PlacePictureComments(placePictureId, offset, limit).AsEnumerable().Join(
-            context.Users.AsNoTracking(),
+            context.Users.Include(bro => bro.Avatar).AsNoTracking(),
             placePictureComment => placePictureComment.CommenterId,
             bro => bro.Id,
             (placePictureComment, bro) => new CommentDto
