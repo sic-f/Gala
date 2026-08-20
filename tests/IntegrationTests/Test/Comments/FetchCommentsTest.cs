@@ -5,12 +5,14 @@ using Infrastructure.Identity;
 using IntegrationTests.Scopes;
 using System.Net;
 using Utility.Factories;
+using Utility.Helpers;
 
 namespace IntegrationTests.Test.Comments;
 
 [Collection("Application Factory Collection")]
 public class FetchCommentsTest(CommentScope app) : BaseTest(app), IClassFixture<CommentScope>
 {
+    private const int FetchLimit = 5;
     private IEnumerable<CommentDto> _response = default!;
 
     public override Task DisposeAsync() => Task.Run(() => app.ClearToken());
@@ -27,7 +29,10 @@ public class FetchCommentsTest(CommentScope app) : BaseTest(app), IClassFixture<
             broId: app.BroId,
             otherBroId: otherBro.Id);
         await CommentFactory.CreateAsync(buildComments, app.Services);
-        _response = (await app.SuccessGetCommentsAsync(place.Picture!.Id))!;
+        _response = (await app.SuccessGetCommentsAsync(
+            offset: DateHelper.GetFormattedDateTimeOffset(DateTimeOffset.UtcNow.AddSeconds(5)),
+            limit: FetchLimit,
+            place.Picture!.Id))!;
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
     }
 
@@ -36,8 +41,8 @@ public class FetchCommentsTest(CommentScope app) : BaseTest(app), IClassFixture<
     {
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
         Assert.Collection(_response,
-            comment => Assert.Equal("Comment Body A", comment.Body),
-            comment => Assert.Equal("Comment Body B", comment.Body));
+            comment => Assert.Equal("Comment Body B", comment.Body),
+            comment => Assert.Equal("Comment Body A", comment.Body));
     }
 
     [Fact]
@@ -45,8 +50,8 @@ public class FetchCommentsTest(CommentScope app) : BaseTest(app), IClassFixture<
     {
         Assert.Equal(HttpStatusCode.OK, app.ResponseStatusCode);
         Assert.Collection(_response,
-            comment => Assert.Equal("test@example.net", comment.CommenterName),
-            comment => Assert.Equal("Martin Nievera", comment.CommenterName));
+            comment => Assert.Equal("Martin Nievera", comment.CommenterName),
+            comment => Assert.Equal("test@example.net", comment.CommenterName));
     }
 
     [Fact]
@@ -65,12 +70,14 @@ public class FetchCommentsTest(CommentScope app) : BaseTest(app), IClassFixture<
                 Body = "Comment Body A",
                 CommentableId = placePictureId,
                 CommenterId = broId,
+                CreatedAt = DateTime.UtcNow.AddSeconds(1),
             },
             new()
             {
                 Body = "Comment Body B",
                 CommentableId = placePictureId,
                 CommenterId = otherBroId,
+                CreatedAt = DateTime.UtcNow.AddSeconds(3),
             }
         ];
     }

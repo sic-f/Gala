@@ -7,9 +7,9 @@ public class CommentScope : ApplicationFactory<Program>
 {
     protected override string DefaultStartUrl => "api/Place-Pictures";
 
-    internal async Task<IEnumerable<CommentDto>?> SuccessGetCommentsAsync(Guid placePictureId)
+    internal async Task<IEnumerable<CommentDto>?> SuccessGetCommentsAsync(string offset, int limit, Guid placePictureId)
     {
-        return await Client.GetFromJsonAsync<IEnumerable<CommentDto>>($"{DefaultStartUrl}/{placePictureId}/comments");
+        return await Client.GetFromJsonAsync<IEnumerable<CommentDto>>($"{DefaultStartUrl}/{placePictureId}/comments?offset={offset}&limit={limit}");
     }
 
     internal async Task<CommentDto?> SuccessWriteCommentResponseAsync()

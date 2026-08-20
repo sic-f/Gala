@@ -6,6 +6,11 @@ namespace Context;
 
 public class Comments(ICommentRepository repository)
 {
+    public IEnumerable<CommentDto> GetPlacePictureComments(Guid placePictureId, DateTimeOffset offset, int limit)
+    {
+        return repository.GetPlacePictureComments(placePictureId, offset, limit);
+    }
+
     public async Task WriteCommentAsync(CommentDetails details, Guid placePictureId, Guid broId)
     {
         PlacePictureComment comment = new();
