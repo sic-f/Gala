@@ -1,6 +1,7 @@
 using Context;
 using Core.Dto;
 using Core.SavedAggregate;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ui.Services;
 
@@ -10,16 +11,12 @@ namespace Ui.Controllers
     [ApiController]
     public class SavedReviewsController(Bookmark bookmark) : ControllerBase
     {
+        [Authorize]
         [HttpGet]
         public IEnumerable<SavedDto> GetSavedReviews(DateTimeOffset offset, int limit)
         {
             return bookmark.GetSavedReviews(offset, limit, this.BroId(User));
         }
-
-        //[HttpGet("{id}")]
-        //public async ActionResult<SavedReview> GetSavedReview(Guid id)
-        //{
-        //}
 
         [HttpPost]
         public async Task<ActionResult<SavedReview>> PostSavedReview(Core.Dto.Saved saved)
@@ -28,20 +25,5 @@ namespace Ui.Controllers
 
             return CreatedAtAction(null, savedReview);
         }
-
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteSavedReview(Guid id)
-        //{
-        //var savedReview = await context.SavedReview.FindAsync(id);
-        //if (savedReview == null)
-        //{
-        //    return NotFound();
-        //}
-
-        //context.SavedReview.Remove(savedReview);
-        //await context.SaveChangesAsync();
-
-        //return NoContent();
-        //}
     }
 }
