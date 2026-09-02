@@ -64,6 +64,51 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AccountAvatar");
                 });
 
+            modelBuilder.Entity("Core.Entities.Comment.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CommentableId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CommenterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentableId");
+
+                    b.HasIndex("CommenterId");
+
+                    b.ToTable("Comment");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Comment");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("Core.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -525,6 +570,13 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Entities.Comment.PlacePictureComment", b =>
+                {
+                    b.HasBaseType("Core.Entities.Comment.Comment");
+
+                    b.HasDiscriminator().HasValue("PlacePictureComment");
+                });
+
             modelBuilder.Entity("Core.PlaceAggregate.PlaceExtraPicture", b =>
                 {
                     b.HasBaseType("Core.PlaceAggregate.PlacePicture");
@@ -556,11 +608,33 @@ namespace Infrastructure.Data.Migrations
                     b.HasDiscriminator().HasValue("SavedPlace");
                 });
 
+            modelBuilder.Entity("Core.SavedAggregate.SavedReview", b =>
+                {
+                    b.HasBaseType("Core.SavedAggregate.Saved");
+
+                    b.HasDiscriminator().HasValue("SavedReview");
+                });
+
             modelBuilder.Entity("Core.Entities.AccountAvatar", b =>
                 {
                     b.HasOne("Infrastructure.Identity.Bro", null)
                         .WithOne("Avatar")
                         .HasForeignKey("Core.Entities.AccountAvatar", "BroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Core.Entities.Comment.Comment", b =>
+                {
+                    b.HasOne("Core.PlaceAggregate.PlacePicture", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("CommentableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Identity.Bro", null)
+                        .WithMany()
+                        .HasForeignKey("CommenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -693,6 +767,11 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ProfilePictures");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("Core.PlaceAggregate.PlacePicture", b =>
+                {
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.Bro", b =>

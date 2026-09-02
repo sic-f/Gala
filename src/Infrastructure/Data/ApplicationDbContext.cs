@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.Entities.Comment;
 using Core.PlaceAggregate;
 using Core.SavedAggregate;
 using Infrastructure.Identity;
@@ -24,6 +25,8 @@ public class ApplicationDbContext : IdentityDbContext<Bro, IdentityRole<Guid>, G
     public DbSet<SavedPlace> SavedPlace => Set<SavedPlace>();
     public DbSet<SavedReview> SavedReview => Set<SavedReview>();
     public DbSet<Review> Review => Set<Review>();
+    public DbSet<Comment> Comment => Set<Comment>();
+    public DbSet<PlacePictureComment> PlacePictureComment => Set<PlacePictureComment>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

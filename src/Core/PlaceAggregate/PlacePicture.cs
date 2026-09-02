@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using Core.Entities.Comment;
+using Core.Interfaces;
 
 namespace Core.PlaceAggregate;
 
@@ -14,6 +15,7 @@ public class PlacePicture : IImageDeletable, IImageTypeSegmentable
     public string SmallLocal { get; set; } = string.Empty;
     public Guid PlaceId { get; set; }
     public Guid? UploaderId { get; set; }
+    public ICollection<Comment> Comments { get; } = [];
     public DateTimeOffset CreatedAt { get; }
     public DateTimeOffset LastModified { get; set; }
 }

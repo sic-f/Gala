@@ -8,7 +8,8 @@ public class SavedReviewFactory
 {
     public static async Task<SavedReview> CreateAsync(SavedReview savedReview, IServiceProvider services)
     {
-        var context = services.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using var scope = services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         SavedReview entity = context.SavedReview.Add(savedReview).Entity;
         await context.SaveChangesAsync();
@@ -18,7 +19,8 @@ public class SavedReviewFactory
 
     public static async Task<IEnumerable<SavedReview>> CreateAsync(IEnumerable<SavedReview> savedReviews, IServiceProvider services)
     {
-        var context = services.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using var scope = services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         await context.SavedReview.AddRangeAsync(savedReviews);
         await context.SaveChangesAsync();
